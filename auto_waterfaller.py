@@ -28,11 +28,11 @@ def main(fits, time, DM, directory='.', FRB_name='FRB121102'):
 	with psrfits.pyfits.open(fits, memmap=True) as fn:
   		header = fn['SUBINT'].header + fn['PRIMARY'].header
 
-	#MJD of the beginning of the observation
-	start_MJD = header['STT_IMJD'] + header['STT_SMJD'] / 86400. 
+	#Start MJD (days) of the beginning of the observation
+	IMJD = header['STT_IMJD'] 
 
-	#MJD of the pulses
-	pulse_MJD = start_MJD + time / 86400.
+	#Seconds past UTC 00h  of the pulses
+	SMJD = header['STT_SMJD'] + time
 
 	for i, t in enumerate(time): 
 		start_time = t - 0.01
@@ -47,8 +47,8 @@ def main(fits, time, DM, directory='.', FRB_name='FRB121102'):
 	                   cmap_str="gist_yarg", sweep_dms=[], sweep_posns=[],
 	                   ax_im=None, ax_ts=None, ax_spec=None, interactive=False)
 
-		plt.suptitle('%s %0.8f [close up]\n %s'%(FRB_name, pulse_MJD[i], observation), y=1.05)
-		plt.savefig('%s/%s_%0.8f_zoomed.png'%(directory, FRB_name, pulse_MJD[i]), bbox_inches='tight', pad_inches=0.1)
+		plt.suptitle('%s %i.%i [close up]\n %s'%(FRB_name, IMJD, SMJD[i], observation), y=1.05)
+		plt.savefig('%s/%s_%i.%i_zoomed.png'%(directory, FRB_name, IMJD, SMJD[i]), bbox_inches='tight', pad_inches=0.1)
 
 		#Zoomed out version
 		start_time = t - 0.05
@@ -64,8 +64,8 @@ def main(fits, time, DM, directory='.', FRB_name='FRB121102'):
 	                   cmap_str="gist_yarg", sweep_dms=[], sweep_posns=[],
 	                   ax_im=None, ax_ts=None, ax_spec=None, interactive=False)
 		
-		plt.suptitle('FRB121102 %0.8f \n %s'%(pulse_MJD[i],observation), y=1.05)
-		plt.savefig('%s/FRB121102_%0.8f.png'%(directory, pulse_MJD[i]), bbox_inches='tight', pad_inches=0.1)
+		plt.suptitle('%s %i.%i \n %s'%(FRB_name, IMJD, SMJD[i],observation), y=1.05)
+                plt.savefig('%s/%s_%i.%i.png'%(directory, FRB_name, IMJD, SMJD[i]), bbox_inches='tight', pad_inches=0.1)
 		plt.close('all')
 
 if __name__ == '__main__':
