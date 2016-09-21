@@ -27,7 +27,7 @@ prepsubband -nsub 64 -noscales -nooffsets -nobary -lodm 461.0 -numdms 200 -dmste
 single_pulse_search.py -t 6.0 -b -m 150 *.dat
 mv ${FITS_BASENAME}_TOPO_DM561.00.dat ..
 
-python ${SCRIPT_DIR}/pulse_grouper.py $FITS -store_events -idL ${FITS_BASENAME} -store_dir $FITS_PATH/$FITS_BASENAME -folder $FITS_PATH/$FITS_BASENAME/TEMP -plot_pulses
+python ${SCRIPT_DIR}/pulse_extract.py $FITS -store_events -idL ${FITS_BASENAME} -store_dir $FITS_PATH/$FITS_BASENAME -folder $FITS_PATH/$FITS_BASENAME/TEMP -plot_pulses
 
 
 #cd $FITS_PATH/$FITS_BASENAME
