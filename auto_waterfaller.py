@@ -16,11 +16,13 @@ import psr_utils
 import rfifind
 import psrfits
 import spectra
+import os
 
 def main(fits, time, DM, directory='.', FRB_name='FRB121102'):
 
 	rawdata = psrfits.PsrfitsFile(fits)
 	observation = str(fits)[:-5]
+	observation = os.path.basename(observation)
 
 	#Open header of the fits file
 	with psrfits.pyfits.open(fits, memmap=True) as fn:
@@ -55,6 +57,7 @@ def main(fits, time, DM, directory='.', FRB_name='FRB121102'):
 				nbins=None, nsub=None, subdm = DM, zerodm=False, downsamp=1,\
 				scaleindep=False, width_bins=1, mask=False, maskfn=None,\
 				bandpass_corr=False, ref_freq=None)
+
 		plt.figure()
 		plot_waterfall(data, start, 0.1, 
 	                   integrate_ts=True, integrate_spec=False, show_cb=False, 
