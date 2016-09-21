@@ -34,7 +34,7 @@ def main(fits, time, DM, directory='.', FRB_name='FRB121102'):
 	#MJD of the pulses
 	pulse_MJD = start_MJD + time / 86400.
 
-	for i, t in enumerate(time[:1]): 
+	for i, t in enumerate(time): 
 		start_time = t - 0.01
 		data, nbinsextra, nbins, start = waterfall(rawdata, start_time, 0.03, DM[i],\
 				nbins=None, nsub=None, subdm = DM, zerodm=False, downsamp=1,\
