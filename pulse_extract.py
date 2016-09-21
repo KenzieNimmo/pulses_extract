@@ -18,7 +18,7 @@ def main():
     parser.add_argument('-fits', help="Filename of .fits file.", default='*.fits')
     parser.add_argument('-idL', help="Basename of .singlepulse files.", default='*')
     parser.add_argument('-folder', help="Path of the folder containig the .singlepulse files.", default='.')
-    parser.add_argument('-store_events', help="Store events in a SinglePulses.hdf5 database.",action='store_true')
+    parser.add_argument('-store_events', help="Store events in a SinglePulses.hdf5 database.", action='store_true')
     parser.add_argument('-events_dt', help="Duration in sec within two events are related to the same pulse.", default=20e-3,
                         type=int)
     parser.add_argument('-events_dDM', help="Number of DM steps within two events are related to the same pulse.", 
@@ -27,8 +27,8 @@ def main():
                         default=1., type=float)
     parser.add_argument('-events_database', help="Load events from this database.")
     parser.add_argument('-pulses_database', help="Load pulses from this database.")
-    parser.add_argument('-store_dir', help="Path of the folder to store the SinglePulses.hdf5 database.", default='.')
-    parser.add_argument('-plot_pulses', help="Save plots of the detected pulses.",action='store_true')
+    parser.add_argument('-store_dir', help="Path of the folder to store the output database.", default='.')
+    parser.add_argument('-plot_pulses', help="Save plots of the detected pulses.", action='store_true')
     return parser.parse_args()
   args = parser()
   
@@ -60,7 +60,7 @@ def events_database(args):
   C_Funct.Get_Group(events.DM.values, events.Sigma.values, events.Time.values, events.Pulse.values, 
                     args.events_dDM, args.events_dt, args.DM_step)
   if args.store_events:
-    store = pd.HDFStore('{}/SinglePulses.hdf5'.format(args.store_dir), 'a')
+    store = pd.HDFStore('{}/SinglePulses.hdf5'.format(args.store_dir), 'w')
     store.append('events',events,data_columns=['Pulse','SAP','BEAM','DM','Time'])
     store.close()
     
