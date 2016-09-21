@@ -41,10 +41,7 @@ def main():
     store.append('pulses',pulses)
     store.close()
   
-  if args.plot_pulses: 
-    fits_name = glob.glob(args.fits)[0]
-    fits_name = os.path.basename(fits_name)
-    auto_waterfaller.main(args.fits, np.array(pulses.Time), np.array(pulses.DM), directory=fits_name)
+  if args.plot_pulses: auto_waterfaller.main(args.fits, np.array(pulses.Time), np.array(pulses.DM), directory=args.store_dir)
   
   return
 
