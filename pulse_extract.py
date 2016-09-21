@@ -92,6 +92,8 @@ def pulses_database(args, header, events=None):
   pulses = pulses[pulses.N_events > 5]
   pulses = pulses[pulses.Sigma >= 8.]
   pulses = pulses[pulses.Downfact <= 100]
+  obs_length = header['NSBLK'] * header['NAXIS2'] * header['TBIN']
+  pulses = pulses[pulses.Time < obs_length-3.]
   
   RFIexcision(events, pulses)
   
