@@ -48,7 +48,7 @@ def main():
 
 def events_database(args):
   #Create events database
-  sp_files = glob.glob("{}/{}.singlepulse".format(args.folder, args.idL))
+  sp_files = glob.glob("{}/{}*.singlepulse".format(args.folder, args.idL))
   events = pd.concat(pd.read_csv(f, delim_whitespace=True, dtype=np.float32) for f in sp_files)
   events.reset_index(drop=True, inplace=True)
   events.columns = ['a','DM','Sigma','Time','Sample','Downfact','b']
