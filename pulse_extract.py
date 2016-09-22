@@ -9,6 +9,17 @@ import pyfits
 
 from src import C_Funct
 import auto_waterfaller
+from extract_psrfits_subints import extract_subints_from_observation
+
+
+
+DM_low = 461.           #Lowest de-dispersed value
+DM_high = 660.          #Highest de-dispersed value
+SNR_peak_min = 8.       #Minumum peak SNR value
+SNR_min = 6.            #Minumum SNR value
+Downfact_max = 100      #Maximum Downfact value
+
+
 
 def main():
   def parser():
@@ -27,8 +38,10 @@ def main():
                         default=1., type=float)
     parser.add_argument('-events_database', help="Load events from this database.")
     parser.add_argument('-pulses_database', help="Load pulses from this database.")
-    parser.add_argument('-store_dir', help="Path of the folder to store the output database.", default='.')
-    parser.add_argument('-plot_pulses', help="Save plots of the detected pulses.", action='store_true')
+    parser.add_argument('-store_dir', help="Path of the folder to store the output.", default='.')
+    parser.add_argument('-plot_pulses', help="Save plots of detected pulses.", action='store_true')
+    parser.add_argument('-extract_raw', help="Extract raw data around detected pulses.", action='store_true')
+    parser.add_argument('-raw_basename', help="Basename for raw .fits files.", default='')
     return parser.parse_args()
   args = parser()
   
@@ -42,6 +55,7 @@ def main():
     store.close()
   
   if args.plot_pulses: auto_waterfaller.main(args.fits, np.array(pulses.Time), np.array(pulses.DM), directory=args.store_dir)
+  if args.extract_raw: extract_subints_from_observation(args.raw_basename, args.store_dir, np.array(pulses.Time), -2, 8)
   
   return
 
@@ -59,11 +73,12 @@ def events_database(args):
   events.sort(['DM','Time'],inplace=True)
   C_Funct.Get_Group(events.DM.values, events.Sigma.values, events.Time.values, events.Pulse.values, 
                     args.events_dDM, args.events_dt, args.DM_step)
+  
   if args.store_events:
     store = pd.HDFStore('{}/SinglePulses.hdf5'.format(args.store_dir), 'w')
     store.append('events',events,data_columns=['Pulse','SAP','BEAM','DM','Time'])
     store.close()
-    
+  
   return events[events.Pulse >= 0]
   
   
@@ -91,8 +106,8 @@ def pulses_database(args, header, events=None):
   pulses.N_events = pulses.N_events.astype(np.int16)
 
   pulses = pulses[pulses.N_events > 5]
-  pulses = pulses[pulses.Sigma >= 8.]
-  pulses = pulses[pulses.Downfact <= 100]
+  pulses = pulses[pulses.Sigma >= SNR_peak_min]
+  pulses = pulses[pulses.Downfact <= Downfact_max]
   obs_length = header['NSBLK'] * header['NAXIS2'] * header['TBIN']
   pulses = pulses[pulses.Time < obs_length-3.]
   
@@ -111,14 +126,12 @@ def RFIexcision(events, pulses):
   pulses.sort_index(inplace=True)
   
   #Remove flat SNR pulses. Minimum ratio to have weakest pulses with SNR = 8
-  pulses.Pulse[pulses.Sigma / gb.Sigma.min() <= 8./6.] += 1
+  pulses.Pulse[pulses.Sigma / gb.Sigma.min() <= SNR_peak_min / SNR_min] += 1
   
   #Remove flat duration pulses. Minimum ratio to have weakest pulses with SNR = 8 (from Eq.6.21 of Pulsar Handbook)
-  pulses.Pulse[gb.Downfact.max() / pulses.Downfact < 1.8] += 1
+  pulses.Pulse[gb.Downfact.max() / pulses.Downfact < (SNR_peak_min / SNR_min)**2] += 1
   
   #Remove pulses peaking near the DM edges
-  DM_low = 461.
-  DM_high = 660.
   DM_frac = (DM_high - DM_low) * 0.2  #Remove 5% of DM range from each edge
   pulses.Pulse[(pulses.DM < DM_low+DM_frac) | (pulses.DM > DM_high-DM_frac)] += 1
   
@@ -126,7 +139,7 @@ def RFIexcision(events, pulses):
   def crosses(sig):
     diff = sig - (sig.max() + sig.min()) / 2.
     count = np.count_nonzero(np.diff(np.sign(diff)))
-    return (count != 2) & (count != 4)
+    return (count != 2) & (count != 4) & (count != 6)
   pulses.Pulse += gb.apply(lambda x: crosses(x.Sigma)).astype(np.int8)
     
   return
