@@ -28,11 +28,11 @@ def main(fits, time, DM, top_freq=0.0, sigma=0.0, duration=0.0, directory='.', F
 	with psrfits.pyfits.open(fits, memmap=True) as fn:
   		header = fn['SUBINT'].header + fn['PRIMARY'].header
 
-	#MJD of the beginning of the observation
-	start_MJD = header['STT_IMJD'] + header['STT_SMJD'] / 86400. 
+	#Start MJD (days) of the beginning of the observation
+	IMJD = header['STT_IMJD'] 
 
-	#MJD of the pulses
-	pulse_MJD = start_MJD + time / 86400.
+	#Seconds past UTC 00h  of the pulses
+	SMJD = header['STT_SMJD'] + time
 
 	for i, t in enumerate(time[:1]): 
 		start_time = t - 0.01
@@ -49,8 +49,8 @@ def main(fits, time, DM, top_freq=0.0, sigma=0.0, duration=0.0, directory='.', F
 		ax2.axis([0,10,0,10])
 		ax2.annotate('DM = %0.2f'%DM[i], xy=(0,9))
 		ax2.annotate('Time (s) = %0.4f'%t, xy=(0,6))
-		ax2.annotate('MJD = %d'%start_MJD, xy=(0,8))
-		ax2.annotate('MJD time = %0.8f'%(t/86400), xy=(0,7))
+		ax2.annotate('MJD = %d'%IMJD, xy=(0,8))
+		ax2.annotate('MJD time = %0.8f'%SMJD, xy=(0,7))
 		ax2.annotate('Duration = %0.4f'%duration, xy=(0,5))
 		ax2.annotate('Top frequency = %0.2f'%top_freq, xy=(0,4))
 		ax2.annotate('Sigma = %0.2f'%sigma, xy=(0,3))
@@ -60,11 +60,14 @@ def main(fits, time, DM, top_freq=0.0, sigma=0.0, duration=0.0, directory='.', F
 	                   cmap_str="gist_yarg", sweep_dms=[], sweep_posns=[],
 	                   ax_im=ax1, ax_ts=ax3, ax_spec=None, interactive=False)
 
+
 		ax3.axvline(t, c='r')
 		ax2.axis('off')
 		fig.tight_layout(w_pad = 10, h_pad = 0.5)
-		plt.suptitle('%s %0.8f [close up]\n %s'%(FRB_name, pulse_MJD[i], observation), y=1.05)
-		plt.savefig('%s/%s_%0.8f_zoomed.png'%(directory, FRB_name, pulse_MJD[i]), bbox_inches='tight', pad_inches=0.1)
+
+		plt.suptitle('%s %id %.3fs [close up]\n %s'%(FRB_name, IMJD, SMJD[i], observation), y=1.05)
+		plt.savefig('%s/%s_%i_%.3f_zoomed.png'%(directory, FRB_name, IMJD, SMJD[i]), bbox_inches='tight', pad_inches=0.1)
+
 
 		#Zoomed out version
 		start_time = t - 0.05
@@ -81,8 +84,8 @@ def main(fits, time, DM, top_freq=0.0, sigma=0.0, duration=0.0, directory='.', F
 		ax2.axis([0,10,0,10])
 		ax2.annotate('DM = %0.2f'%DM[i], xy=(0,9))
 		ax2.annotate('Time (s) = %0.4f'%t, xy=(0,6))
-		ax2.annotate('MJD = %d'%start_MJD, xy=(0,8))
-		ax2.annotate('MJD time = %0.8f'%(t/86400), xy=(0,7))
+		ax2.annotate('MJD = %d'%IMJD, xy=(0,8))
+		ax2.annotate('MJD time = %0.8f'%SMJD, xy=(0,7))
 		ax2.annotate('Duration = %0.4f'%duration, xy=(0,5))
 		ax2.annotate('Top frequency = %0.2f'%top_freq, xy=(0,4))
 		ax2.annotate('Sigma = %0.2f'%sigma, xy=(0,3))
@@ -95,8 +98,8 @@ def main(fits, time, DM, top_freq=0.0, sigma=0.0, duration=0.0, directory='.', F
 		ax3.axvline(t, c='r')
 		ax2.axis('off')
 		fig.tight_layout(w_pad = 10, h_pad = 0.5)		
-		plt.suptitle('FRB121102 %0.8f \n %s'%(pulse_MJD[i],observation), y=1.05)
-		plt.savefig('%s/FRB121102_%0.8f.png'%(directory, pulse_MJD[i]), bbox_inches='tight', pad_inches=0.1)
+		plt.suptitle('%s %id %.3fs \n %s'%(FRB_name, IMJD, SMJD[i],observation), y=1.05)
+        plt.savefig('%s/%s_%i_%.3f.png'%(directory, FRB_name, IMJD, SMJD[i]), bbox_inches='tight', pad_inches=0.1)
 		plt.close('all')
 
 if __name__ == '__main__':

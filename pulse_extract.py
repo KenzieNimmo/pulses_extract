@@ -77,7 +77,8 @@ def pulses_database(args, header, events=None):
   pulses.index.name = None
   pulses = pulses.loc[:,['DM','Sigma','Time','Sample','Downfact']]
   pulses.index.name = 'idx'
-  pulses['MJD'] = header['STT_IMJD'] + (header['STT_SMJD'] + pulses.Time) / 86400.
+  pulses['IMJD'] = header['STT_IMJD']
+  pulses['SMJD'] = header['STT_SMJD'] + pulses.Time
   pulses['Duration'] = pulses.Downfact * header['TBIN']
   pulses['top_Freq'] = header['OBSFREQ'] + abs(header['OBSBW']) / 2.
   pulses['Pulse'] = 0
@@ -92,6 +93,8 @@ def pulses_database(args, header, events=None):
   pulses = pulses[pulses.N_events > 5]
   pulses = pulses[pulses.Sigma >= 8.]
   pulses = pulses[pulses.Downfact <= 100]
+  obs_length = header['NSBLK'] * header['NAXIS2'] * header['TBIN']
+  pulses = pulses[pulses.Time < obs_length-3.]
   
   RFIexcision(events, pulses)
   
