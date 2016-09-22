@@ -9,7 +9,7 @@ import pyfits
 
 from src import C_Funct
 import auto_waterfaller
-from extract import extract_subints_from_observation
+from extract_psrfits_subints import extract_subints_from_observation
 
 def main():
   def parser():
@@ -28,9 +28,10 @@ def main():
                         default=1., type=float)
     parser.add_argument('-events_database', help="Load events from this database.")
     parser.add_argument('-pulses_database', help="Load pulses from this database.")
-    parser.add_argument('-store_dir', help="Path of the folder to store the output database.", default='.')
+    parser.add_argument('-store_dir', help="Path of the folder to store the output.", default='.')
     parser.add_argument('-plot_pulses', help="Save plots of detected pulses.", action='store_true')
     parser.add_argument('-extract_raw', help="Extract raw data around detected pulses.", action='store_true')
+    parser.add_argument('-raw_basename', help="Basename for raw .fits files.", default='')
     return parser.parse_args()
   args = parser()
   
@@ -44,9 +45,7 @@ def main():
     store.close()
   
   if args.plot_pulses: auto_waterfaller.main(args.fits, np.array(pulses.Time), np.array(pulses.DM), directory=args.store_dir)
-  if args.extract_raw:
-    idx_end = args.fits.find('_subs_')
-    extract_subints_from_observation(args.fits[:idx_end], np.array(pulses.Time), -2, 8)
+  if args.extract_raw: extract_subints_from_observation(args.raw_basename, args.store_dir, np.array(pulses.Time), -2, 8)
   
   return
 
