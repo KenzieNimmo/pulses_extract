@@ -6,6 +6,23 @@ from astropy.io import fits
 
 # Read FITS start times
 def get_starttimes(froot):
+    """Retrieve information about PSRFITS files
+
+    Input:
+       froot: Root of PSRFITS filenames, string
+              e.g. fits/puppi_57614_C0531+33_0803 for fits/puppi_57614_C0531+33_0803_*.fits
+
+    Output:
+       files: array of filenames in PSRFITS observation
+       stt_imjd: numpy array of integer MJDs of observation start
+       stt_smjd: numpy array of integer seconds of observation start
+       stt_offs: numpy array of offset from start time (seconds)
+       nsblk: numpy array of bumber of spectra per subint
+       tbin: numpy array of sampling time (seconds)
+       nsuboffs: numpy array of subint offset with respect to observation start
+       nsub: numpy array of number of subints within each file
+
+    """  
     # Start file
     ifile=1
 
@@ -52,6 +69,14 @@ def get_starttimes(froot):
 
 # Extract subints from a single file
 def extract_subints_from_single_file(infname,outfname,isubmin,isubmax):
+    """Extract subints from a single FITS file and store them as a different FITS file
+
+    Input:
+       infname: Name of input FITS file
+       outfname: Name of output FITS file
+       isubmin,isubmax: subint range to extract and store
+
+    """  
     # Open file
     fits_file=fits.open(infname,memmap=True)
 
@@ -82,7 +107,17 @@ def extract_subints_from_single_file(infname,outfname,isubmin,isubmax):
     return
 
 # Extract subints from an observation
-def extract_subints_from_observation(froot,tbursts,isub0,isub1):
+def extract_subints_from_observation(froot,path,tbursts,isub0,isub1):
+    """Extract subints from a PSRFITS observation
+
+    Input:
+       froot: root file PSRFITS filename
+       path: output pat
+       tbursts: list of burst times to extract
+       isub0: number of subints to extract before the pulse (negative)
+       isub1: number of subints to extract after the pulse
+
+    """  
     # Get start times
     files,stt_imjd,stt_smjd,stt_offs,nsblk,tbin,nsuboffs,nsub=get_starttimes(froot)
 
@@ -114,7 +149,7 @@ def extract_subints_from_observation(froot,tbursts,isub0,isub1):
                     isubmax=isub+isub1
                     
                     # Output filename
-                    fname="%s_%08.3f.fits"%(os.path.basename(froot),tburst)
+                    fname="%s_%08.3f.fits"%(os.path.join(path,os.path.basename(froot)),tburst)
                     
                     print "Extracting subints %03d to %03d from %s to %s"%(isubmin,isubmax,files[i],fname) 
                     
@@ -128,7 +163,9 @@ def extract_subints_from_observation(froot,tbursts,isub0,isub1):
 if __name__ == '__main__':     
 
     # File root name    
-    froot="../../puppi_57614_C0531+33_0803"
+    froot="../../../puppi_57614_C0531+33_0803"
+
+    path="extracted_pulses"
 
     # Subint offsets
     isub0=-2
@@ -138,4 +175,4 @@ if __name__ == '__main__':
     tbursts=np.array([1970.861179,318.310236,2367.424102,6033.051320])
 
     # Extract subints
-    extract_subints_from_observation(froot,tbursts,isub0,isub1)
+    extract_subints_from_observation(froot,path,tbursts,isub0,isub1)
