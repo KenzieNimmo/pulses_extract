@@ -106,6 +106,7 @@ def extract_subints_from_single_file(infname,outfname,isubmin,isubmax):
 
     return
 
+
 # Extract subints from an observation
 def extract_subints_from_observation(froot,path,tbursts,isub0,isub1):
     """Extract subints from a PSRFITS observation
@@ -142,12 +143,12 @@ def extract_subints_from_observation(froot,path,tbursts,isub0,isub1):
                 toff=tburst-tstart[i]
                 isub=int(np.floor(toff/(nsblk[i]*tbin[i])))
                 
+                # Subint limits
+                isubmin=isub+isub0
+                isubmax=isub+isub1
+
                 # Some logic for dealing with file breaks
-                if isub+isub0>=0 and isub+isub1<nsub[i]:
-                    # Subint limits
-                    isubmin=isub+isub0
-                    isubmax=isub+isub1
-                    
+                if isubmin>=0 and isubmax<nsub[i]:
                     # Output filename
                     fname="%s_%08.3f.fits"%(os.path.join(path,os.path.basename(froot)),tburst)
                     
@@ -157,7 +158,7 @@ def extract_subints_from_observation(froot,path,tbursts,isub0,isub1):
                     extract_subints_from_single_file(files[i],fname,isubmin,isubmax)
                 else:
                     print "Pulse at t=%g,isub=%d extends over a file break."%(tburst,isub)
-          
+                        
     return
     
 if __name__ == '__main__':     
@@ -172,7 +173,8 @@ if __name__ == '__main__':
     isub1=+8
     
     # Burst times
-    tbursts=np.array([1970.861179,318.310236,2367.424102,6033.051320])
+    #    tbursts=np.array([1970.861179,318.310236,2367.424102,6033.051320])
+    tbursts=np.array([214.0])
 
     # Extract subints
     extract_subints_from_observation(froot,path,tbursts,isub0,isub1)
