@@ -47,8 +47,8 @@ def main(fits, time, DM, directory='.', FRB_name='FRB121102'):
 	                   cmap_str="gist_yarg", sweep_dms=[], sweep_posns=[],
 	                   ax_im=None, ax_ts=None, ax_spec=None, interactive=False)
 
-		plt.suptitle('%s %i.%i [close up]\n %s'%(FRB_name, IMJD, SMJD[i], observation), y=1.05)
-		plt.savefig('%s/%s_%i.%i_zoomed.png'%(directory, FRB_name, IMJD, SMJD[i]), bbox_inches='tight', pad_inches=0.1)
+		plt.suptitle('%s %id %.3fs [close up]\n %s'%(FRB_name, IMJD, SMJD[i], observation), y=1.05)
+		plt.savefig('%s/%s_%i_%.3f_zoomed.png'%(directory, FRB_name, IMJD, SMJD[i]), bbox_inches='tight', pad_inches=0.1)
 
 		#Zoomed out version
 		start_time = t - 0.05
@@ -64,8 +64,8 @@ def main(fits, time, DM, directory='.', FRB_name='FRB121102'):
 	                   cmap_str="gist_yarg", sweep_dms=[], sweep_posns=[],
 	                   ax_im=None, ax_ts=None, ax_spec=None, interactive=False)
 		
-		plt.suptitle('%s %i.%i \n %s'%(FRB_name, IMJD, SMJD[i],observation), y=1.05)
-                plt.savefig('%s/%s_%i.%i.png'%(directory, FRB_name, IMJD, SMJD[i]), bbox_inches='tight', pad_inches=0.1)
+		plt.suptitle('%s %id %.3fs \n %s'%(FRB_name, IMJD, SMJD[i],observation), y=1.05)
+                plt.savefig('%s/%s_%i_%.3f.png'%(directory, FRB_name, IMJD, SMJD[i]), bbox_inches='tight', pad_inches=0.1)
 		plt.close('all')
 
 if __name__ == '__main__':
