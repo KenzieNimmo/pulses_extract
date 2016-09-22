@@ -2,37 +2,23 @@
 
 if [ $# -ne 1 ]; then
    echo "Pipeline to process Arecibo data of FRB121102."
+   echo "The pipeline use pulses stored in a SinglePulse.hdf5 database to chop raw data around the pulses."
    echo ""
-   echo "Usage: sh FRB_pipeline.sh fits_filename"
-   echo "fits_filename contains the full path of the file."
+   echo "Usage: sh chop_raw_data.sh database_filename"
+   echo "database_filename contains the full path of the SinglePulse.hdf5 file."
    echo ""
-   echo "The script will store the output in the same fits file folder,"
-   echo "in a directory named as the fits file."
+   echo "The script will store the output in the path defined by FITS_PATH,"
+   echo "in a directory named fits."
    exit
 fi
 
-FITS=$1
-FITS_PATH=${FITS%/*}
-FITS_BASENAME=${FITS##*/}; FITS_BASENAME=${FITS_BASENAME%.*}
+DB=$1
+FITS_PATH=/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/output/
+FITS_BASENAME=${DB##*/}; FITS_BASENAME=${FITS_BASENAME%SinglePulse.hdf5}
 SCRIPT_DIR="$( cd -P "$( dirname "$0" )" && pwd )"
 
-cd $FITS_PATH 
-mkdir $FITS_BASENAME
-cd $FITS_BASENAME
-mkdir TEMP
-cd TEMP
+cd $FITS_PATH/$FITS_BASENAME
+mkdit fits
 
-prepsubband -nsub 64 -noscales -nooffsets -nobary -lodm 461.0 -numdms 200 -dmstep 1.0 -o ${FITS_BASENAME}_TOPO $FITS
-
-single_pulse_search.py -t 6.0 -b -m 150 *.dat
-mv ${FITS_BASENAME}_TOPO_DM561.00.dat ..
-
-python ${SCRIPT_DIR}/pulse_extract.py -fits $FITS -store_events -idL ${FITS_BASENAME} -store_dir $FITS_PATH/$FITS_BASENAME \
-  -folder $FITS_PATH/$FITS_BASENAME/TEMP -plot_pulses -extract_raw -raw_basename ${FITS_BASENAME}
-
-
-#cd $FITS_PATH/$FITS_BASENAME
-#rm -r TEMP
-
-
+python ${SCRIPT_DIR}/pulse_extract.py -pulses_database $DB -store_dir $FITS_PATH/$FITS_BASENAME/fits -extract_raw -raw_basename $FITS_BASENAME
 

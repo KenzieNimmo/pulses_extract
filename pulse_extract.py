@@ -11,6 +11,16 @@ from src import C_Funct
 import auto_waterfaller
 from extract_psrfits_subints import extract_subints_from_observation
 
+
+
+DM_low = 461.           #Lowest de-dispersed value
+DM_high = 660.          #Highest de-dispersed value
+SNR_peak_min = 8.       #Minumum peak SNR value
+SNR_min = 6.            #Minumum SNR value
+Downfact_max = 100      #Maximum Downfact value
+
+
+
 def main():
   def parser():
     # Command-line options
@@ -96,8 +106,8 @@ def pulses_database(args, header, events=None):
   pulses.N_events = pulses.N_events.astype(np.int16)
 
   pulses = pulses[pulses.N_events > 5]
-  pulses = pulses[pulses.Sigma >= 8.]
-  pulses = pulses[pulses.Downfact <= 100]
+  pulses = pulses[pulses.Sigma >= SNR_peak_min]
+  pulses = pulses[pulses.Downfact <= Downfact_max]
   obs_length = header['NSBLK'] * header['NAXIS2'] * header['TBIN']
   pulses = pulses[pulses.Time < obs_length-3.]
   
@@ -116,14 +126,12 @@ def RFIexcision(events, pulses):
   pulses.sort_index(inplace=True)
   
   #Remove flat SNR pulses. Minimum ratio to have weakest pulses with SNR = 8
-  pulses.Pulse[pulses.Sigma / gb.Sigma.min() <= 8./6.] += 1
+  pulses.Pulse[pulses.Sigma / gb.Sigma.min() <= SNR_peak_min / SNR_min] += 1
   
   #Remove flat duration pulses. Minimum ratio to have weakest pulses with SNR = 8 (from Eq.6.21 of Pulsar Handbook)
-  pulses.Pulse[gb.Downfact.max() / pulses.Downfact < 1.8] += 1
+  pulses.Pulse[gb.Downfact.max() / pulses.Downfact < (SNR_peak_min / SNR_min)**2] += 1
   
   #Remove pulses peaking near the DM edges
-  DM_low = 461.
-  DM_high = 660.
   DM_frac = (DM_high - DM_low) * 0.2  #Remove 5% of DM range from each edge
   pulses.Pulse[(pulses.DM < DM_low+DM_frac) | (pulses.DM > DM_high-DM_frac)] += 1
   
