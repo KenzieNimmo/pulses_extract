@@ -17,15 +17,16 @@ import psrfits
 import spectra
 import os
 
-def plotter(data, start, plot_duration, t, DM, IMJD, SMJD, duration, top_freq, sigma, directory, FRB_name, observation, zoom=True, idx=''):
+def plotter(data, start, plot_duration, t, DM, IMJD, SMJD, duration, top_freq, sigma, directory, FRB_name, observation, pulse_id, zoom=True, idx=''):
 	fig = plt.figure(figsize=(8,5))
 	ax1 = plt.subplot2grid((3,4), (1,1), rowspan=3, colspan=3)
 	ax2 = plt.subplot2grid((3,4), (0,0), rowspan=3)
 	ax3 = plt.subplot2grid((3,4), (0,1), colspan=3)
 
 	ax2.axis([0,7,0,7])
-	ax2.annotate('DM \n%d'%DM, xy=(0,6))
-	ax2.annotate('MJD \n%.8f'%(IMJD+SMJD), xy=(0,5))
+        ax2.annotate('Pulse ID \n%i'%pulse_id, xy=(0,6))
+	ax2.annotate('DM \n%d'%DM, xy=(0,5))
+	ax2.annotate('MJD \n%.8f'%(IMJD+SMJD), xy=(0,4))
 	ax2.annotate('Time (s) \n%0.3f'%t, xy=(0,3))
 	ax2.annotate('Duration (ms) \n%0.2f'%(duration*1000.), xy=(0,2))
 	ax2.annotate('Top frequency \n%0.2f'%top_freq, xy=(0,1))
@@ -52,8 +53,13 @@ def plotter(data, start, plot_duration, t, DM, IMJD, SMJD, duration, top_freq, s
 	fig.clf()
 	plt.close('all')
 
-def main(fits, time, DM, sigma, duration, top_freq, directory='.', FRB_name='FRB121102', downsamp=False):
-
+def main(fits, time, DM=560., sigma=0., duration=0., pulse_id=0, top_freq=0., directory='.', FRB_name='FRB121102', downsamp=False):
+        num_elements = time.size
+        if isinstance(DM, float) or isinstance(DM, int): DM = np.zeros(num_elements) + DM
+        if isinstance(sigma, float) or isinstance(sigma, int): sigma = np.zeros(num_elements) + sigma
+        if isinstance(duration, float) or isinstance(duration, int): duration = np.zeros(num_elements) + duration
+        if isinstance(pulse_id, float) or isinstance(pulse_id, int): pulse_id = np.zeros(num_elements) + pulse_id
+        
 	rawdata = psrfits.PsrfitsFile(fits)
 	observation = str(fits)[:-5]
 	observation = os.path.basename(observation)
@@ -79,7 +85,7 @@ def main(fits, time, DM, sigma, duration, top_freq, directory='.', FRB_name='FRB
 				bandpass_corr=False, ref_freq=None)
 
 		plotter(data, start, plot_duration, t, DM[i], IMJD, SMJD[i], duration[i], top_freq,\
-			sigma[i], directory, FRB_name, observation, zoom=True, idx=i)
+			sigma[i], directory, FRB_name, observation, zoom=True, idx=i, pulse_id=pulse_id[i])
 
 		#Zoomed out version
 		start_time = t - 0.05
@@ -91,7 +97,7 @@ def main(fits, time, DM, sigma, duration, top_freq, directory='.', FRB_name='FRB
 				bandpass_corr=False, ref_freq=None)
 
 		plotter(data, start, plot_duration, t, DM[i], IMJD, SMJD[i], duration[i], top_freq,\
-			sigma[i], directory, FRB_name, observation, zoom=False, idx=i)
+			sigma[i], directory, FRB_name, observation, zoom=False, idx=i, pulse_id=pulse_id[i])
                 
                 
                 

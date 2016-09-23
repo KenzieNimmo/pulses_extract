@@ -47,6 +47,7 @@ def main():
     parser.add_argument('-extract_raw', help="Extract raw data around detected pulses.", action='store_true')
     parser.add_argument('-raw_basename', help="Basename for raw .fits files.", default='')
     parser.add_argument('-pulses_checked', help="Path of a text file containig a list of pulse identifiers to label as RFI.", default='')
+    parser.add_argument('-plot_statistics', help="Produce plots with statistics of the pulses.", action='store_true')
     return parser.parse_args()
   args = parser()
   
@@ -70,6 +71,8 @@ def main():
     store.remove('pulses')
     store.append('pulses',pulses)
     store.close()
+    
+  if args.plot_statistics: plot_statistics(pulses[pulses.Pulse == 0])
 
   return
 
@@ -177,6 +180,11 @@ def pulses_checked(pulses, filename):
   
   pulses.Pulse.loc[RFI_list] += 1
   return pulses
+
+
+def plot_statistics(pulses):
+  auto_waterfaller.histogram(pulses.DM)
+  auto_waterfaller.histogram(pulses.Sigma)
 
   
 
