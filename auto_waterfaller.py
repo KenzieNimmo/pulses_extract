@@ -97,7 +97,16 @@ def main(fits, time, DM, sigma, duration, top_freq, directory='.', FRB_name='FRB
                 
                 #ADD DOWNSAMP
                 
-                
+
+def histogram(data, title='', xlabel='', color='k'):
+
+  #...
+
+  pass
+
+
+
+
 
 if __name__ == '__main__':
 	DM, time, sample = np.loadtxt(sys.argv[2], usecols=(0,2,3), unpack=True)
