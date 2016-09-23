@@ -17,7 +17,7 @@ import psrfits
 import spectra
 import os
 
-def plotter(data, start, plot_duration, t, DM, IMJD, SMJD, duration, top_freq, sigma, directory, FRB_name, observation, zoom=True):
+def plotter(data, start, plot_duration, t, DM, IMJD, SMJD, duration, top_freq, sigma, directory, FRB_name, observation, zoom=True, idx=''):
 	fig = plt.figure(figsize=(8,5))
 	ax1 = plt.subplot2grid((3,4), (1,1), rowspan=3, colspan=3)
 	ax2 = plt.subplot2grid((3,4), (0,0), rowspan=3)
@@ -42,14 +42,14 @@ def plotter(data, start, plot_duration, t, DM, IMJD, SMJD, duration, top_freq, s
 	ax2.axis('off')
 	fig.tight_layout(w_pad = 8, h_pad = 0.5)
 
-	if zoom:
-		plt.suptitle('%s %id %.3fs [close up]\n %s'%(FRB_name, IMJD, SMJD, observation), y=1.05)
-		plt.savefig('%s/%s_%i_%.3f_zoomed.png'%(directory, FRB_name, IMJD, SMJD), bbox_inches='tight', pad_inches=0.2)
-
-	else:
-		plt.suptitle('%s %id %.3fs \n %s'%(FRB_name, IMJD, SMJD,observation), y=1.05)
-        plt.savefig('%s/%s_%i_%.3f.png'%(directory, FRB_name, IMJD, SMJD), bbox_inches='tight', pad_inches=0.2)
-
+	if zoom: 
+          title = ' [close up]'
+          name = '_zoomed'
+        else:
+          title = name = ''
+          
+	plt.suptitle('%s %id %.3fs %s\n %s'%(FRB_name, IMJD, SMJD, title, observation), y=1.05)
+	plt.savefig('%s/%s_%i_%.3f_%s%s.png'%(directory, FRB_name, IMJD, SMJD, idx, name), bbox_inches='tight', pad_inches=0.2)
 	fig.clf()
 	plt.close('all')
 
@@ -80,7 +80,7 @@ def main(fits, time, DM, top_freq=0.0, sigma=0.0, duration=0.0, directory='.', F
 				bandpass_corr=False, ref_freq=None)
 
 		plotter(data, start, plot_duration, t, DM[i], IMJD, SMJD[i], duration, top_freq,\
-			sigma, directory, FRB_name, observation, zoom=True)
+			sigma, directory, FRB_name, observation, zoom=True, idx=i)
 
 		#Zoomed out version
 		start_time = t - 0.05
@@ -92,7 +92,7 @@ def main(fits, time, DM, top_freq=0.0, sigma=0.0, duration=0.0, directory='.', F
 				bandpass_corr=False, ref_freq=None)
 
 		plotter(data, start, plot_duration, t, DM[i], IMJD, SMJD[i], duration, top_freq,\
-			sigma, directory, FRB_name, observation, zoom=False)
+			sigma, directory, FRB_name, observation, zoom=False, idx=i)
 
 if __name__ == '__main__':
 	DM, time, sample = np.loadtxt(sys.argv[2], usecols=(0,2,3), unpack=True)

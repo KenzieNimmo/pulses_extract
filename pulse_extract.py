@@ -12,6 +12,9 @@ import auto_waterfaller
 from extract_psrfits_subints import extract_subints_from_observation
 
 
+#ELIMNARE pulses piu' vicini di 20ms a diversi DM
+
+
 
 DM_low = 461.           #Lowest de-dispersed value
 DM_high = 660.          #Highest de-dispersed value
