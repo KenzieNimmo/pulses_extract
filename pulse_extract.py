@@ -1,6 +1,7 @@
 import argparse
 import glob
 import os
+import sys
 
 import pandas as pd
 import numpy as np
@@ -39,27 +40,37 @@ def main():
                         default=5, type=float)
     parser.add_argument('-DM_step', help="Value of the DM step between timeseries.", 
                         default=1., type=float)
-    parser.add_argument('-events_database', help="Load events from this database.")
-    parser.add_argument('-pulses_database', help="Load pulses from this database.")
+    parser.add_argument('-events_database', help="Load events from this database.", default='')
+    parser.add_argument('-pulses_database', help="Load pulses from this database.", default='')
     parser.add_argument('-store_dir', help="Path of the folder to store the output.", default='.')
     parser.add_argument('-plot_pulses', help="Save plots of detected pulses.", action='store_true')
     parser.add_argument('-extract_raw', help="Extract raw data around detected pulses.", action='store_true')
     parser.add_argument('-raw_basename', help="Basename for raw .fits files.", default='')
+    parser.add_argument('-pulses_checked', help="Path of a text file containig a list of pulse identifiers to label as RFI.", default='')
     return parser.parse_args()
   args = parser()
   
   header = fits_header(args.fits)
   
-  if isinstance(args.pulses_database, str): pulses = pd.read_hdf(args.pulses_database,'pulses')
+  if args.pulses_database: pulses = pd.read_hdf(args.pulses_database,'pulses')
   else: 
     pulses = pulses_database(args, header)
     store = pd.HDFStore('{}/SinglePulses.hdf5'.format(args.store_dir), 'a')
     store.append('pulses',pulses)
+    store.append('pulses_bu',pulses)
     store.close()
   
-  if args.plot_pulses: auto_waterfaller.main(args.fits, np.array(pulses.Time), np.array(pulses.DM), directory=args.store_dir)
+  if args.plot_pulses: auto_waterfaller.main(args.fits, np.array(pulses.Time), np.array(pulses.DM), np.array(pulses.Sigma), /
+                                             np.array(pulses.Duration), top_freq=pulses.top_Freq.iloc[0], directory=args.store_dir)
   if args.extract_raw: extract_subints_from_observation(args.raw_basename, args.store_dir, np.array(pulses.Time), -2, 8)
   
+  if args.pulses_checked: 
+    pulses_checked(pulses, args.pulses_checked)
+    store = pd.HDFStore('{}/SinglePulses.hdf5'.format(args.store_dir), 'r+')
+    store.remove('pulses')
+    store.append('pulses',pulses)
+    store.close()
+
   return
 
 
@@ -89,7 +100,7 @@ def events_database(args):
   
 def pulses_database(args, header, events=None):
   #Create pulses database
-  if isinstance(args.events_database, str): events = pd.read_hdf(args.events_database,'events')
+  if args.events_database: events = pd.read_hdf(args.events_database,'events')
   elif not isinstance(events, pd.DataFrame): events = events_database(args)
   gb = events.groupby('Pulse',sort=False)
   pulses = events.loc[gb.Sigma.idxmax()]
@@ -152,6 +163,21 @@ def fits_header(filename):
   with pyfits.open(filename,memmap=True) as fits:
     header = fits['SUBINT'].header + fits['PRIMARY'].header
   return header
+  
+  
+def pulses_checked(pulses, filename):
+  RFI_list = np.genfromtxt(filename)
+
+  print "Folowing pulses will be marked as RFI: ", RFI_list
+  sys.stdout.write("Proceed? [y/n]")
+  choice = raw_input().lower()
+  if not (choice == 'y') | (choice == 'yes'): 
+    print "Aborting..."
+    return
+  
+  pulses.Pulse.loc[RFI_list] += 1
+  return pulses
+
   
 
 if __name__ == '__main__':

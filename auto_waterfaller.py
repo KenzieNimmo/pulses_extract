@@ -52,7 +52,7 @@ def plotter(data, start, plot_duration, t, DM, IMJD, SMJD, duration, top_freq, s
 	fig.clf()
 	plt.close('all')
 
-def main(fits, time, DM, top_freq=0.0, sigma=0.0, duration=0.0, directory='.', FRB_name='FRB121102', downsamp=False):
+def main(fits, time, DM, sigma, duration, top_freq, directory='.', FRB_name='FRB121102', downsamp=False):
 
 	rawdata = psrfits.PsrfitsFile(fits)
 	observation = str(fits)[:-5]
@@ -78,8 +78,8 @@ def main(fits, time, DM, top_freq=0.0, sigma=0.0, duration=0.0, directory='.', F
 				scaleindep=False, width_bins=1, mask=False, maskfn=None,\
 				bandpass_corr=False, ref_freq=None)
 
-		plotter(data, start, plot_duration, t, DM[i], IMJD, SMJD[i], duration, top_freq,\
-			sigma, directory, FRB_name, observation, zoom=True, idx=i)
+		plotter(data, start, plot_duration, t, DM[i], IMJD, SMJD[i], duration[i], top_freq,\
+			sigma[i], directory, FRB_name, observation, zoom=True, idx=i)
 
 		#Zoomed out version
 		start_time = t - 0.05
@@ -90,8 +90,8 @@ def main(fits, time, DM, top_freq=0.0, sigma=0.0, duration=0.0, directory='.', F
 				scaleindep=False, width_bins=1, mask=False, maskfn=None,\
 				bandpass_corr=False, ref_freq=None)
 
-		plotter(data, start, plot_duration, t, DM[i], IMJD, SMJD[i], duration, top_freq,\
-			sigma, directory, FRB_name, observation, zoom=False, idx=i)
+		plotter(data, start, plot_duration, t, DM[i], IMJD, SMJD[i], duration[i], top_freq,\
+			sigma[i], directory, FRB_name, observation, zoom=False, idx=i)
                 
                 
                 
