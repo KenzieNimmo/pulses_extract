@@ -25,8 +25,7 @@ def plotter(data, start, plot_duration, t, DM, IMJD, SMJD, duration, top_freq, s
 
 	ax2.axis([0,7,0,7])
 	ax2.annotate('DM \n%d'%DM, xy=(0,6))
-	ax2.annotate('MJD \n%d'%IMJD, xy=(0,5))
-	ax2.annotate('Sec past 00h \n%0.3f'%SMJD, xy=(0,4))
+	ax2.annotate('MJD \n%.8f'%(IMJD+SMJD), xy=(0,5))
 	ax2.annotate('Time (s) \n%0.3f'%t, xy=(0,3))
 	ax2.annotate('Duration (ms) \n%0.2f'%(duration*1000.), xy=(0,2))
 	ax2.annotate('Top frequency \n%0.2f'%top_freq, xy=(0,1))
@@ -43,17 +42,17 @@ def plotter(data, start, plot_duration, t, DM, IMJD, SMJD, duration, top_freq, s
 	fig.tight_layout(w_pad = 8, h_pad = 0.5)
 
 	if zoom: 
-          title = ' [close up]'
-          name = '_zoomed'
+          title_zoom = ' [close up]'
+          name_zoom = '_zoomed'
         else:
-          title = name = ''
+          title_zoom = name_zoom = ''
           
-	plt.suptitle('%s %id %.3fs %s\n %s'%(FRB_name, IMJD, SMJD, title, observation), y=1.05)
-	plt.savefig('%s/%s_%i_%.3f_%s%s.png'%(directory, FRB_name, IMJD, SMJD, idx, name), bbox_inches='tight', pad_inches=0.2)
+	plt.suptitle('%s %id %.8fs %s\n %s'%(FRB_name, IMJD, SMJD, title_zoom, observation), y=1.05)
+	plt.savefig('%s/%s_%i_%.8f_%s%s.png'%(directory, FRB_name, IMJD, SMJD, idx, name_zoom), bbox_inches='tight', pad_inches=0.2)
 	fig.clf()
 	plt.close('all')
 
-def main(fits, time, DM, top_freq=0.0, sigma=0.0, duration=0.0, directory='.', FRB_name='FRB121102'):
+def main(fits, time, DM, top_freq=0.0, sigma=0.0, duration=0.0, directory='.', FRB_name='FRB121102', downsamp=False):
 
 	rawdata = psrfits.PsrfitsFile(fits)
 	observation = str(fits)[:-5]
@@ -66,8 +65,8 @@ def main(fits, time, DM, top_freq=0.0, sigma=0.0, duration=0.0, directory='.', F
 	#Start MJD (days) of the beginning of the observation
 	IMJD = header['STT_IMJD'] 
 
-	#Seconds past UTC 00h  of the pulses
-	SMJD = header['STT_SMJD'] + time
+	#Fractional day
+	SMJD = (header['STT_SMJD'] + time) / 86400.
 
 	for i, t in enumerate(time): 
 
@@ -93,6 +92,12 @@ def main(fits, time, DM, top_freq=0.0, sigma=0.0, duration=0.0, directory='.', F
 
 		plotter(data, start, plot_duration, t, DM[i], IMJD, SMJD[i], duration, top_freq,\
 			sigma, directory, FRB_name, observation, zoom=False, idx=i)
+                
+                
+                
+                #ADD DOWNSAMP
+                
+                
 
 if __name__ == '__main__':
 	DM, time, sample = np.loadtxt(sys.argv[2], usecols=(0,2,3), unpack=True)

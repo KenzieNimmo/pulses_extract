@@ -66,13 +66,15 @@ def main():
 def events_database(args):
   #Create events database
   sp_files = glob.glob("{}/{}*.singlepulse".format(args.folder, args.idL))
-  events = pd.concat(pd.read_csv(f, delim_whitespace=True, dtype=np.float32) for f in sp_files)
+  events = pd.concat(pd.read_csv(f, delim_whitespace=True, dtype=np.float64) for f in sp_files)
   events.reset_index(drop=True, inplace=True)
   events.columns = ['a','DM','Sigma','Time','Sample','Downfact','b']
   events = events.ix[:,['DM','Sigma','Time','Sample','Downfact']]
   events.index.name = 'idx'
   events['Pulse'] = 0
   events.Pulse = events.Pulse.astype(np.int32)
+  events.Downfact = events.Downfact.astype(np.int16)
+  events.Sample = events.Sample.astype(np.int32)
   events.sort(['DM','Time'],inplace=True)
   C_Funct.Get_Group(events.DM.values, events.Sigma.values, events.Time.values, events.Pulse.values, 
                     args.events_dDM, args.events_dt, args.DM_step)
@@ -122,8 +124,6 @@ def pulses_database(args, header, events=None):
 
 def RFIexcision(events, pulses):
   events = events[events.Pulse.isin(pulses.index)]
-  events.DM = events.DM.astype(np.float64)
-  events.Sigma = events.Sigma.astype(np.float64)
   events.sort('DM',inplace=True)
   gb = events.groupby('Pulse')
   pulses.sort_index(inplace=True)
