@@ -20,5 +20,6 @@ SCRIPT_DIR="$( cd -P "$( dirname "$0" )" && pwd )"
 cd $FITS_PATH/$FITS_BASENAME
 mkdit fits
 
-python ${SCRIPT_DIR}/pulse_extract.py -pulses_database $DB -store_dir $FITS_PATH/$FITS_BASENAME/fits -extract_raw -raw_basename $FITS_BASENAME
+python ${SCRIPT_DIR}/pulse_extract.py -pulses_database $DB -pulses_checked $FITS_PATH/${FITS_BASENAME}/pulses_list.txt \
+  -store_dir $FITS_PATH/$FITS_BASENAME/fits -extract_raw -raw_basename $FITS_BASENAME
 

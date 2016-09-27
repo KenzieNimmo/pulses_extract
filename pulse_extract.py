@@ -13,10 +13,6 @@ import auto_waterfaller
 from extract_psrfits_subints import extract_subints_from_observation
 
 
-#ELIMNARE pulses piu' vicini di 20ms a diversi DM
-
-
-
 DM_low = 461.           #Lowest de-dispersed value
 DM_high = 660.          #Highest de-dispersed value
 SNR_peak_min = 8.       #Minumum peak SNR value
@@ -56,13 +52,12 @@ def main():
   if args.pulses_database: pulses = pd.read_hdf(args.pulses_database,'pulses')
   else: 
     pulses = pulses_database(args, header)
-    create_pulses_DB(pulses, args)
+    store = pd.HDFStore('{}/SinglePulses.hdf5'.format(args.store_dir), 'a')
+    store.append('pulses',pulses)
+    #store.append('pulses_bu',pulses) #Create a back up table in the database
+    store.close()
+    pulses.to_csv('{}/pulses_list.txt'.format(args.store_dir), sep='\t', cols=['Pulse',], header=['Rank',], index_label='#PulseID')
 
-  
-  if args.plot_pulses: auto_waterfaller.main(args.fits, np.array(pulses.Time), np.array(pulses.DM), np.array(pulses.Sigma), \
-                                             np.array(pulses.Duration), top_freq=pulses.top_Freq.iloc[0], directory=args.store_dir)
-  if args.extract_raw: extract_subints_from_observation(args.raw_basename, args.store_dir, np.array(pulses.Time), -2, 8)
-  
   if args.pulses_checked: 
     pulses_checked(pulses, args.pulses_checked)
     store = pd.HDFStore('{}/SinglePulses.hdf5'.format(args.store_dir), 'r+')
@@ -70,20 +65,21 @@ def main():
     store.append('pulses',pulses)
     store.close()
     
+  if args.plot_pulses: 
+    real_pulses = pulses[pulses.Pulse < 2]
+    auto_waterfaller.main(args.fits, np.array(real_pulses.Time), np.array(real_pulses.DM), np.array(real_pulses.Sigma), \
+                                             np.array(real_pulses.Duration), top_freq=real_pulses.top_Freq.iloc[0], directory=args.store_dir)
+  
+  if args.extract_raw: 
+    real_pulses = pulses[pulses.Pulse < 2]
+    extract_subints_from_observation(args.raw_basename, args.store_dir, np.array(real_pulses.Time), -2, 8)
+  
   if args.plot_statistics: plot_statistics(pulses[pulses.Pulse == 0])
 
   return
 
 
-def create_pulses_DB(pulses, args):
-    store = pd.HDFStore('{}/SinglePulses.hdf5'.format(args.store_dir), 'a')
-    store.append('pulses',pulses)
-    #store.append('pulses_bu',pulses) #Create a back up table in the database
-    store.close()
-    pulses.to_csv('{}/pulses_list.txt'.format(args.store_dir), sep='\t', cols=['Pulse',], header=['Rank',], index_label='#PulseID')
-
-
-def events_database(args):
+def events_database(args, header):
   #Create events database
   sp_files = glob.glob("{}/{}*.singlepulse".format(args.folder, args.idL))
   events = pd.concat(pd.read_csv(f, delim_whitespace=True, dtype=np.float64) for f in sp_files)
@@ -96,13 +92,18 @@ def events_database(args):
   events.Downfact = events.Downfact.astype(np.int16)
   events.Sample = events.Sample.astype(np.int32)
   events.sort(['DM','Time'],inplace=True)
-  C_Funct.Get_Group(events.DM.values, events.Sigma.values, events.Time.values, events.Pulse.values, 
-                    args.events_dDM, args.events_dt, args.DM_step)
-  
+
   if args.store_events:
     store = pd.HDFStore('{}/SinglePulses.hdf5'.format(args.store_dir), 'w')
     store.append('events',events,data_columns=['Pulse','SAP','BEAM','DM','Time'])
     store.close()
+  
+  #Remove last 10s of data
+  obs_length = header['NSBLK'] * header['NAXIS2'] * header['TBIN']
+  pulses = pulses[pulses.Time < obs_length-10.]
+
+  C_Funct.Get_Group(events.DM.values, events.Sigma.values, events.Time.values, events.Pulse.values, 
+                    args.events_dDM, args.events_dt, args.DM_step)
   
   return events[events.Pulse >= 0]
   
@@ -110,7 +111,7 @@ def events_database(args):
 def pulses_database(args, header, events=None):
   #Create pulses database
   if args.events_database: events = pd.read_hdf(args.events_database,'events')
-  elif not isinstance(events, pd.DataFrame): events = events_database(args)
+  elif not isinstance(events, pd.DataFrame): events = events_database(args, header)
   gb = events.groupby('Pulse',sort=False)
   pulses = events.loc[gb.Sigma.idxmax()]
   pulses.index = pulses.Pulse
@@ -133,8 +134,6 @@ def pulses_database(args, header, events=None):
   pulses = pulses[pulses.N_events > 5]
   pulses = pulses[pulses.Sigma >= SNR_peak_min]
   pulses = pulses[pulses.Downfact <= Downfact_max]
-  obs_length = header['NSBLK'] * header['NAXIS2'] * header['TBIN']
-  pulses = pulses[pulses.Time < obs_length-3.]
   
   RFIexcision(events, pulses)
   
@@ -183,16 +182,16 @@ def fits_header(filename):
   
   
 def pulses_checked(pulses, filename):
-  RFI_list = np.genfromtxt(filename)
+  RFI_list = np.genfromtxt(filename, dtype=int).T
 
-  print "Folowing pulses will be marked as RFI: ", RFI_list
-  sys.stdout.write("Proceed? [y/n]")
-  choice = raw_input().lower()
-  if not (choice == 'y') | (choice == 'yes'): 
-    print "Aborting..."
-    return
+  #print "Folowing pulses will be marked as RFI: ", RFI_list[0,RFI_list[1]==0]
+  #sys.stdout.write("Proceed? [y/n]")
+  #choice = raw_input().lower()
+  #if not (choice == 'y') | (choice == 'yes'): 
+    #print "Aborting..."
+    #return
   
-  pulses.Pulse.loc[RFI_list] += 1
+  pulses.Pulse.loc[RFI_list[0]] = RFI_list[1]
   return pulses
 
 
