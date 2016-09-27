@@ -56,10 +56,8 @@ def main():
   if args.pulses_database: pulses = pd.read_hdf(args.pulses_database,'pulses')
   else: 
     pulses = pulses_database(args, header)
-    store = pd.HDFStore('{}/SinglePulses.hdf5'.format(args.store_dir), 'a')
-    store.append('pulses',pulses)
-    store.append('pulses_bu',pulses)
-    store.close()
+    create_pulses_DB(pulses, args)
+
   
   if args.plot_pulses: auto_waterfaller.main(args.fits, np.array(pulses.Time), np.array(pulses.DM), np.array(pulses.Sigma), /
                                              np.array(pulses.Duration), top_freq=pulses.top_Freq.iloc[0], directory=args.store_dir)
@@ -75,6 +73,14 @@ def main():
   if args.plot_statistics: plot_statistics(pulses[pulses.Pulse == 0])
 
   return
+
+
+def create_pulses_DB(pulses, args):
+    store = pd.HDFStore('{}/SinglePulses.hdf5'.format(args.store_dir), 'a')
+    store.append('pulses',pulses)
+    #store.append('pulses_bu',pulses) #Create a back up table in the database
+    store.close()
+    pulses.to_csv(sep='\t', columns=['Pulse',], header=['Rank',], index_label='#PulseID')
 
 
 def events_database(args):
@@ -158,7 +164,15 @@ def RFIexcision(events, pulses):
     count = np.count_nonzero(np.diff(np.sign(diff)))
     return (count != 2) & (count != 4) & (count != 6)
   pulses.Pulse += gb.apply(lambda x: crosses(x.Sigma)).astype(np.int8)
-    
+  
+  #Remove weaker pulses within a temporal window
+  def simultaneous(p):                            
+    puls = pulses.Pulse[np.abs(pulses.Time-p.Time) < 0.02]
+    if puls.shape[0] == 1: return 0
+    if p.name == puls.index[0]: return 0
+    else: return 1
+  pulses.Pulse += pulses.apply(lambda x: simultaneous(x), axis=1)
+  
   return
 
 
