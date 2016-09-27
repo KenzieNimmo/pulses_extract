@@ -40,17 +40,15 @@ def main():
     parser.add_argument('-pulses_database', help="Load pulses from this database.", default='')
     parser.add_argument('-store_dir', help="Path of the folder to store the output.", default='.')
     parser.add_argument('-plot_pulses', help="Save plots of detected pulses.", action='store_true')
-    parser.add_argument('-extract_raw', help="Extract raw data around detected pulses.", action='store_true')
-    parser.add_argument('-raw_basename', help="Basename for raw .fits files.", default='')
+    parser.add_argument('-extract_raw', help="Extract raw data specified in this path around detected pulses.", default='')
     parser.add_argument('-pulses_checked', help="Path of a text file containig a list of pulse identifiers to label as RFI.", default='')
     parser.add_argument('-plot_statistics', help="Produce plots with statistics of the pulses.", action='store_true')
     return parser.parse_args()
   args = parser()
   
-  header = fits_header(args.fits)
-  
   if args.pulses_database: pulses = pd.read_hdf(args.pulses_database,'pulses')
   else: 
+    header = fits_header(args.fits)
     pulses = pulses_database(args, header)
     store = pd.HDFStore('{}/SinglePulses.hdf5'.format(args.store_dir), 'a')
     store.append('pulses',pulses)
@@ -72,7 +70,7 @@ def main():
   
   if args.extract_raw: 
     real_pulses = pulses[pulses.Pulse < 2]
-    extract_subints_from_observation(args.raw_basename, args.store_dir, np.array(real_pulses.Time), -2, 8)
+    extract_subints_from_observation(args.extract_raw, args.store_dir, np.array(real_pulses.Time), -2, 8)
   
   if args.plot_statistics: plot_statistics(pulses[pulses.Pulse == 0])
 

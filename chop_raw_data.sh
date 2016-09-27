@@ -21,5 +21,5 @@ cd $FITS_PATH/$FITS_BASENAME
 mkdit fits
 
 python ${SCRIPT_DIR}/pulse_extract.py -pulses_database $DB -pulses_checked $FITS_PATH/${FITS_BASENAME}/pulses_list.txt \
-  -store_dir $FITS_PATH/$FITS_BASENAME/fits -extract_raw -raw_basename $FITS_BASENAME
+  -store_dir $FITS_PATH/$FITS_BASENAME/fits -extract_raw $FITS_BASENAME
 
