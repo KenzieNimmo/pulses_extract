@@ -80,7 +80,7 @@ def create_pulses_DB(pulses, args):
     store.append('pulses',pulses)
     #store.append('pulses_bu',pulses) #Create a back up table in the database
     store.close()
-    pulses.to_csv(sep='\t', columns=['Pulse',], header=['Rank',], index_label='#PulseID')
+    pulses.to_csv('{}/pulses_list.txt'.format(args.store_dir), sep='\t', columns=['Pulse',], header=['Rank',], index_label='#PulseID')
 
 
 def events_database(args):
