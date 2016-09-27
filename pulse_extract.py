@@ -59,7 +59,7 @@ def main():
     create_pulses_DB(pulses, args)
 
   
-  if args.plot_pulses: auto_waterfaller.main(args.fits, np.array(pulses.Time), np.array(pulses.DM), np.array(pulses.Sigma), /
+  if args.plot_pulses: auto_waterfaller.main(args.fits, np.array(pulses.Time), np.array(pulses.DM), np.array(pulses.Sigma), \
                                              np.array(pulses.Duration), top_freq=pulses.top_Freq.iloc[0], directory=args.store_dir)
   if args.extract_raw: extract_subints_from_observation(args.raw_basename, args.store_dir, np.array(pulses.Time), -2, 8)
   
