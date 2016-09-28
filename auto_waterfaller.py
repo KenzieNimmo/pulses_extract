@@ -82,8 +82,6 @@ def toa_plotter(time, SN, duration, observation):
 	plt.title('Times of Arrival v. Signal to Noise Ratio\n%s'%observation)
 	plt.savefig('toa_%s.png'%observation)
 
-
-
 def main(fits, time, DM=560., sigma=0., duration=0.01, pulse_id=0, top_freq=0., directory='.',\
 		  FRB_name='FRB121102', downsamp=1.):
         num_elements = time.size
@@ -106,7 +104,7 @@ def main(fits, time, DM=560., sigma=0., duration=0.01, pulse_id=0, top_freq=0., 
 	#Fractional day
 	SMJD = (header['STT_SMJD'] + time) / 86400.
 
-	for i, t in enumerate(time[:1]): 
+	for i, t in enumerate(time): 
 		start_time = t - 0.05
 		plot_duration = 0.1
 
@@ -137,7 +135,8 @@ def main(fits, time, DM=560., sigma=0., duration=0.01, pulse_id=0, top_freq=0., 
 				bandpass_corr=False, ref_freq=None)
 
 		plotter(data, start, plot_duration, t, DM[i], IMJD, SMJD[i], duration[i], top_freq,\
-			sigma[i], directory, FRB_name, observation, zoom=True, idx=i, pulse_id=pulse_id[i], downsamp=downsamp[i])
+				sigma[i], directory, FRB_name, observation, zoom=True, idx=i, pulse_id=pulse_id[i],\
+			 	downsamp=downsamp[i])
 
 	histogram(downfact, title='Distribution of Dispersion Measures \n%s'%observation,\
 				xlabel=(r'DM (pc cm$^{-3}$)'), color='r', name='DM')
