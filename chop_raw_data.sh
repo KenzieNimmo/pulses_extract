@@ -20,7 +20,7 @@ DB_PATH=${DB%SinglePulses.hdf5}
 SCRIPT_DIR="$( cd -P "$( dirname "$0" )" && pwd )"
 
 cd $DB_PATH
-mkdit fits
+mkdir fits
 
 python ${SCRIPT_DIR}/pulse_extract.py -pulses_database $DB -pulses_checked $DB_PATH/pulses_list.txt \
   -store_dir $DB_PATH -extract_raw $FITS_BASENAME
