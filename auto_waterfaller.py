@@ -62,6 +62,7 @@ def main(fits, time, DM=560., sigma=0., duration=0., pulse_id=0, top_freq=0., di
         if isinstance(sigma, float) or isinstance(sigma, int): sigma = np.zeros(num_elements) + sigma
         if isinstance(duration, float) or isinstance(duration, int): duration = np.zeros(num_elements) + duration
         if isinstance(pulse_id, float) or isinstance(pulse_id, int): pulse_id = np.zeros(num_elements) + pulse_id
+        if isinstance(downsamp, float) or isinstance(downsamp, int): downsamp = np.zeros(num_elements) + downsamp
         
 	rawdata = psrfits.PsrfitsFile(fits)
 	observation = str(fits)[:-5]
@@ -104,12 +105,12 @@ def main(fits, time, DM=560., sigma=0., duration=0., pulse_id=0, top_freq=0., di
         #downsamped version (zoomed)
 		#print downsamp
 		data, nbinsextra, nbins, start = waterfall(rawdata, start_time, plot_duration, DM[i],\
-				nbins=None, nsub=None, subdm = DM, zerodm=False, downsamp=downsamp,\
+				nbins=None, nsub=None, subdm = DM, zerodm=False, downsamp=downsamp[i],\
 				scaleindep=False, width_bins=1, mask=False, maskfn=None,\
 				bandpass_corr=False, ref_freq=None)
 
 		plotter(data, start, plot_duration, t, DM[i], IMJD, SMJD[i], duration[i], top_freq,\
-			sigma[i], directory, FRB_name, observation, zoom=True, idx=i, pulse_id=pulse_id[i], downsamp=downsamp)
+			sigma[i], directory, FRB_name, observation, zoom=True, idx=i, pulse_id=pulse_id[i], downsamp=downsamp[i])
                 
 
 def histogram(data, title='', xlabel='', color='k'):
