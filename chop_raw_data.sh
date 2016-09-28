@@ -15,7 +15,7 @@ fi
 
 DB=$1
 FITS=$2
-FITS_BASENAME=${FITS##*/}; FITS_BASENAME=${FITS_BASENAME%_0???.fits}
+FITS_BASENAME=${FITS%_0???.fits}
 DB_PATH=${DB%SinglePulses.hdf5}
 SCRIPT_DIR="$( cd -P "$( dirname "$0" )" && pwd )"
 
