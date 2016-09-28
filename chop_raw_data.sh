@@ -25,3 +25,10 @@ mkdir fits
 python ${SCRIPT_DIR}/pulse_extract.py -pulses_database $DB -pulses_checked $DB_PATH/pulses_list.txt \
   -store_dir $DB_PATH -extract_raw $FITS_BASENAME
 
+#RFI masks
+cd fits
+for fits in `ls *.fits`; do 
+  rfifind -blocks 10 -noweights -noscales -nooffsets -o ${fits%.fits} $fits
+done
+
+
