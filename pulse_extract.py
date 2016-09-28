@@ -70,7 +70,7 @@ def main():
   
   if args.extract_raw: 
     real_pulses = pulses[pulses.Pulse < 2]
-    extract_subints_from_observation(args.extract_raw, args.store_dir, np.array(real_pulses.Time), -2, 8)
+    extract_subints_from_observation(args.extract_raw, args.store_dir+'/fits', np.array(real_pulses.Time), -2, 8)
   
   if args.plot_statistics: plot_statistics(pulses[pulses.Pulse == 0])
 
