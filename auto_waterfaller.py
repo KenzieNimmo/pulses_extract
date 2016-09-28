@@ -56,6 +56,15 @@ def plotter(data, start, plot_duration, t, DM, IMJD, SMJD, duration, top_freq, s
 	fig.clf()
 	plt.close('all')
 
+def histogram(data, title='', xlabel='', color='', name=''):
+	plt.hist(data, bins=np.sqrt(len(data)), color=color, histtype='bar')
+	plt.xlabel(xlabel)
+	plt.ylabel('Counts')
+	plt.title(title)
+	plt.savefig('Histogram_of_%s.png'%name)
+	plt.close('all')
+
+
 def main(fits, time, DM=560., sigma=0., duration=0., pulse_id=0, top_freq=0., directory='.', FRB_name='FRB121102', downsamp=1.):
         num_elements = time.size
         if isinstance(DM, float) or isinstance(DM, int): DM = np.zeros(num_elements) + DM
@@ -102,27 +111,19 @@ def main(fits, time, DM=560., sigma=0., duration=0., pulse_id=0, top_freq=0., di
 			sigma[i], directory, FRB_name, observation, zoom=True, idx=i, pulse_id=pulse_id[i], downsamp=False)               
         
         #downsamped version (zoomed)
-		#print downsamp
 		data, nbinsextra, nbins, start = waterfall(rawdata, start_time, plot_duration, DM[i],\
-				nbins=None, nsub=None, subdm = DM, zerodm=False, downsamp=downsamp,\
+				nbins=None, nsub=None, subdm = DM, zerodm=False, downsamp=downsamp[i],\
 				scaleindep=False, width_bins=1, mask=False, maskfn=None,\
 				bandpass_corr=False, ref_freq=None)
 
 		plotter(data, start, plot_duration, t, DM[i], IMJD, SMJD[i], duration[i], top_freq,\
-			sigma[i], directory, FRB_name, observation, zoom=True, idx=i, pulse_id=pulse_id[i], downsamp=downsamp)
-                
+			sigma[i], directory, FRB_name, observation, zoom=True, idx=i, pulse_id=pulse_id[i], downsamp=downsamp[i])
 
-def histogram(data, title='', xlabel='', color='k'):
-
-  #...
-
-  pass
-
-
-
-
+	histogram(downfact, title='Distribution of Dispersion Measures \n%s'%observation, xlabel=(r'DM (pc cm$^{-3}$)'), color='r', name='DM')
+	histogram(downfact, title='Distribution of Signal to Noise Ratios\n%s'%observation, xlabel='S/N', color='b', name='SN')
+	histogram(downfact, title='Distribution of Burst Durations\n%s'%observation, xlabel='Duration (ms)', color='g', name='width')
 
 if __name__ == '__main__':
-	DM, time, sample = np.loadtxt(sys.argv[2], usecols=(0,2,3), unpack=True)
-
-	main(sys.argv[1],time,DM)
+	DM, time, downfact = np.loadtxt(sys.argv[2], usecols=(0,2,4), unpack=True)
+	downsamp = np.zeros(len(downfact)) + 1. #just a place holder so my code runs upon testing.
+	main(sys.argv[1],time, DM, downsamp = downsamp)
