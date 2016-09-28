@@ -140,6 +140,14 @@ def main(fits, time, DM=560., sigma=0., duration=0.01, pulse_id=0, top_freq=0., 
 		plotter(data, start, plot_duration, t, DM[i], IMJD, SMJD[i], duration[i], top_freq,\
 			sigma[i], directory, FRB_name, observation, zoom=True, idx=i, pulse_id=pulse_id[i], downsamp=downsamp[i])
 
+	#histogram(downfact, title='Distribution of Dispersion Measures \n%s'%observation,\
+				#xlabel=(r'DM (pc cm$^{-3}$)'), color='r', name='DM')
+	#histogram(downfact, title='Distribution of Signal to Noise Ratios\n%s'%observation,\
+				#xlabel='S/N', color='b', name='SN')
+	#histogram(downfact, title='Distribution of Burst Durations\n%s'%observation,\
+				#xlabel='Duration (ms)', color='g', name='width')
+
+	#toa_plotter(time, sigma, duration, observation)
 
 if __name__ == '__main__':
 	DM, sigma, time, downfact = np.loadtxt(sys.argv[2], usecols=(0,1,2,4), unpack=True)
