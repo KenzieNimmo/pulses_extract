@@ -13,10 +13,6 @@ import auto_waterfaller
 from extract_psrfits_subints import extract_subints_from_observation
 
 
-#ELIMNARE pulses piu' vicini di 20ms a diversi DM
-
-
-
 DM_low = 461.           #Lowest de-dispersed value
 DM_high = 660.          #Highest de-dispersed value
 SNR_peak_min = 8.       #Minumum peak SNR value
@@ -44,27 +40,22 @@ def main():
     parser.add_argument('-pulses_database', help="Load pulses from this database.", default='')
     parser.add_argument('-store_dir', help="Path of the folder to store the output.", default='.')
     parser.add_argument('-plot_pulses', help="Save plots of detected pulses.", action='store_true')
-    parser.add_argument('-extract_raw', help="Extract raw data around detected pulses.", action='store_true')
-    parser.add_argument('-raw_basename', help="Basename for raw .fits files.", default='')
+    parser.add_argument('-extract_raw', help="Extract raw data specified in this path around detected pulses.", default='')
     parser.add_argument('-pulses_checked', help="Path of a text file containig a list of pulse identifiers to label as RFI.", default='')
     parser.add_argument('-plot_statistics', help="Produce plots with statistics of the pulses.", action='store_true')
     return parser.parse_args()
   args = parser()
   
-  header = fits_header(args.fits)
-  
   if args.pulses_database: pulses = pd.read_hdf(args.pulses_database,'pulses')
   else: 
+    header = fits_header(args.fits)
     pulses = pulses_database(args, header)
     store = pd.HDFStore('{}/SinglePulses.hdf5'.format(args.store_dir), 'a')
     store.append('pulses',pulses)
-    store.append('pulses_bu',pulses)
+    #store.append('pulses_bu',pulses) #Create a back up table in the database
     store.close()
-  
-  if args.plot_pulses: auto_waterfaller.main(args.fits, np.array(pulses.Time), np.array(pulses.DM), np.array(pulses.Sigma), /
-                                             np.array(pulses.Duration), top_freq=pulses.top_Freq.iloc[0], directory=args.store_dir)
-  if args.extract_raw: extract_subints_from_observation(args.raw_basename, args.store_dir, np.array(pulses.Time), -2, 8)
-  
+    pulses.to_csv('{}/pulses_list.txt'.format(args.store_dir), sep='\t', cols=['Pulse',], header=['Rank',], index_label='#PulseID')
+
   if args.pulses_checked: 
     pulses_checked(pulses, args.pulses_checked)
     store = pd.HDFStore('{}/SinglePulses.hdf5'.format(args.store_dir), 'r+')
@@ -72,12 +63,21 @@ def main():
     store.append('pulses',pulses)
     store.close()
     
+  if args.plot_pulses: 
+    real_pulses = pulses[pulses.Pulse < 2]
+    auto_waterfaller.main(args.fits, np.array(real_pulses.Time), np.array(real_pulses.DM), np.array(real_pulses.Sigma), \
+                                             np.array(real_pulses.Duration), top_freq=real_pulses.top_Freq.iloc[0], directory=args.store_dir)
+  
+  if args.extract_raw: 
+    real_pulses = pulses[pulses.Pulse < 2]
+    extract_subints_from_observation(args.extract_raw, args.store_dir+'/fits', np.array(real_pulses.Time), -2, 8)
+  
   if args.plot_statistics: plot_statistics(pulses[pulses.Pulse == 0])
 
   return
 
 
-def events_database(args):
+def events_database(args, header):
   #Create events database
   sp_files = glob.glob("{}/{}*.singlepulse".format(args.folder, args.idL))
   events = pd.concat(pd.read_csv(f, delim_whitespace=True, dtype=np.float64) for f in sp_files)
@@ -90,13 +90,18 @@ def events_database(args):
   events.Downfact = events.Downfact.astype(np.int16)
   events.Sample = events.Sample.astype(np.int32)
   events.sort(['DM','Time'],inplace=True)
-  C_Funct.Get_Group(events.DM.values, events.Sigma.values, events.Time.values, events.Pulse.values, 
-                    args.events_dDM, args.events_dt, args.DM_step)
-  
+
   if args.store_events:
     store = pd.HDFStore('{}/SinglePulses.hdf5'.format(args.store_dir), 'w')
     store.append('events',events,data_columns=['Pulse','SAP','BEAM','DM','Time'])
     store.close()
+  
+  #Remove last 10s of data
+  obs_length = header['NSBLK'] * header['NAXIS2'] * header['TBIN']
+  pulses = pulses[pulses.Time < obs_length-10.]
+
+  C_Funct.Get_Group(events.DM.values, events.Sigma.values, events.Time.values, events.Pulse.values, 
+                    args.events_dDM, args.events_dt, args.DM_step)
   
   return events[events.Pulse >= 0]
   
@@ -104,7 +109,7 @@ def events_database(args):
 def pulses_database(args, header, events=None):
   #Create pulses database
   if args.events_database: events = pd.read_hdf(args.events_database,'events')
-  elif not isinstance(events, pd.DataFrame): events = events_database(args)
+  elif not isinstance(events, pd.DataFrame): events = events_database(args, header)
   gb = events.groupby('Pulse',sort=False)
   pulses = events.loc[gb.Sigma.idxmax()]
   pulses.index = pulses.Pulse
@@ -127,8 +132,6 @@ def pulses_database(args, header, events=None):
   pulses = pulses[pulses.N_events > 5]
   pulses = pulses[pulses.Sigma >= SNR_peak_min]
   pulses = pulses[pulses.Downfact <= Downfact_max]
-  obs_length = header['NSBLK'] * header['NAXIS2'] * header['TBIN']
-  pulses = pulses[pulses.Time < obs_length-3.]
   
   RFIexcision(events, pulses)
   
@@ -158,7 +161,15 @@ def RFIexcision(events, pulses):
     count = np.count_nonzero(np.diff(np.sign(diff)))
     return (count != 2) & (count != 4) & (count != 6)
   pulses.Pulse += gb.apply(lambda x: crosses(x.Sigma)).astype(np.int8)
-    
+  
+  #Remove weaker pulses within a temporal window
+  def simultaneous(p):                            
+    puls = pulses.Pulse[np.abs(pulses.Time-p.Time) < 0.02]
+    if puls.shape[0] == 1: return 0
+    if p.name == puls.index[0]: return 0
+    else: return 1
+  pulses.Pulse += pulses.apply(lambda x: simultaneous(x), axis=1)
+  
   return
 
 
@@ -169,16 +180,16 @@ def fits_header(filename):
   
   
 def pulses_checked(pulses, filename):
-  RFI_list = np.genfromtxt(filename)
+  RFI_list = np.genfromtxt(filename, dtype=int).T
 
-  print "Folowing pulses will be marked as RFI: ", RFI_list
-  sys.stdout.write("Proceed? [y/n]")
-  choice = raw_input().lower()
-  if not (choice == 'y') | (choice == 'yes'): 
-    print "Aborting..."
-    return
+  #print "Folowing pulses will be marked as RFI: ", RFI_list[0,RFI_list[1]==0]
+  #sys.stdout.write("Proceed? [y/n]")
+  #choice = raw_input().lower()
+  #if not (choice == 'y') | (choice == 'yes'): 
+    #print "Aborting..."
+    #return
   
-  pulses.Pulse.loc[RFI_list] += 1
+  pulses.Pulse.loc[RFI_list[0]] = RFI_list[1]
   return pulses
 
 

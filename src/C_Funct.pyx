@@ -18,9 +18,9 @@ cimport cython
 #---------------------------------
 @cython.boundscheck(False)
 @cython.wraparound(False)
-def Get_Group(float[::1] DM not None,
-          float[::1] Sigma not None,
-          float[::1] Time not None,
+def Get_Group(double[::1] DM not None,
+          double[::1] Sigma not None,
+          double[::1] Time not None,
           int[::1] Pulse not None,
           unsigned int n_steps,
           float durat,
