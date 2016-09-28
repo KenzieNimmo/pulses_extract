@@ -17,7 +17,8 @@ import psrfits
 import spectra
 import os
 
-def plotter(data, start, plot_duration, t, DM, IMJD, SMJD, duration, top_freq, sigma, directory, FRB_name, observation, pulse_id, zoom=True, idx='', downsamp=True):
+def plotter(data, start, plot_duration, t, DM, IMJD, SMJD, duration, top_freq, sigma, 
+			directory, FRB_name, observation, pulse_id, zoom=True, idx='', downsamp=True):
 	fig = plt.figure(figsize=(8,5))
 	ax1 = plt.subplot2grid((3,4), (1,1), rowspan=3, colspan=3)
 	ax2 = plt.subplot2grid((3,4), (0,0), rowspan=3)
@@ -52,11 +53,16 @@ def plotter(data, start, plot_duration, t, DM, IMJD, SMJD, duration, top_freq, s
 		title = name = ''
           
 	plt.suptitle('%s %id %.8fs %s\n %s'%(FRB_name, IMJD, SMJD, title, observation), y=1.05)
-	plt.savefig('%s/%s_%i_%.8f_%s%s.png'%(directory, FRB_name, IMJD, SMJD, idx, name), bbox_inches='tight', pad_inches=0.2)
+	plt.savefig('%s/%s_%i_%.8f_%s%s.png'%(directory, FRB_name, IMJD, SMJD, idx, name),\
+										   bbox_inches='tight', pad_inches=0.2)
 	fig.clf()
 	plt.close('all')
 
 def histogram(data, title='', xlabel='', color='', name=''):
+	"""
+	Creates a histogram of a given burst property.
+
+	"""
 	plt.hist(data, bins=np.sqrt(len(data)), color=color, histtype='bar')
 	plt.xlabel(xlabel)
 	plt.ylabel('Counts')
@@ -64,8 +70,22 @@ def histogram(data, title='', xlabel='', color='', name=''):
 	plt.savefig('Histogram_of_%s.png'%name)
 	plt.close('all')
 
+def toa_plotter(time, SN, duration, observation):
+	"""
+	Plots a bar at each candidate time. Bar width corresponds to burst duration, while its
+	height corresponds to the signal to noise ratio of the burst.
 
-def main(fits, time, DM=560., sigma=0., duration=0., pulse_id=0, top_freq=0., directory='.', FRB_name='FRB121102', downsamp=1.):
+	"""
+	plt.bar(time, SN, duration)
+	plt.xlabel('Time (s)')
+	plt.ylabel('S/N')
+	plt.title('Times of Arrival v. Signal to Noise Ratio\n%s'%observation)
+	plt.savefig('toa_%s.png'%observation)
+
+
+
+def main(fits, time, DM=560., sigma=0., duration=0.01, pulse_id=0, top_freq=0., directory='.',\
+		  FRB_name='FRB121102', downsamp=1.):
         num_elements = time.size
         if isinstance(DM, float) or isinstance(DM, int): DM = np.zeros(num_elements) + DM
         if isinstance(sigma, float) or isinstance(sigma, int): sigma = np.zeros(num_elements) + sigma
@@ -119,11 +139,16 @@ def main(fits, time, DM=560., sigma=0., duration=0., pulse_id=0, top_freq=0., di
 		plotter(data, start, plot_duration, t, DM[i], IMJD, SMJD[i], duration[i], top_freq,\
 			sigma[i], directory, FRB_name, observation, zoom=True, idx=i, pulse_id=pulse_id[i], downsamp=downsamp[i])
 
-	histogram(downfact, title='Distribution of Dispersion Measures \n%s'%observation, xlabel=(r'DM (pc cm$^{-3}$)'), color='r', name='DM')
-	histogram(downfact, title='Distribution of Signal to Noise Ratios\n%s'%observation, xlabel='S/N', color='b', name='SN')
-	histogram(downfact, title='Distribution of Burst Durations\n%s'%observation, xlabel='Duration (ms)', color='g', name='width')
+	histogram(downfact, title='Distribution of Dispersion Measures \n%s'%observation,\
+				xlabel=(r'DM (pc cm$^{-3}$)'), color='r', name='DM')
+	histogram(downfact, title='Distribution of Signal to Noise Ratios\n%s'%observation,\
+				xlabel='S/N', color='b', name='SN')
+	histogram(downfact, title='Distribution of Burst Durations\n%s'%observation,\
+				xlabel='Duration (ms)', color='g', name='width')
+
+	toa_plotter(time, sigma, duration, observation)
 
 if __name__ == '__main__':
-	DM, time, downfact = np.loadtxt(sys.argv[2], usecols=(0,2,4), unpack=True)
+	DM, sigma, time, downfact = np.loadtxt(sys.argv[2], usecols=(0,1,2,4), unpack=True)
 	downsamp = np.zeros(len(downfact)) + 1. #just a place holder so my code runs upon testing.
-	main(sys.argv[1],time, DM, downsamp = downsamp)
+	main(sys.argv[1],time, DM, sigma, downsamp = downsamp)
