@@ -37,8 +37,8 @@ def load_cands(folder='.'):
   # Try to read the .inf files first, as _if_ they are present, all of
   # them should be there.  (if no candidates are found by accelsearch
   # we get no ACCEL files...
-  inffiles = glob.glob(folder + '/TEMP/' + globinf)
-  candfiles = glob.glob(folder + '/TEMP/' + globaccel)
+  inffiles = glob.glob(folder + '/' + globinf)
+  candfiles = glob.glob(folder + '/' + globaccel)
   # Check to see if this is from a short search
   if len(re.findall("_[0-9][0-9][0-9]M_" , inffiles[0])):
       dmstrs = [x.split("DM")[-1].split("_")[0] for x in candfiles]
@@ -99,7 +99,7 @@ if __name__ == '__main__':
   if not isinstance(dm_list, np.ndarray): exit()
   
   for idx,[dm, p] in enumerate(zip(dm_list, p_list)):
-    if subprocess.call(['prepfold', '-nsub', '64', '-p', str(p), '-dm', str(dm), '-o', '{}/{}_periodic_cand_{}'.format(args.folder, basename, idx), args.fits]):
+    if subprocess.call(['prepfold', '-nsub', '64', '-p', str(p), '-dm', str(dm), '-noxwin', '-o', '{}/{}_periodic_cand_{}'.format(args.folder, basename, idx), args.fits]):
      print "Error in prepfold!"
 
 

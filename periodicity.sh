@@ -16,6 +16,17 @@ SCRIPT_DIR="$( cd -P "$( dirname "$0" )" && pwd )"
 
 cd $FOLDER/TEMP
 
+#FFT
 ls *.dat | xargs -n 1 realfft
-ls *.fft | xargs -n 1 accelsearch -zmax 0 
-python $SCRIPT_DIR/periodic_candidates_plot.py -folder $FOLDER -fits $FITS
+
+#Periodicity search
+ls *.fft | xargs -n 1 accelsearch -zmax 0
+
+#Plot of best candidates
+python $SCRIPT_DIR/periodic_candidates_plot.py -folder $FOLDER/TEMP -fits $FITS
+
+#Convertion of plots
+for plot in `ls *.ps`; do
+  convert -rotate 90 -background white -alpha remove $plot $FOLDER/${plot%.ps}.png
+done
+
