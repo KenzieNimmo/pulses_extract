@@ -25,7 +25,7 @@ cd TEMP
 
 prepsubband -nsub 64 -noscales -nooffsets -nobary -lodm 461.0 -numdms 200 -numout 88473600 -dmstep 1.0 -o ${FITS_BASENAME}_TOPO $FITS  #-zero_dm
 
-sh ${SCRIPT_DIR}/periodicity.sh $FITS_BASENAME/TEMP $FITS
+sh ${SCRIPT_DIR}/periodicity.sh $FITS_BASENAME $FITS
 
 single_pulse_search.py -t 6.0 -b -m 150 *.dat
 cp ${FITS_BASENAME}_TOPO_DM561.00.dat ..

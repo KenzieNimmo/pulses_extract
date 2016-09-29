@@ -97,6 +97,6 @@ if __name__ == '__main__':
   
   for idx,[dm, p] in enumerate(zip(dm_list, p_list)):
     if subprocess.call(['prepfold', '-nsub', '64', '-p', str(p), '-dm', str(dm), '-o', '{}/{}_periodic_cand_{}'.format(args.folder, basename, idx), args.fits]):
-    print "Error in prepfold!"
+     print "Error in prepfold!"
 
 
