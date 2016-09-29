@@ -68,7 +68,7 @@ def load_cands(folder='.'):
   if len(cands):
       cands.sort(sifting.cmp_sigma)
 
-      n_cands = 10  #Number of candidates to return
+      n_cands = 2  #Number of candidates to return
       dm = np.zeros(n_cands)
       p = np.zeros(n_cands)
       for i, goodcand in enumerate(cands):
@@ -95,6 +95,8 @@ def parser():
 if __name__ == '__main__':
   args = parser()
   basename = os.path.splitext(os.path.basename(args.fits))[0]
+  idx = basename.find('_subs_0001')
+  basename = basename[:idx]
   dm_list, p_list = load_cands(args.folder)
   if not isinstance(dm_list, np.ndarray): exit()
   

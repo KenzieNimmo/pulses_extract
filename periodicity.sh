@@ -26,7 +26,7 @@ ls *.fft | xargs -n 1 accelsearch -zmax 0
 python $SCRIPT_DIR/periodic_candidates_plot.py -folder $FOLDER/TEMP -fits $FITS
 
 #Convertion of plots
-for plot in `ls *.ps`; do
+for plot in `ls *periodic_cand*.ps`; do
   convert -rotate 90 -background white -alpha remove $plot $FOLDER/${plot%.ps}.png
 done
 
