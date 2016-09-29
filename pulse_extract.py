@@ -98,7 +98,7 @@ def events_database(args, header):
   
   #Remove last 10s of data
   obs_length = header['NSBLK'] * header['NAXIS2'] * header['TBIN']
-  pulses = pulses[pulses.Time < obs_length-10.]
+  events = events[events.Time < obs_length-10.]
 
   C_Funct.Get_Group(events.DM.values, events.Sigma.values, events.Time.values, events.Pulse.values, 
                     args.events_dDM, args.events_dt, args.DM_step)
