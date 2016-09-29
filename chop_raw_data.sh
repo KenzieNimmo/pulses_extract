@@ -13,6 +13,9 @@ if [ $# -ne 2 ]; then
    exit
 fi
 
+echo "Pipeline chop_raw.sh starting..."
+date
+
 DB=$1
 FITS=$2
 FITS_BASENAME=${FITS%_0???.fits}
@@ -31,4 +34,5 @@ for fits in `ls *.fits`; do
   rfifind -blocks 10 -noweights -noscales -nooffsets -o ${fits%.fits} $fits
 done
 
-
+date
+echo "Pipeline chop_raw.sh finished"

@@ -12,6 +12,9 @@ if [ $# -ne 1 ]; then
    exit
 fi
 
+echo "Pipeline pulses_identify.sh starting..."
+date
+
 FITS=$1
 FITS_PATH=/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/output/
 FITS_BASENAME=${FITS##*/}; FITS_BASENAME=${FITS_BASENAME%_subs_0001.fits}
@@ -38,5 +41,7 @@ python ${SCRIPT_DIR}/pulse_extract.py -fits $FITS -store_events -idL ${FITS_BASE
 #cd $FITS_PATH/$FITS_BASENAME
 #rm -r TEMP
 
+date
+echo "Pipeline pulses_identify.sh finished"
 
 
