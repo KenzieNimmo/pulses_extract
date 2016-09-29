@@ -68,7 +68,7 @@ def load_cands(folder='.'):
   if len(cands):
       cands.sort(sifting.cmp_sigma)
 
-      n_cands = 2  #Number of candidates to return
+      n_cands = 10  #Number of candidates to return
       dm = np.zeros(n_cands)
       p = np.zeros(n_cands)
       for i, goodcand in enumerate(cands):
@@ -101,7 +101,7 @@ if __name__ == '__main__':
   if not isinstance(dm_list, np.ndarray): exit()
   
   for idx,[dm, p] in enumerate(zip(dm_list, p_list)):
-    if subprocess.call(['prepfold', '-nsub', '64', '-p', str(p), '-dm', str(dm), '-noxwin', '-o', '{}/{}_periodic_cand_{}'.format(args.folder, basename, idx), args.fits]):
+    if subprocess.call(['prepfold', '-nsub', '64', '-p', str(p), '-dm', str(dm), '-noxwin', '-o', '{}_periodic_cand_{}'.format(basename, idx), args.fits], cwd=args.folder):
      print "Error in prepfold!"
 
 
