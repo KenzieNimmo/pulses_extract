@@ -66,7 +66,8 @@ def main():
   if args.plot_pulses: 
     real_pulses = pulses[pulses.Pulse < 2]
     auto_waterfaller.main(args.fits, np.array(real_pulses.Time), np.array(real_pulses.DM), np.array(real_pulses.Sigma), \
-                                             np.array(real_pulses.Duration), top_freq=real_pulses.top_Freq.iloc[0], downsamp=np.array(real_pulses.Downfact), directory=args.store_dir)
+                                             np.array(real_pulses.Duration), top_freq=real_pulses.top_Freq.iloc[0], \
+                                             downsamp=np.array(real_pulses.Downfact), directory=args.store_dir, pulse_id=np.array(real_pulses.index))
   
   if args.extract_raw: 
     real_pulses = pulses[pulses.Pulse < 2]
