@@ -5,6 +5,8 @@ import subprocess
 import argparse
 import os
 
+import numpy as np
+
 import sifting
 
 #From ACCEL_sift.py
