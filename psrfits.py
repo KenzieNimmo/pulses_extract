@@ -102,9 +102,9 @@ class PsrfitsFile(object):
         subintdata = self.fits['SUBINT'].data[isub]['DATA']
         
         #######################################
-        #Temporary changes by Daniele Michilli
-        if subintdata.shape[1] > 1:
-          apply_weights = apply_scales = apply_offsets = False
+        ##Temporary changes by Daniele Michilli
+        #if subintdata.shape[1] > 1:
+        #  apply_weights = apply_scales = apply_offsets = False
         #######################################
         
         shp = subintdata.squeeze().shape
@@ -134,8 +134,8 @@ class PsrfitsFile(object):
             
         #######################################
         #Temporary changes by Daniele Michilli
-        if subintdata.shape[1] > 1:
-          data = data[:,:1,:,:] + data[:,1:2,:,:]
+        #if subintdata.shape[1] > 1:
+        #  data = data[:,:1,:,:] + data[:,1:2,:,:]
         #######################################
             
         data = data.reshape((self.nsamp_per_subint, self.nchan))
