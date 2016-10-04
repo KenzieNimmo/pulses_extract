@@ -100,6 +100,13 @@ class PsrfitsFile(object):
                      applied in float32 dtype with shape (nsamps,nchan).
         """ 
         subintdata = self.fits['SUBINT'].data[isub]['DATA']
+        
+        #######################################
+        ##Temporary changes by Daniele Michilli
+        #if subintdata.shape[1] > 1:
+        #  apply_weights = apply_scales = apply_offsets = False
+        #######################################
+        
         shp = subintdata.squeeze().shape
         if ((self.nbits < 8) and \
             (shp[0] != self.nsamp_per_subint) and \
@@ -124,6 +131,13 @@ class PsrfitsFile(object):
             weights = self.get_weights(isub)
         else:
             weights = 1
+            
+        #######################################
+        #Temporary changes by Daniele Michilli
+        #if subintdata.shape[1] > 1:
+        #  data = data[:,:1,:,:] + data[:,1:2,:,:]
+        #######################################
+            
         data = data.reshape((self.nsamp_per_subint, self.nchan))
         data_wso = ((data * scales) + offsets) * weights
         return data_wso

@@ -10,8 +10,8 @@ if [ $# -ne 2 ]; then
    exit
 fi
 
-FOLDER=$1
-FITS=$2
+FOLDER="$1"
+FITS="$2"
 SCRIPT_DIR="$( cd -P "$( dirname "$0" )" && pwd )"
 
 cd $FOLDER/TEMP
