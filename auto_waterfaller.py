@@ -6,6 +6,7 @@ Kelly Gourdji - Sept. 2016
 """
 from waterfaller import waterfall, plot_waterfall
 from matplotlib import pyplot as plt
+from matplotlib import cm
 import matplotlib.cm
 import numpy as np
 import sys
@@ -60,27 +61,56 @@ def plotter(data, start, plot_duration, t, DM, IMJD, SMJD, duration, top_freq, s
 
 def histogram(data, title='', xlabel='', color='', name=''):
 	"""
-	Creates a histogram of a given burst property.
+	Creates a histogram of a given burst property. 
+
+	Inputs:
+
+		name: burst property being plotted
 
 	"""
-	plt.hist(data, bins=np.sqrt(len(data)), color=color, histtype='bar')
+	plt.hist(data, bins=(2*np.sqrt(len(data))), color=color, histtype='step', lw=2)
 	plt.xlabel(xlabel)
 	plt.ylabel('Counts')
 	plt.title(title)
 	plt.savefig('Histogram_of_%s.png'%name)
 	plt.close('all')
 
-def toa_plotter(time, SN, duration, observation):
+def toa_plotter(time, SN, duration, observation, Rank=False):
 	"""
-	Plots a bar at each candidate time. Bar width corresponds to burst duration, while its
+	Plots a bar at each candidate time. Bar width corresponds to pulse duration, while its
 	height corresponds to the signal to noise ratio of the burst.
 
+	Inputs:
+
+		time: numpy array of arrival times
+		SN: numpy array of signal-to-noise ratios
+		duration: numpy array of burst durations
+		observation: observation name (str)
+
+	Optional Input:
+		Rank: numpy array of pulse rankings for color-mapping. Default is no coloring.
+
+
 	"""
-	plt.bar(time, SN, duration)
-	plt.xlabel('Time (s)')
-	plt.ylabel('S/N')
-	plt.title('Times of Arrival v. Signal to Noise Ratio\n%s'%observation)
-	plt.savefig('toa_%s.png'%observation)
+	Rank = np.asarray(Rank)
+	if Rank.any():
+		rank_colors = cm.colors.LinearSegmentedColormap.from_list('rank_colors', [(0,'red'),
+                                                                          		  (0.5,'cyan'),
+                                                                                  (1,'black')]) 
+		norm=cm.colors.Normalize(vmin=0, vmax=2)
+		ranks=norm(Rank)
+		plt.bar(time, SN, duration, color=rank_colors(ranks), edgecolor=rank_colors(ranks))
+		plt.xlabel('Time (s)')
+		plt.ylabel('S/N')
+		plt.title('Times of Arrival v. Signal to Noise Ratio\n%s'%observation)
+		plt.savefig('toa_%s_ranked.png'%observation)
+
+	else:
+		plt.bar(time, SN, duration)
+		plt.xlabel('Time (s)')
+		plt.ylabel('S/N')
+		plt.title('Times of Arrival v. Signal to Noise Ratio\n%s'%observation)
+		plt.savefig('toa_%s.png'%observation)
 
 def main(fits, time, DM=560., sigma=0., duration=0.01, pulse_id=0, top_freq=0., directory='.',\
 		  FRB_name='FRB121102', downsamp=1.):
@@ -108,7 +138,6 @@ def main(fits, time, DM=560., sigma=0., duration=0.01, pulse_id=0, top_freq=0., 
 	for i, t in enumerate(time): 
 		start_time = t - 0.05
 		plot_duration = 0.1
-
 		data, nbinsextra, nbins, start = waterfall(rawdata, start_time, plot_duration, DM[i],\
 				nbins=None, nsub=None, subdm = DM, zerodm=False, downsamp=1,\
 				scaleindep=False, width_bins=1, mask=False, maskfn=None,\
@@ -139,15 +168,6 @@ def main(fits, time, DM=560., sigma=0., duration=0.01, pulse_id=0, top_freq=0., 
 
 				sigma[i], directory, FRB_name, observation, zoom=True, idx=i, pulse_id=pulse_id[i],\
 			 	downsamp=downsamp[i])
-
-	#histogram(downfact, title='Distribution of Dispersion Measures \n%s'%observation,\
-				#xlabel=(r'DM (pc cm$^{-3}$)'), color='r', name='DM')
-	#histogram(downfact, title='Distribution of Signal to Noise Ratios\n%s'%observation,\
-				#xlabel='S/N', color='b', name='SN')
-	#histogram(downfact, title='Distribution of Burst Durations\n%s'%observation,\
-				#xlabel='Duration (ms)', color='g', name='width')
-
-	#toa_plotter(time, sigma, duration, observation)
 
 if __name__ == '__main__':
 	DM, sigma, time, downfact = np.loadtxt(sys.argv[2], usecols=(0,1,2,4), unpack=True)
