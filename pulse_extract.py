@@ -55,7 +55,8 @@ def main():
     store.append('pulses',pulses)
     #store.append('pulses_bu',pulses) #Create a back up table in the database
     store.close()
-    pulses.to_csv('{}/pulses_list.txt'.format(args.store_dir), sep='\t', cols=['Pulse',], header=['Rank',], index_label='#PulseID')
+    obs_id = os.path.splitext(args.db_name)[0]
+    pulses.to_csv('{}/{}_pulses.txt'.format(args.store_dir,obs_id), sep='\t', cols=['Pulse',], header=['Rank',], index_label='#PulseID')
 
   if args.pulses_checked: 
     pulses_checked(pulses, args.pulses_checked)
@@ -72,7 +73,7 @@ def main():
   
   if args.extract_raw: 
     real_pulses = pulses[pulses.Pulse < 2]
-    extract_subints_from_observation(args.extract_raw, args.store_dir+'/fits', np.array(real_pulses.Time), -2, 8)
+    extract_subints_from_observation(args.extract_raw, args.store_dir, np.array(real_pulses.Time), -2, 8)
   
   if args.plot_statistics: plot_statistics(pulses[pulses.Pulse == 0])
 

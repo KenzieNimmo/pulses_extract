@@ -27,6 +27,6 @@ python $SCRIPT_DIR/periodic_candidates_plot.py -folder $FOLDER/TEMP -fits $FITS
 
 #Convertion of plots
 for plot in `ls *periodic_cand*.ps`; do
-  convert -rotate 90 -background white -alpha remove $plot $FOLDER/${plot%.ps}.png
+  convert -rotate 90 -background white -alpha remove $plot $FOLDER/periodic_cands/${plot%.ps}.png
 done
 

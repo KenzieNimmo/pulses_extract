@@ -108,7 +108,7 @@ def extract_subints_from_single_file(infname,outfname,isubmin,isubmax):
 
 
 # Extract subints from an observation
-def extract_subints_from_observation(froot,path,tbursts,isub0,isub1):
+def extract_subints_from_observation(froot,path,tbursts,isub0,isub1,pulseID=''):
     """Extract subints from a PSRFITS observation
 
     Input:
@@ -117,8 +117,12 @@ def extract_subints_from_observation(froot,path,tbursts,isub0,isub1):
        tbursts: list of burst times to extract
        isub0: number of subints to extract before the pulse (negative)
        isub1: number of subints to extract after the pulse
+       pulseID: list of burst ID numbers
 
     """  
+    # Check that pulseID is an array
+    if isinstance(pulseID, str): pulseID = [pulseID,] * len(tbursts)
+
     # Get start times
     files,stt_imjd,stt_smjd,stt_offs,nsblk,tbin,nsuboffs,nsub=get_starttimes(froot)
 
@@ -130,7 +134,7 @@ def extract_subints_from_observation(froot,path,tbursts,isub0,isub1):
     tend=offsets+nsblk*nsub*tbin
 
     # Loop over bursts
-    for tburst in tbursts:
+    for idx, tburst in enumerate(tbursts):
         # Skip bursts outside of observation
         if tburst<0.0 or tburst>np.max(tend):
             print "Burst time %f not in range of observation!"%tburst
@@ -150,7 +154,7 @@ def extract_subints_from_observation(froot,path,tbursts,isub0,isub1):
                 # Some logic for dealing with file breaks
                 if isubmin>=0 and isubmax<nsub[i]:
                     # Output filename
-                    fname="%s_%08.3f.fits"%(os.path.join(path,os.path.basename(froot)),tburst)
+                    fname="%s_%08.3f.fits"%(os.path.join(path,pulseID[idx],os.path.basename(froot)),tburst)
                     
                     print "Extracting subints %03d to %03d from %s to %s"%(isubmin,isubmax,files[i],fname) 
                     

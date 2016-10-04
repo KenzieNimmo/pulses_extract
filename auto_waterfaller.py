@@ -54,7 +54,8 @@ def plotter(data, start, plot_duration, t, DM, IMJD, SMJD, duration, top_freq, s
 		title = name = ''
           
 	plt.suptitle('%s %.8f %s\n %s'%(FRB_name, IMJD + SMJD, title, observation), y=1.05)
-	plt.savefig('%s/%s_%.8f_%s%s.png'%(directory, FRB_name, IMJD + SMJD, idx, name),\
+	if not os.path.isdir('%s/%s'%(directory, pulse_id)): os.makedirs('%s/%s'%(directory, pulse_id))
+	plt.savefig('%s/%s/%s_%.8f_%s%s.png'%(directory, pulse_id, FRB_name, IMJD + SMJD, idx, name),\
 										   bbox_inches='tight', pad_inches=0.2)
 	fig.clf()
 	plt.close('all')
