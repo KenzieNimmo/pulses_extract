@@ -26,18 +26,19 @@ def main():
     # Command-line options
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
                                     description="The program groupes events from single_pulse_search.py in pulses.")
+    parser.add_argument('-db_name', help="Filename of the HDF5 database.", default='SinglePulses.hdf5')
     parser.add_argument('-fits', help="Filename of .fits file.", default='*.fits')
     parser.add_argument('-idL', help="Basename of .singlepulse files.", default='*')
     parser.add_argument('-folder', help="Path of the folder containig the .singlepulse files.", default='.')
-    parser.add_argument('-store_events', help="Store events in a SinglePulses.hdf5 database.", action='store_true')
+    parser.add_argument('-store_events', help="Store events in a HDF5 database.", action='store_true')
     parser.add_argument('-events_dt', help="Duration in sec within two events are related to the same pulse.", default=20e-3,
                         type=int)
     parser.add_argument('-events_dDM', help="Number of DM steps within two events are related to the same pulse.", 
                         default=5, type=float)
     parser.add_argument('-DM_step', help="Value of the DM step between timeseries.", 
                         default=1., type=float)
-    parser.add_argument('-events_database', help="Load events from this database.", default='')
-    parser.add_argument('-pulses_database', help="Load pulses from this database.", default='')
+    parser.add_argument('-events_database', help="Load events from the database.", action='store_true')
+    parser.add_argument('-pulses_database', help="Load pulses from the database.", action='store_true')
     parser.add_argument('-store_dir', help="Path of the folder to store the output.", default='.')
     parser.add_argument('-plot_pulses', help="Save plots of detected pulses.", action='store_true')
     parser.add_argument('-extract_raw', help="Extract raw data specified in this path around detected pulses.", default='')
@@ -46,11 +47,11 @@ def main():
     return parser.parse_args()
   args = parser()
   
-  if args.pulses_database: pulses = pd.read_hdf(args.pulses_database,'pulses')
+  if args.pulses_database: pulses = pd.read_hdf(args.db_name,'pulses')
   else: 
     header = fits_header(args.fits)
     pulses = pulses_database(args, header)
-    store = pd.HDFStore('{}/SinglePulses.hdf5'.format(args.store_dir), 'a')
+    store = pd.HDFStore('{}/{}'.format(args.store_dir,args.db_name), 'a')
     store.append('pulses',pulses)
     #store.append('pulses_bu',pulses) #Create a back up table in the database
     store.close()
@@ -58,7 +59,7 @@ def main():
 
   if args.pulses_checked: 
     pulses_checked(pulses, args.pulses_checked)
-    store = pd.HDFStore('{}/SinglePulses.hdf5'.format(args.store_dir), 'r+')
+    store = pd.HDFStore('{}/{}'.format(args.store_dir,args.db_name), 'r+')
     store.remove('pulses')
     store.append('pulses',pulses)
     store.close()
@@ -93,7 +94,7 @@ def events_database(args, header):
   events.sort(['DM','Time'],inplace=True)
 
   if args.store_events:
-    store = pd.HDFStore('{}/SinglePulses.hdf5'.format(args.store_dir), 'w')
+    store = pd.HDFStore('{}/{}'.format(args.store_dir,args.db_name), 'w')
     store.append('events',events,data_columns=['Pulse','SAP','BEAM','DM','Time'])
     store.close()
   
@@ -109,7 +110,7 @@ def events_database(args, header):
   
 def pulses_database(args, header, events=None):
   #Create pulses database
-  if args.events_database: events = pd.read_hdf(args.events_database,'events')
+  if args.events_database: events = pd.read_hdf(args.db_name,'events')
   elif not isinstance(events, pd.DataFrame): events = events_database(args, header)
   gb = events.groupby('Pulse',sort=False)
   pulses = events.loc[gb.Sigma.idxmax()]

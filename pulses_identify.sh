@@ -54,7 +54,7 @@ mkdir TEMP
 cd TEMP
 
 #Run the search
-prepsubband -nsub 64 -noscales -nooffsets -nobary -lodm 461.0 -numdms 200 -numout 88473600 -dmstep 1.0 -o ${FITS_ID}_TOPO -zero_dm $FITS_FILE
+prepsubband -nsub 64 -noscales -nooffsets -nobary -lodm 461.0 -numdms 200 -numout 88473600 -dmstep 1.0 -o ${FITS_ID}_TOPO -zerodm $FITS_FILE
 
 bash ${SCRIPT_DIR}/periodicity.sh $OUT_DIR $FITS_FILE
 
@@ -62,7 +62,7 @@ single_pulse_search.py -t 6.0 -b -m 150 *.dat
 cp ${FITS_ID}_TOPO_DM561.00.dat ..
 cp ${FITS_ID}_TOPO_DM561.00.inf ..
 
-python ${SCRIPT_DIR}/pulse_extract.py -fits $FITS_FILE -store_events -idL ${FITS_ID}_TOPO -store_dir $OUT_DIR \
+python ${SCRIPT_DIR}/pulse_extract.py -db_name ${FITS_ID}.hdf5 -fits $FITS_FILE -store_events -idL ${FITS_ID}_TOPO -store_dir $OUT_DIR \
   -folder $OUT_DIR/TEMP -plot_pulses
 
 #Remove meta products

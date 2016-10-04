@@ -2,19 +2,39 @@
 
 if [ $# -ne 2 ]; then
    echo "Pipeline to process Arecibo data of FRB121102."
-   echo "The pipeline use pulses stored in a SinglePulse.hdf5 database to chop raw data around the pulses."
+   echo "The pipeline uses pulses stored in a HDF5 database to chop raw data around the pulses."
    echo ""
-   echo "Usage: sh chop_raw_data.sh database_filename raw_fits_files_basename"
-   echo "database_filename contains the full path of the SinglePulse.hdf5 file."
-   echo "raw_fits_files_basename contains the basename of the raw fits files."
-   echo ""
-   echo "The script will store the output in the path defined by FITS_PATH,"
-   echo "in a directory named fits."
+   echo "Usage: bash chop_raw_data.sh database_filename"
+   echo "NB: use the command bash to run the pipeline"
    exit
 fi
 
-echo "Pipeline chop_raw.sh starting..."
+#Check that bash is used
+if [ ! "$BASH_VERSION" ] ; then
+    echo "Execute the script using the bash command. Exiting..."
+    exit 1
+fi
+
+echo "Pipeline chop_raw_data.sh starting..."
 date
+
+#Setting variables
+SUB_DIR="/psr_archive/hessels/hessels/AO-FRB/subbanded_data"
+GENERAL_OUT_DIR="/psr_archive/hessels/hessels/AO-FRB/pipeline_products"
+RAW_DIR="/psr_archive/hessels/hessels/AO-FRB/raw_data"
+
+
+
+
+
+#Check that SinglePulse.hdf5 exists
+if [ ! -e $SUB_DIR/$FITS_NAME ]; then
+  echo ""
+  echo "ATTENTION! Subbanded fits file $FITS_NAME not found. Exiting..."
+  exit 1
+fi
+
+
 
 DB=$1
 FITS=$2
