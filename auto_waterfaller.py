@@ -107,7 +107,7 @@ def toa_plotter(time, SN, duration, Rank, observation='', ax=None):
 	ax.tick_params(axis='x', labelsize=9)
 	ax.tick_params(axis='y', labelsize=9)
 
- def plot_statistics(dm, SNR, duration, Rank, folder='.', observation='', ranked=False):
+def plot_statistics(dm, SNR, duration, Rank, folder='.', observation='', ranked=False):
 	fig = plt.figure(figsize=(8,5))
 	ax1 = plt.subplot2grid((2,3), (0,0))
 	ax2 = plt.subplot2grid((2,3), (0,1))
