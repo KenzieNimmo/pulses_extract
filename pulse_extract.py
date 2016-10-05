@@ -78,7 +78,7 @@ def main():
   if args.plot_statistics: 
     if pulses_checked: ranked = True
     else: ranked = False
-    auto_waterfaller.plot_statistics(np.array(pulses.DM), np.array(pulses.Sigma), np.array(pulses.Duration), np.array(pulses.Rank), folder=args.store_dir, observation=args.db_name, ranked=ranked)
+    auto_waterfaller.plot_statistics(np.array(pulses.DM), np.array(pulses.Sigma), np.array(pulses.Duration), np.array(pulses.Pulse), folder=args.store_dir, observation=args.db_name, ranked=ranked)
 
   return
 
