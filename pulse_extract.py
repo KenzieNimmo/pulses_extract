@@ -85,7 +85,7 @@ def events_database(args, header):
   sp_files = glob.glob("{}/{}*.singlepulse".format(args.folder, args.idL))
   events = pd.concat(pd.read_csv(f, delim_whitespace=True, dtype=np.float64) for f in sp_files)
   events.reset_index(drop=True, inplace=True)
-  events.columns = ['a','DM','Sigma','Time','Sample','Downfact','b']
+  events.columns = ['DM','Sigma','Time','Sample','Downfact','a','b']
   events = events.ix[:,['DM','Sigma','Time','Sample','Downfact']]
   events.index.name = 'idx'
   events['Pulse'] = 0

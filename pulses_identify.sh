@@ -72,7 +72,7 @@ echo ".fft files created. Time taken: $(($duration / 60)) m"
 #Create ACCEL files
 echo "ACCEL files creating..."
 SECONDS=0
-ls *.dat | awk '{printf("accelsearch -zmax 20 %s\n",$1)}' > jobs.txt
+ls *.fft | awk '{printf("accelsearch -zmax 20 %s\n",$1)}' > jobs.txt
 bash $SCRIPT_DIR/parallel.sh jobs.txt $n_cores >/dev/null
 duration=$SECONDS
 echo "ACCEL files created. Time taken: $(($duration / 60)) m"
