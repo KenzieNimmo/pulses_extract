@@ -20,7 +20,7 @@ cd $FOLDER/TEMP
 ls *.dat | xargs -n 1 realfft
 
 #Periodicity search
-ls *.fft | xargs -n 1 accelsearch -zmax 0
+ls *.fft | xargs -n 1 accelsearch -zmax 20
 
 #Plot of best candidates
 python $SCRIPT_DIR/periodic_candidates_plot.py -folder $FOLDER/TEMP -fits $FITS

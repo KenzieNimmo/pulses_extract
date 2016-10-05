@@ -67,7 +67,7 @@ cp ${FITS_ID}_TOPO_DM561.00.dat $OUT_DIR/obs_data
 cp ${FITS_ID}_TOPO_DM561.00.inf $OUT_DIR/obs_data
 
 python ${SCRIPT_DIR}/pulse_extract.py -db_name ${FITS_ID}.hdf5 -fits $FITS_FILE -store_events -idL ${FITS_ID}_TOPO -store_dir $OUT_DIR/pulses \
-  -folder $OUT_DIR/TEMP -plot_pulses -create_pulse_dirs
+  -folder $OUT_DIR/TEMP -plot_pulses
 
 #Remove meta products
 cd $OUT_DIR
