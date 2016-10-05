@@ -80,7 +80,7 @@ def histogram(data, ax, title='', xlabel='', color='', name='', bins=None, stack
 	ax.tick_params(axis='x', labelsize=8)
 	ax.tick_params(axis='y', labelsize=8)
 
-def toa_plotter(time, SN, duration, Rank=False, observation='', ax=None):
+def toa_plotter(time, SN, duration, Rank, observation='', ax=None):
 	"""
 	Plots a bar at each candidate time. Bar width corresponds to pulse duration, while its
 	height corresponds to the signal to noise ratio of the burst.
@@ -97,30 +97,29 @@ def toa_plotter(time, SN, duration, Rank=False, observation='', ax=None):
 
 
 	"""
-	Rank = np.asarray(Rank)
-	if Rank.any():
-		rank_colors = cm.colors.LinearSegmentedColormap.from_list('rank_colors', [(0,'green'),
-                                                                          		  (0.5,'#D4AC0D'),
-                                                                                  (1,'red')]) 
-		norm=cm.colors.Normalize(vmin=0, vmax=2)
-		ranks=norm(Rank)
-		ax.bar(time, SN, duration, color=rank_colors(ranks), edgecolor=rank_colors(ranks))
-		ax.set_xlabel('Time (s)',fontsize=10)
-		ax.set_ylabel('S/N', fontsize=10)
-		ax.set_title('Times of Arrival v. Signal to Noise Ratio\n%s'%observation, fontsize=12)
-		ax.tick_params(axis='x', labelsize=9)
-		ax.tick_params(axis='y', labelsize=9)
-		#green_line = mlines.Line2D([], [], color='green',markersize=15, label='Rank 0')
-		#yellow_line = mlines.Line2D([], [], color='#D4AC0D', markersize=15, label='Rank 1')
-		#red_line = mlines.Line2D([], [], color='red', markersize=15, label='Rank 2')
-		#handles = [green_line, yellow_line, red_line]
-		#labels = [h.get_label() for h in handles]
-		#ax.legend(handles=handles, labels=labels)   
-		#h,l = ax.get_legend_handles_labels()
-		#ax.legend(h,l)
-		#ax.legend(bbox_to_anchor)
 
-		#plt.savefig('toa_%s_ranked.png'%observation)
+	rank_colors = cm.colors.LinearSegmentedColormap.from_list('rank_colors', [(0,'green'),
+                                                                      		  (0.5,'#D4AC0D'),
+                                                                              (1,'red')]) 
+	norm=cm.colors.Normalize(vmin=0, vmax=2)
+	ranks=norm(Rank)
+	ax.bar(time, SN, duration, color=rank_colors(ranks), edgecolor=rank_colors(ranks))
+	ax.set_xlabel('Time (s)',fontsize=10)
+	ax.set_ylabel('S/N', fontsize=10)
+	ax.set_title('Times of Arrival v. Signal to Noise Ratio\n%s'%observation, fontsize=12)
+	ax.tick_params(axis='x', labelsize=9)
+	ax.tick_params(axis='y', labelsize=9)
+	#green_line = mlines.Line2D([], [], color='green',markersize=15, label='Rank 0')
+	#yellow_line = mlines.Line2D([], [], color='#D4AC0D', markersize=15, label='Rank 1')
+	#red_line = mlines.Line2D([], [], color='red', markersize=15, label='Rank 2')
+	#handles = [green_line, yellow_line, red_line]
+	#labels = [h.get_label() for h in handles]
+	#ax.legend(handles=handles, labels=labels)   
+	#h,l = ax.get_legend_handles_labels()
+	#ax.legend(h,l)
+	#ax.legend(bbox_to_anchor)
+
+	#plt.savefig('toa_%s_ranked.png'%observation)
 
 	else:
 		ax.bar(time, SN, duration)
@@ -138,24 +137,24 @@ def plot_statistics(dm, SNR, duration, Rank, folder='.', observation='', ranked=
 	ax3 = plt.subplot2grid((2,3), (0,2))
 	ax4 = plt.subplot2grid((2,3), (1,0), colspan=3)
 
-        colors = ['green', '#D4AC0D', 'red']
-        toa_plotter(time, SNR, duration, ax=ax4, Rank=Rank)
-        
-        DMs = [dm[np.where(Rank==0)], dm[np.where(Rank==1)], dm[np.where(Rank==2)]]
-        histogram(DMs, ax = ax1, title='Distribution of Dispersion Measures \n%s'%observation,\
-                                                        xlabel=(r'DM (pc cm$^{-3}$)'), color=colors, name='DM')
-        
-        SNRs = [SNR[np.where(Rank==0)], SNR[np.where(Rank==1)], SNR[np.where(Rank==2)]]
-        histogram(SNRs, ax= ax2, title='Distribution of Signal to Noise Ratios\n%s'%observation,\
-                                                        xlabel='S/N', color=colors, name='SN')
+    colors = ['green', '#D4AC0D', 'red']
+    toa_plotter(time, SNR, duration, ax=ax4, Rank=Rank)
+    
+    DMs = [dm[np.where(Rank==0)], dm[np.where(Rank==1)], dm[np.where(Rank==2)]]
+    histogram(DMs, ax = ax1, title='Distribution of Dispersion Measures \n%s'%observation,\
+                                                    xlabel=(r'DM (pc cm$^{-3}$)'), color=colors, name='DM')
+    
+    SNRs = [SNR[np.where(Rank==0)], SNR[np.where(Rank==1)], SNR[np.where(Rank==2)]]
+    histogram(SNRs, ax= ax2, title='Distribution of Signal to Noise Ratios\n%s'%observation,\
+                                                    xlabel='S/N', color=colors, name='SN')
 
-        durations = [duration[np.where(Rank==0)]*1000., duration[np.where(Rank==1)]*1000., duration[np.where(Rank==2)]*1000.]
-        histogram(durations, ax=ax3, title='Distribution of Burst Durations\n%s'%observation,\
-                                                        xlabel='Duration (ms)', color=colors, name='width')
-        fig.tight_layout(w_pad = 0.3, h_pad = 0.5)
-        if ranked: rank = '_ranked'
-        else: rank = ''
-        plt.savefig('%s/statistical_plots_%s%s.png'%(folder,observation,rank), bbox_inches='tight')
+    durations = [duration[np.where(Rank==0)]*1000., duration[np.where(Rank==1)]*1000., duration[np.where(Rank==2)]*1000.]
+    histogram(durations, ax=ax3, title='Distribution of Burst Durations\n%s'%observation,\
+                                                    xlabel='Duration (ms)', color=colors, name='width')
+    fig.tight_layout(w_pad = 0.3, h_pad = 0.5)
+    if ranked: rank = '_ranked'
+    else: rank = ''
+    plt.savefig('%s/statistical_plots_%s%s.png'%(folder,observation,rank), bbox_inches='tight')
 
 
 def main(fits, time, DM=560., sigma=0., duration=0.01, pulse_id=0, top_freq=0., directory='.',\
