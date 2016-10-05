@@ -75,7 +75,10 @@ def main():
     real_pulses = pulses[pulses.Pulse < 2]
     extract_subints_from_observation(args.extract_raw, args.store_dir, np.array(real_pulses.Time), -2, 8)
   
-  if args.plot_statistics: plot_statistics(pulses[pulses.Pulse == 0])
+  if args.plot_statistics: 
+    if pulses_checked: ranked = True
+    else: ranked = False
+    auto_waterfaller.plot_statistics(np.array(pulses.DM), np.array(pulses.Sigma), np.array(pulses.Duration), np.array(pulses.Rank), folder=args.store_dir, observation=args.db_name, ranked=ranked)
 
   return
 
@@ -195,14 +198,6 @@ def pulses_checked(pulses, filename):
   pulses.Pulse.loc[RFI_list[0]] = RFI_list[1]
   return pulses
 
-
-def plot_statistics(pulses):
-  auto_waterfaller.histogram(pulses.DM)
-  auto_waterfaller.histogram(pulses.Sigma)
-  auto_waterfaller.toa_plotter(pulses.Time, pulses.Sigma, pulses.Duration)
-
-
-  
 
 if __name__ == '__main__':
   main()
