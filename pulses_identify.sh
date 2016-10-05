@@ -1,11 +1,12 @@
 #!/bin/bash -x
 
-if [ $# -ne 1 ]; then
+if [ $# -ne 1 ] && [ $# -ne 2 ]; then
    echo "Pipeline to process Arecibo data of FRB121102."
    echo "The pipeline identify interesting pulses, store them in a SinglePulse.hdf5 database and produces diagnostic plots."
    echo ""
    echo "Usage: bash pulses_identify.sh fits_filename"
    echo "NB: use the command bash to run the pipeline"
+   echo "Use the argument -single_core to avoid the pipeline to run in parallel"
    exit
 fi
 
@@ -27,26 +28,19 @@ ORIGINAL_FITS_FILE="$1"
 FITS_NAME=${ORIGINAL_FITS_FILE##*/}
 FITS_ID=${FITS_NAME%_subs_0001.fits}
 SCRIPT_DIR="$( cd -P "$( dirname "$0" )" && pwd )"
-CAL_FILE="${FITS_ID:0: -1}$((${FITS_ID: -1} - 1))_cal_0001.fits"
 OUT_DIR="$GENERAL_OUT_DIR/$FITS_ID"
-FITS_FILE=$OUT_DIR/obs_data/$FITS_NAME
+FITS_FILE="$SUB_DIR/$FITS_NAME"
 
-#Check that subbanded fits file and calibration file exist
-if [ ! -e $SUB_DIR/$FITS_NAME ]; then
+#Check that subbanded fits file exists
+if [ ! -e $FITS_FILE ]; then
   echo ""
   echo "ATTENTION! Subbanded fits file $FITS_NAME not found. Exiting..."
-  exit 1
-fi
-if [ ! -e $RAW_DIR/$CAL_FILE ]; then
-  echo ""
-  echo "ATTENTION! Calibration file $CAL_FILE not found. Exiting..."
   exit 1
 fi
 
 #Set up the output folder
 mkdir $OUT_DIR
 cd $OUT_DIR
-
 mkdir obs_data
 mkdir stat_plots
 mkdir pulses
@@ -54,26 +48,66 @@ mkdir periodic_cands
 mkdir TEMP
 cd TEMP
 
-#Run the search
-cp $RAW_DIR/$CAL_FILE $OUT_DIR/obs_data
-cp $SUB_DIR/$FITS_NAME $OUT_DIR/obs_data
+#Create .dat files
+echo ".dat files creating..."
+SECONDS=0
+cp $FITS_FILE /dev/shm/
+prepsubband -nsub 64 -noscales -nooffsets -nobary -lodm 461.0 -numdms 201 -numout 88473600 -dmstep 1.0 -o ${FITS_ID}_TOPO -zerodm /dev/shm/$FITS_FILE
+rm /dev/shm/$FITS_FILE
+duration=$SECONDS
+echo ".dat files created. Time taken: $(($duration / 60)) m"
 
-prepsubband -nsub 64 -noscales -nooffsets -nobary -lodm 461.0 -numdms 200 -numout 88473600 -dmstep 1.0 -o ${FITS_ID}_TOPO -zerodm $FITS_FILE
+#Parallelisation parameters
+if [ "$2" -eq "-single_core" ]; then 
+  n_cores=1
+else
+  n_cores=`lscpu -p | egrep -v '#' | sort -u -t, -k 2,4 | wc -l`
+fi
 
-bash ${SCRIPT_DIR}/periodicity.sh $OUT_DIR $FITS_FILE
+#Create .fft files
+echo ".fft files creating..."
+SECONDS=0
+ls *.dat | awk '{printf("realfft %s\n",$1)}' > jobs.txt
+bash parallel.sh jobs.txt $n_cores
+duration=$SECONDS
+echo ".fft files created. Time taken: $(($duration / 60)) m"
 
-single_pulse_search.py -t 6.0 -b -m 150 *.dat
+#Create ACCEL files
+echo "ACCEL files creating..."
+SECONDS=0
+ls *.dat | awk '{printf("accelsearch -zmax 20 %s\n",$1)}' > jobs.txt
+bash parallel.sh jobs.txt $n_cores
+duration=$SECONDS
+echo "ACCEL files created. Time taken: $(($duration / 60)) m"
+
+#Create ACCEL files
+echo ".singlepulse files creating..."
+SECONDS=0
+ls *.dat | awk '{printf("single_pulse_search.py -t 6.0 -b -m 150 %s\n",$1)}' > jobs.txt
+duration=$SECONDS
+echo ".singlepulse files created. Time taken: $(($duration / 60)) m"
+
+#Saving best DM timeseries
 cp ${FITS_ID}_TOPO_DM561.00.dat $OUT_DIR/obs_data
 cp ${FITS_ID}_TOPO_DM561.00.inf $OUT_DIR/obs_data
 
+#Create database and plots
+echo "Database and plots creating..."
+SECONDS=0
+#Single pulse candidates
 python ${SCRIPT_DIR}/pulse_extract.py -db_name ${FITS_ID}.hdf5 -fits $FITS_FILE -store_events -idL ${FITS_ID}_TOPO -store_dir $OUT_DIR/pulses \
   -folder $OUT_DIR/TEMP -plot_pulses
-
+#Periodic candidates
+python $SCRIPT_DIR/periodic_candidates_plot.py -folder $OUT_DIR/TEMP -fits $FITS_FILE
+for plot in `ls *periodic_cand*.ps`; do
+  convert -rotate 90 -background white -alpha remove $plot $OUT_DIR/periodic_cands/${plot%.ps}.png
+done
+duration=$SECONDS
+echo "Database and plots created. Time taken: $(($duration / 60)) m"
+  
 #Remove meta products
 cd $OUT_DIR
 rm -rf TEMP
 
-date
 echo "Pipeline pulses_identify.sh finished"
-
-
+date

@@ -52,17 +52,14 @@ def load_cands(folder='.'):
   cands = sifting.read_candidates(candfiles)
 
   # Remove candidates that are duplicated in other ACCEL files
-  if len(cands):
-      cands = sifting.remove_duplicate_candidates(cands)
+  cands = sifting.remove_duplicate_candidates(cands)
 
   # Remove candidates with DM problems
-  if len(cands):
-      cands = sifting.remove_DM_problems(cands, min_num_DMs, dmstrs, low_DM_cutoff)
+  cands = sifting.remove_DM_problems(cands, min_num_DMs, dmstrs, low_DM_cutoff)
 
   # Remove candidates that are harmonically related to each other
   # Note:  this includes only a small set of harmonics
-  if len(cands):
-      cands = sifting.remove_harmonics(cands)
+  cands = sifting.remove_harmonics(cands)
 
   # Read dm and period of best candidates
   if len(cands):
@@ -78,8 +75,9 @@ def load_cands(folder='.'):
       
       return dm, p
 
-  print "No periodic candidates found!"
-  return None, None
+  else:
+    print "No periodic candidates found!"
+    return None, None
 
 
 def parser():

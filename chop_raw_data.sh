@@ -27,6 +27,8 @@ SCRIPT_DIR="$( cd -P "$( dirname "$0" )" && pwd )"
 OBS_ID="$1"
 OUT_DIR="$GENERAL_OUT_DIR/$OBS_ID"
 DB_FILE="$OUT_DIR/obs_data/$OBS_ID.hdf5"
+CAL_FILE="${OBS_ID:0: -1}$((${OBS_ID: -1} - 1))_cal_0001.fits"
+FITS_NAME="${OBS_ID}_subs_0001.fits"
 
 #Check that database exists
 if [ ! -e $DB_FILE ]; then
@@ -34,6 +36,21 @@ if [ ! -e $DB_FILE ]; then
   echo "ATTENTION! HDF5 database $DB_FILE not found. Exiting..."
   exit 1
 fi
+#Check that the calibration file exists
+if [ ! -e $RAW_DIR/$CAL_FILE ]; then
+  echo ""
+  echo "ATTENTION! Calibration file $CAL_FILE not found. Exiting..."
+  exit 1
+fi
+#Check that subbanded fits file exists
+if [ ! -e $SUB_DIR/$FITS_NAME ]; then
+  echo ""
+  echo "ATTENTION! Subbanded fits file $FITS_NAME not found. Exiting..."
+  exit 1
+fi
+
+cp $RAW_DIR/$CAL_FILE $OUT_DIR/obs_data
+cp $SUB_DIR/$FITS_NAME $OUT_DIR/obs_data
 
 #Create raw fits files
 python ${SCRIPT_DIR}/pulse_extract.py -db_name $DB_FILE -pulses_database -pulses_checked ${OUT_DIR}/obs_data/${OBS_ID}_pulses.txt \

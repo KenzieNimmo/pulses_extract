@@ -14,7 +14,7 @@ from extract_psrfits_subints import extract_subints_from_observation
 
 
 DM_low = 461.           #Lowest de-dispersed value
-DM_high = 660.          #Highest de-dispersed value
+DM_high = 661.          #Highest de-dispersed value
 SNR_peak_min = 8.       #Minumum peak SNR value
 SNR_min = 6.            #Minumum SNR value
 Downfact_max = 100      #Maximum Downfact value
