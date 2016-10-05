@@ -22,7 +22,6 @@ date
 #Setting variables
 SUB_DIR="/psr_archive/hessels/hessels/AO-FRB/subbanded_data"
 GENERAL_OUT_DIR="/psr_archive/hessels/hessels/AO-FRB/pipeline_products"
-RAW_DIR="/psr_archive/hessels/hessels/AO-FRB/raw_data"
 
 ORIGINAL_FITS_FILE="$1"
 FITS_NAME=${ORIGINAL_FITS_FILE##*/}
@@ -51,9 +50,9 @@ cd TEMP
 #Create .dat files
 echo ".dat files creating..."
 SECONDS=0
-cp $FITS_FILE /dev/shm/
-prepsubband -nsub 64 -noscales -nooffsets -nobary -lodm 461.0 -numdms 201 -numout 88473600 -dmstep 1.0 -o ${FITS_ID}_TOPO -zerodm /dev/shm/$FITS_FILE
-rm /dev/shm/$FITS_FILE
+cp $FITS_FILE /dev/shm/$FITS_NAME
+prepsubband -nsub 64 -noscales -nooffsets -nobary -lodm 461.0 -numdms 201 -numout 88473600 -dmstep 1.0 -o ${FITS_ID}_TOPO -zerodm /dev/shm/$FITS_NAME
+rm /dev/shm/$FITS_NAME
 duration=$SECONDS
 echo ".dat files created. Time taken: $(($duration / 60)) m"
 
