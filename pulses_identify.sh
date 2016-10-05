@@ -94,7 +94,7 @@ echo "Database and plots creating..."
 SECONDS=0
 #Single pulse candidates
 python ${SCRIPT_DIR}/pulse_extract.py -db_name ${FITS_ID}.hdf5 -fits $FITS_FILE -store_events -idL ${FITS_ID}_TOPO -store_dir $OUT_DIR/pulses \
-  -folder $OUT_DIR/TEMP -plot_pulses
+  -folder $OUT_DIR/TEMP -plot_pulses -plot_statistics
 #Periodic candidates
 python $SCRIPT_DIR/periodic_candidates_plot.py -folder $OUT_DIR/TEMP -fits $FITS_FILE
 for plot in `ls *periodic_cand*.ps`; do
