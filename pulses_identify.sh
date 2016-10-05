@@ -20,8 +20,8 @@ echo "Pipeline pulses_identify.sh starting..."
 date
 
 #Setting variables
-SUB_DIR="/psr_archive/hessels/hessels/AO-FRB/subbanded_data"
-GENERAL_OUT_DIR="/psr_archive/hessels/hessels/AO-FRB/pipeline_products"
+SUB_DIR="/data1/pulses_extract"
+GENERAL_OUT_DIR="/data1/pulses_extract/pipeline_products"
 
 ORIGINAL_FITS_FILE="$1"
 FITS_NAME=${ORIGINAL_FITS_FILE##*/}
