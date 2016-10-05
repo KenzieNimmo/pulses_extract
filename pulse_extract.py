@@ -56,7 +56,7 @@ def main():
     #store.append('pulses_bu',pulses) #Create a back up table in the database
     store.close()
     obs_id = os.path.splitext(args.db_name)[0]
-    pulses.to_csv('{}/{}_pulses.txt'.format(args.store_dir,obs_id), sep='\t', cols=['Pulse',], header=['Rank',], index_label='#PulseID')
+    pulses.to_csv('{}/{}_pulses.txt'.format(args.store_dir,obs_id), sep='\t', columns=['Pulse',], header=['Rank',], index_label='#PulseID')
 
   if args.pulses_checked: 
     pulses_checked(pulses, args.pulses_checked)
@@ -92,7 +92,7 @@ def events_database(args, header):
   events.Pulse = events.Pulse.astype(np.int32)
   events.Downfact = events.Downfact.astype(np.int16)
   events.Sample = events.Sample.astype(np.int32)
-  events.sort(['DM','Time'],inplace=True)
+  events.sort_values(['DM','Time'],inplace=True)
 
   if args.store_events:
     store = pd.HDFStore('{}/{}'.format(args.store_dir,args.db_name), 'w')
@@ -138,13 +138,13 @@ def pulses_database(args, header, events=None):
   
   RFIexcision(events, pulses)
   
-  pulses.sort('Sigma', ascending=False, inplace=True)
+  pulses.sort_values('Sigma', ascending=False, inplace=True)
   return pulses[pulses.Pulse == 0]
   
 
 def RFIexcision(events, pulses):
   events = events[events.Pulse.isin(pulses.index)]
-  events.sort('DM',inplace=True)
+  events.sort_values('DM',inplace=True)
   gb = events.groupby('Pulse')
   pulses.sort_index(inplace=True)
   
