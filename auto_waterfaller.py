@@ -60,7 +60,7 @@ def plotter(data, start, plot_duration, t, DM, IMJD, SMJD, duration, top_freq, s
 	fig.clf()
 	plt.close('all')
 
-def histogram(data, title='', xlabel='', color='', name=''):
+def histogram(data, title='', xlabel='', color='', name=''): #optionally choose number of bins. Currently: 2*sqrt(counts)
 	"""
 	Creates a histogram of a given burst property. 
 
@@ -76,7 +76,7 @@ def histogram(data, title='', xlabel='', color='', name=''):
 	plt.savefig('Histogram_of_%s.png'%name)
 	plt.close('all')
 
-def toa_plotter(time, SN, duration, observation, Rank=False):
+def toa_plotter(time, SN, duration, Rank=False, observation=''):
 	"""
 	Plots a bar at each candidate time. Bar width corresponds to pulse duration, while its
 	height corresponds to the signal to noise ratio of the burst.
@@ -86,10 +86,10 @@ def toa_plotter(time, SN, duration, observation, Rank=False):
 		time: numpy array of arrival times
 		SN: numpy array of signal-to-noise ratios
 		duration: numpy array of burst durations
-		observation: observation name (str)
 
 	Optional Input:
 		Rank: numpy array of pulse rankings for color-mapping. Default is no coloring.
+		observation: observation name (str). Default is none.
 
 
 	"""
