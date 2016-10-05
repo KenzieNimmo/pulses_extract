@@ -116,20 +116,22 @@ def plot_statistics(dm, SNR, duration, Rank=False):
 
         colors = ['green', '#D4AC0D', 'red']
         toa_plotter(time, SNR, duration, Rank, ax=ax4)
-        
+    
         DMs = [dm[np.where(Rank==0)], dm[np.where(Rank==1)], dm[np.where(Rank==2)]]
         histogram(DMs, ax = ax1, title='Distribution of Dispersion Measures \n%s'%observation,\
-                                                        xlabel=(r'DM (pc cm$^{-3}$)'), color=colors, name='DM')
-        
+                                                    xlabel=(r'DM (pc cm$^{-3}$)'), color=colors, name='DM')
+    
         SNRs = [SNR[np.where(Rank==0)], SNR[np.where(Rank==1)], SNR[np.where(Rank==2)]]
         histogram(SNRs, ax= ax2, title='Distribution of Signal to Noise Ratios\n%s'%observation,\
-                                                        xlabel='S/N', color=colors, name='SN')
+                                                    xlabel='S/N', color=colors, name='SN')
 
         durations = [duration[np.where(Rank==0)]*1000., duration[np.where(Rank==1)]*1000., duration[np.where(Rank==2)]*1000.]
         histogram(durations, ax=ax3, title='Distribution of Burst Durations\n%s'%observation,\
-                                                        xlabel='Duration (ms)', color=colors, name='width')
+                                                    xlabel='Duration (ms)', color=colors, name='width')
         fig.tight_layout(w_pad = 0.3, h_pad = 0.5)
-        plt.savefig('statistical_plots_%s_ranked.png'%observation, bbox_inches='tight')
+        if ranked: rank = '_ranked'
+        else: rank = ''
+        plt.savefig('%s/statistical_plots_%s%s.png'%(folder,observation,rank), bbox_inches='tight')
 
 
 def main(fits, time, DM=560., sigma=0., duration=0.01, pulse_id=0, top_freq=0., directory='.',\
