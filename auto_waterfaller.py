@@ -72,7 +72,8 @@ def histogram(data, ax, title='', xlabel='', color='', name='', bins=None, stack
 
 	"""
 	if not bins:
-		bins = 2 * np.sqrt(len(data))
+                lenght = sum(len(x) for x in data)
+		bins = int(2 * np.sqrt(lenght))
 	ax.hist(data, bins=bins, color=color, histtype='step', lw=2, stacked=stacked)
 	ax.set_xlabel(xlabel, fontsize=8)
 	ax.set_ylabel('Counts', fontsize=8)
@@ -117,15 +118,15 @@ def plot_statistics(dm, time, SNR, duration, Rank, folder='.', observation='', r
         colors = ['green', '#D4AC0D', 'red']
         toa_plotter(time, SNR, duration, Rank, ax=ax4)
     
-        DMs = [dm[np.where(Rank==0)], dm[np.where(Rank==1)], dm[np.where(Rank==2)]]
+        DMs = [dm[Rank==0], dm[Rank==1], dm[Rank>=2]]
         histogram(DMs, ax = ax1, title='Distribution of Dispersion Measures \n%s'%observation,\
                                                     xlabel=(r'DM (pc cm$^{-3}$)'), color=colors, name='DM')
     
-        SNRs = [SNR[np.where(Rank==0)], SNR[np.where(Rank==1)], SNR[np.where(Rank==2)]]
+        SNRs = [SNR[Rank==0], SNR[Rank==1], SNR[Rank>=2]]
         histogram(SNRs, ax= ax2, title='Distribution of Signal to Noise Ratios\n%s'%observation,\
                                                     xlabel='S/N', color=colors, name='SN')
 
-        durations = [duration[np.where(Rank==0)]*1000., duration[np.where(Rank==1)]*1000., duration[np.where(Rank==2)]*1000.]
+        durations = [duration[Rank==0]*1000., duration[Rank==1]*1000., duration[Rank>=2]*1000.]
         histogram(durations, ax=ax3, title='Distribution of Burst Durations\n%s'%observation,\
                                                     xlabel='Duration (ms)', color=colors, name='width')
         fig.tight_layout(w_pad = 0.3, h_pad = 0.5)
