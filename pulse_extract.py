@@ -199,6 +199,8 @@ def pulses_checked(pulses, filename):
 def plot_statistics(pulses):
   auto_waterfaller.histogram(pulses.DM)
   auto_waterfaller.histogram(pulses.Sigma)
+  auto_waterfaller.toa_plotter(pulses.Time, pulses.Sigma, pulses.Duration)
+
 
   
 
