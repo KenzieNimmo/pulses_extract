@@ -50,14 +50,12 @@ cd TEMP
 #Create .dat files
 echo ".dat files creating..."
 SECONDS=0
-cp $FITS_FILE /dev/shm/$FITS_NAME
-prepsubband -nsub 64 -noscales -nooffsets -nobary -lodm 461.0 -numdms 201 -numout 88473600 -dmstep 1.0 -o ${FITS_ID}_TOPO -zerodm /dev/shm/$FITS_NAME
-rm /dev/shm/$FITS_NAME
+prepsubband -nsub 64 -noscales -nooffsets -nobary -lodm 461.0 -numdms 201 -numout 88473600 -dmstep 1.0 -o ${FITS_ID}_TOPO -zerodm $FITS_FILE
 duration=$SECONDS
 echo ".dat files created. Time taken: $(($duration / 60)) m"
 
 #Parallelisation parameters
-if [ "$2" -eq "-single_core" ]; then 
+if [ "$2" == "-single_core" ]; then 
   n_cores=1
 else
   n_cores=`lscpu -p | egrep -v '#' | sort -u -t, -k 2,4 | wc -l`
@@ -67,7 +65,7 @@ fi
 echo ".fft files creating..."
 SECONDS=0
 ls *.dat | awk '{printf("realfft %s\n",$1)}' > jobs.txt
-bash parallel.sh jobs.txt $n_cores
+bash $SCRIPT_DIR/parallel.sh jobs.txt $n_cores
 duration=$SECONDS
 echo ".fft files created. Time taken: $(($duration / 60)) m"
 
@@ -75,7 +73,7 @@ echo ".fft files created. Time taken: $(($duration / 60)) m"
 echo "ACCEL files creating..."
 SECONDS=0
 ls *.dat | awk '{printf("accelsearch -zmax 20 %s\n",$1)}' > jobs.txt
-bash parallel.sh jobs.txt $n_cores
+bash $SCRIPT_DIR/parallel.sh jobs.txt $n_cores
 duration=$SECONDS
 echo "ACCEL files created. Time taken: $(($duration / 60)) m"
 
@@ -83,6 +81,7 @@ echo "ACCEL files created. Time taken: $(($duration / 60)) m"
 echo ".singlepulse files creating..."
 SECONDS=0
 ls *.dat | awk '{printf("single_pulse_search.py -t 6.0 -b -m 150 %s\n",$1)}' > jobs.txt
+bash $SCRIPT_DIR/parallel.sh jobs.txt $n_cores
 duration=$SECONDS
 echo ".singlepulse files created. Time taken: $(($duration / 60)) m"
 
