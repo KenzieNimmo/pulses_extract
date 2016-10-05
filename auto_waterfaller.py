@@ -17,6 +17,8 @@ import rfifind
 import psrfits
 import spectra
 import os
+import pandas as pd
+import matplotlib.lines as mlines
 
 def plotter(data, start, plot_duration, t, DM, IMJD, SMJD, duration, top_freq, sigma, 
 			directory, FRB_name, observation, pulse_id, zoom=True, idx='', downsamp=True):
@@ -60,7 +62,7 @@ def plotter(data, start, plot_duration, t, DM, IMJD, SMJD, duration, top_freq, s
 	fig.clf()
 	plt.close('all')
 
-def histogram(data, title='', xlabel='', color='', name=''): #optionally choose number of bins. Currently: 2*sqrt(counts)
+def histogram(data, ax, title='', xlabel='', color='', name='', bins=None, stacked=False): #optionally choose number of bins. Currently: 2*sqrt(counts)
 	"""
 	Creates a histogram of a given burst property. 
 
@@ -69,14 +71,16 @@ def histogram(data, title='', xlabel='', color='', name=''): #optionally choose 
 		name: burst property being plotted
 
 	"""
-	plt.hist(data, bins=(2*np.sqrt(len(data))), color=color, histtype='step', lw=2)
-	plt.xlabel(xlabel)
-	plt.ylabel('Counts')
-	plt.title(title)
-	plt.savefig('Histogram_of_%s.png'%name)
-	plt.close('all')
+	if not bins:
+		bins = 2 * np.sqrt(len(data))
+	ax.hist(data, bins=bins, color=color, histtype='step', lw=2, stacked=stacked)
+	ax.set_xlabel(xlabel, fontsize=8)
+	ax.set_ylabel('Counts', fontsize=8)
+	ax.set_title(title, fontsize=8)
+	ax.tick_params(axis='x', labelsize=8)
+	ax.tick_params(axis='y', labelsize=8)
 
-def toa_plotter(time, SN, duration, Rank=False, observation=''):
+def toa_plotter(time, SN, duration, Rank=False, observation='', ax=None):
 	"""
 	Plots a bar at each candidate time. Bar width corresponds to pulse duration, while its
 	height corresponds to the signal to noise ratio of the burst.
@@ -95,23 +99,75 @@ def toa_plotter(time, SN, duration, Rank=False, observation=''):
 	"""
 	Rank = np.asarray(Rank)
 	if Rank.any():
-		rank_colors = cm.colors.LinearSegmentedColormap.from_list('rank_colors', [(0,'red'),
-                                                                          		  (0.5,'cyan'),
-                                                                                  (1,'black')]) 
+		rank_colors = cm.colors.LinearSegmentedColormap.from_list('rank_colors', [(0,'green'),
+                                                                          		  (0.5,'#D4AC0D'),
+                                                                                  (1,'red')]) 
 		norm=cm.colors.Normalize(vmin=0, vmax=2)
 		ranks=norm(Rank)
-		plt.bar(time, SN, duration, color=rank_colors(ranks), edgecolor=rank_colors(ranks))
-		plt.xlabel('Time (s)')
-		plt.ylabel('S/N')
-		plt.title('Times of Arrival v. Signal to Noise Ratio\n%s'%observation)
-		plt.savefig('toa_%s_ranked.png'%observation)
+		ax.bar(time, SN, duration, color=rank_colors(ranks), edgecolor=rank_colors(ranks))
+		ax.set_xlabel('Time (s)',fontsize=10)
+		ax.set_ylabel('S/N', fontsize=10)
+		ax.set_title('Times of Arrival v. Signal to Noise Ratio\n%s'%observation, fontsize=12)
+		ax.tick_params(axis='x', labelsize=9)
+		ax.tick_params(axis='y', labelsize=9)
+		#green_line = mlines.Line2D([], [], color='green',markersize=15, label='Rank 0')
+		#yellow_line = mlines.Line2D([], [], color='#D4AC0D', markersize=15, label='Rank 1')
+		#red_line = mlines.Line2D([], [], color='red', markersize=15, label='Rank 2')
+		#handles = [green_line, yellow_line, red_line]
+		#labels = [h.get_label() for h in handles]
+		#ax.legend(handles=handles, labels=labels)   
+		#h,l = ax.get_legend_handles_labels()
+		#ax.legend(h,l)
+		#ax.legend(bbox_to_anchor)
+
+		#plt.savefig('toa_%s_ranked.png'%observation)
 
 	else:
-		plt.bar(time, SN, duration)
-		plt.xlabel('Time (s)')
-		plt.ylabel('S/N')
-		plt.title('Times of Arrival v. Signal to Noise Ratio\n%s'%observation)
-		plt.savefig('toa_%s.png'%observation)
+		ax.bar(time, SN, duration)
+		ax.set_xlabel('Time (s)',fontsize=10)
+		ax.set_ylabel('S/N',fontsize=10)
+		ax.set_title('Times of Arrival v. Signal to Noise Ratio\n%s'%observation, fontsize=12)
+		ax.tick_params(axis='x', labelsize=9)
+		ax.tick_params(axis='y', labelsize=9)
+		#ax.savefig('toa_%s.png'%observation)
+
+def plot_statistics(dm, SNR, duration, Rank=False):
+	fig = plt.figure(figsize=(8,5))
+	ax1 = plt.subplot2grid((2,3), (0,0))
+	ax2 = plt.subplot2grid((2,3), (0,1))
+	ax3 = plt.subplot2grid((2,3), (0,2))
+	ax4 = plt.subplot2grid((2,3), (1,0), colspan=3)
+
+	Rank = np.asarray(Rank)
+	if Rank.any():
+		colors = ['green', '#D4AC0D', 'red']
+		toa_plotter(time, SNR, duration, ax=ax4, Rank=Rank)
+		
+		DMs = [dm[np.where(Rank==0)], dm[np.where(Rank==1)], dm[np.where(Rank==2)]]
+		histogram(DMs, ax = ax1, title='Distribution of Dispersion Measures \n%s'%observation,\
+								xlabel=(r'DM (pc cm$^{-3}$)'), color=colors, name='DM')
+		
+		SNRs = [SNR[np.where(Rank==0)], SNR[np.where(Rank==1)], SNR[np.where(Rank==2)]]
+		histogram(SNRs, ax= ax2, title='Distribution of Signal to Noise Ratios\n%s'%observation,\
+								xlabel='S/N', color=colors, name='SN')
+
+		durations = [duration[np.where(Rank==0)]*1000., duration[np.where(Rank==1)]*1000., duration[np.where(Rank==2)]*1000.]
+		histogram(durations, ax=ax3, title='Distribution of Burst Durations\n%s'%observation,\
+								xlabel='Duration (ms)', color=colors, name='width')
+		fig.tight_layout(w_pad = 0.3, h_pad = 0.5)
+		plt.savefig('statistical_plots_%s_ranked.png'%observation, bbox_inches='tight')
+
+	else:
+		toa_plotter(time, SNR, duration, ax=ax4)
+		histogram(dm, ax = ax1, title='Distribution of Dispersion Measures \n%s'%observation,\
+								xlabel=(r'DM (pc cm$^{-3}$)'), color='k', name='DM')
+		histogram(SNR, ax= ax2, title='Distribution of Signal to Noise Ratios\n%s'%observation,\
+								xlabel='S/N', color='k', name='SN')
+		histogram((duration*1000.), ax=ax3, title='Distribution of Burst Durations\n%s'%observation,\
+								xlabel='Duration (ms)', color='k', name='width')
+		fig.tight_layout(w_pad = 0.3, h_pad = 0.5)
+		plt.savefig('statistical_plots_%s.png'%observation, bbox_inches='tight')
+
 
 def main(fits, time, DM=560., sigma=0., duration=0.01, pulse_id=0, top_freq=0., directory='.',\
 		  FRB_name='FRB121102', downsamp=1.):
@@ -171,6 +227,16 @@ def main(fits, time, DM=560., sigma=0., duration=0.01, pulse_id=0, top_freq=0., 
 			 	downsamp=downsamp[i])
 
 if __name__ == '__main__':
-	DM, sigma, time, downfact = np.loadtxt(sys.argv[2], usecols=(0,1,2,4), unpack=True)
-	downsamp = np.zeros(len(downfact)) + 1. #just a place holder so my code runs upon testing.
-	main(sys.argv[1],time, DM, sigma, downsamp = downsamp)
+	#DM, sigma, time, downfact = np.loadtxt(sys.argv[2], usecols=(0,1,2,4), unpack=True)
+	#downsamp = np.zeros(len(downfact)) + 1. #just a place holder so my code runs upon testing.
+	#main(sys.argv[1],time, DM, sigma, downsamp = downsamp)
+	database = '/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/output/puppi_57614_C0531+33_0803/OLD/SinglePulses.hdf5'
+
+	pulses = pd.read_hdf(database,'pulses')
+	dm = np.array(pulses.DM)
+	SNR = np.array(pulses.Sigma)
+	time = np.array(pulses.Time)
+	duration = np.array(pulses.Duration)
+	observation = "test_observation"
+	Rank = np.random.randint(0,3,len(time))
+	plot_statistics(dm, SNR, duration)

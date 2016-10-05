@@ -12,11 +12,27 @@ time = np.array(pulses.Time)
 duration = np.array(pulses.Duration)
 observation = "test_observation"
 Rank = np.random.randint(0,3,len(time))
-auto_waterfaller.histogram(dm, title='Distribution of Dispersion Measures \n%s'%observation,\
-							xlabel=(r'DM (pc cm$^{-3}$)'), color='r', name='DM')
-auto_waterfaller.histogram(SNR, title='Distribution of Signal to Noise Ratios\n%s'%observation,\
-							xlabel='S/N', color='b', name='SN')
-auto_waterfaller.histogram((duration*1000.), title='Distribution of Burst Durations\n%s'%observation,\
-							xlabel='Duration (ms)', color='g', name='width')
-auto_waterfaller.toa_plotter(time, SNR, duration) #no rankings passed
 
+auto_waterfaller.plot_statistics()
+
+		histogram(dm[np.where(Rank==0)], ax = ax1, title='Distribution of Dispersion Measures \n%s'%observation,\
+								xlabel=(r'DM (pc cm$^{-3}$)'), color='r', name='DM', stacked=True)
+		histogram(dm[np.where(Rank==1)], ax = ax1, title='Distribution of Dispersion Measures \n%s'%observation,\
+								xlabel=(r'DM (pc cm$^{-3}$)'), color='g', name='DM', stacked=True)
+		histogram(dm[np.where(Rank==2)], ax = ax1, title='Distribution of Dispersion Measures \n%s'%observation,\
+								xlabel=(r'DM (pc cm$^{-3}$)'), color='k', name='DM', stacked=True)
+		#ranked SNR hist
+		histogram(SNR[np.where(Rank==0)], ax= ax2, title='Distribution of Signal to Noise Ratios\n%s'%observation,\
+								xlabel='S/N', color='r', name='SN', stacked=True)
+		histogram(SNR[np.where(Rank==1)], ax= ax2, title='Distribution of Signal to Noise Ratios\n%s'%observation,\
+								xlabel='S/N', color='g', name='SN', stacked=True)
+		histogram(SNR[np.where(Rank==2)], ax= ax2, title='Distribution of Signal to Noise Ratios\n%s'%observation,\
+								xlabel='S/N', color='k', name='SN', stacked=True)
+
+		#ranked duration hist
+		histogram((duration[np.where(Rank==0)])*1000., ax=ax3, title='Distribution of Burst Durations\n%s'%observation,\
+								xlabel='Duration (ms)', color='r', name='width', stacked=True)
+		histogram((duration[np.where(Rank==1)])*1000., ax=ax3, title='Distribution of Burst Durations\n%s'%observation,\
+								xlabel='Duration (ms)', color='g', name='width', stacked=True)
+		histogram((duration[np.where(Rank==2)])*1000., ax=ax3, title='Distribution of Burst Durations\n%s'%observation,\
+								xlabel='Duration (ms)', color='k', name='width', stacked=True)
