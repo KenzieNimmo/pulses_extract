@@ -49,8 +49,7 @@ cd TEMP
 #Create .dat files
 echo ".dat files creating..."
 SECONDS=0
-#CAMBIARE Numout: non si puo hardcode, scrivere funzione per farlo sempre positivo
-prepsubband -nsub 64 -noscales -nooffsets -noweights -nobary -lodm 461.0 -numdms 201 -numout 88473600 -dmstep 1.0 -o ${FITS_ID}_TOPO -zerodm $FITS_FILE >/dev/null
+python prepsubband_call.py -nsub 64 -noscales -nooffsets -noweights -nobary -lodm 461.0 -numdms 201 -numout 88473600 -dmstep 1.0 -o ${FITS_ID}_TOPO -zerodm $FITS_FILE >/dev/null
 duration=$SECONDS
 echo ".dat files created. Time taken: $(($duration / 60)) m"
 
@@ -69,12 +68,18 @@ bash $SCRIPT_DIR/parallel.sh jobs.txt $n_cores >/dev/null
 duration=$SECONDS
 echo ".fft files created. Time taken: $(($duration / 60)) m"
 
-#CAMBIARE rednoise
+#Remove rednoise
+echo "Rednoise removing..."
+SECONDS=0
+ls *.fft | awk '{printf("rednoise %s\n",$1)}' > jobs.txt
+bash $SCRIPT_DIR/parallel.sh jobs.txt $n_cores >/dev/null
+duration=$SECONDS
+echo "Rednoise removed. Time taken: $(($duration / 60)) m"
 
 #Create ACCEL files
 echo "ACCEL files creating..."
 SECONDS=0
-ls *.fft | awk '{printf("accelsearch -zmax 20 %s\n",$1)}' > jobs.txt
+ls *_red.fft | awk '{printf("accelsearch -zmax 20 %s\n",$1)}' > jobs.txt
 bash $SCRIPT_DIR/parallel.sh jobs.txt $n_cores >/dev/null
 duration=$SECONDS
 echo "ACCEL files created. Time taken: $(($duration / 60)) m"
