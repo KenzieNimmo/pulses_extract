@@ -99,7 +99,7 @@ if __name__ == '__main__':
   if not isinstance(dm_list, np.ndarray): exit()
   
   for idx,[dm, p] in enumerate(zip(dm_list, p_list)):
-    if subprocess.call(['prepfold', '-nsub', '64', '-p', str(p), '-dm', str(dm), '-noxwin', '-o', '{}_periodic_cand_{}'.format(basename, idx), args.fits], cwd=args.folder):
+    if subprocess.call(['prepfold', '-noscales', '-nooffsets', '-noweights', '-nsub', '64', '-p', str(p), '-dm', str(dm), '-noxwin', '-o', '{}_periodic_cand_{}'.format(basename, idx), args.fits], cwd=args.folder):
      print "Error in prepfold!"
 
 

@@ -56,7 +56,7 @@ def main():
     #store.append('pulses_bu',pulses) #Create a back up table in the database
     store.close()
     obs_id = os.path.splitext(args.db_name)[0]
-    pulses.to_csv('{}/{}_pulses.txt'.format(args.store_dir,obs_id), sep='\t', columns=['Pulse',], header=['Rank',], index_label='#PulseID')
+    pulses.sort_index().to_csv('{}/{}_pulses.txt'.format(args.store_dir,obs_id), sep='\t', columns=['Pulse',], header=['Rank',], index_label='#PulseID')
 
   if args.pulses_checked: 
     pulses_checked(pulses, args.pulses_checked)
@@ -76,7 +76,7 @@ def main():
     extract_subints_from_observation(args.extract_raw, args.store_dir, np.array(real_pulses.Time), -2, 8)
   
   if args.plot_statistics: 
-    if pulses_checked: ranked = True
+    if args.pulses_checked: ranked = True
     else: ranked = False
     obs_id = os.path.splitext(args.db_name)[0]
     auto_waterfaller.plot_statistics(np.array(pulses.DM), np.array(pulses.Time), np.array(pulses.Sigma), np.array(pulses.Duration), np.array(pulses.Pulse), folder=args.store_dir, observation=obs_id, ranked=ranked)
@@ -98,19 +98,21 @@ def events_database(args, header):
   events.Sample = events.Sample.astype(np.int32)
   events.sort_values(['DM','Time'],inplace=True)
 
-  if args.store_events:
-    store = pd.HDFStore('{}/{}'.format(args.store_dir,args.db_name), 'w')
-    store.append('events',events,data_columns=['Pulse','SAP','BEAM','DM','Time'])
-    store.close()
-  
   #Remove last 10s of data
   obs_length = header['NSBLK'] * header['NAXIS2'] * header['TBIN']
   events = events[events.Time < obs_length-10.]
 
   C_Funct.Get_Group(events.DM.values, events.Sigma.values, events.Time.values, events.Pulse.values, 
                     args.events_dDM, args.events_dt, args.DM_step)
-  
-  return events[events.Pulse >= 0]
+
+  events = events[events.Pulse >= 0]
+
+  if args.store_events:
+    store = pd.HDFStore('{}/{}'.format(args.store_dir,args.db_name), 'w')
+    store.append('events',events,data_columns=['Pulse','SAP','BEAM','DM','Time'])
+    store.close()
+    
+  return events
   
   
 def pulses_database(args, header, events=None):
@@ -148,7 +150,7 @@ def pulses_database(args, header, events=None):
 
 def RFIexcision(events, pulses):
   events = events[events.Pulse.isin(pulses.index)]
-  events.sort_values('DM',inplace=True)
+  events.sort('DM',inplace=True)
   gb = events.groupby('Pulse')
   pulses.sort_index(inplace=True)
   

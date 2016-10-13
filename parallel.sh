@@ -2,7 +2,7 @@
 
 # Maximum number of jobs
 if [ -z $2 ]; then
-    MAXJOBS=4
+    MAXJOBS=1
 else
     MAXJOBS=$2
 fi

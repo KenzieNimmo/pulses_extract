@@ -41,7 +41,6 @@ fi
 mkdir $OUT_DIR
 cd $OUT_DIR
 mkdir obs_data
-mkdir stat_plots
 mkdir pulses
 mkdir periodic_cands
 mkdir TEMP
@@ -50,7 +49,8 @@ cd TEMP
 #Create .dat files
 echo ".dat files creating..."
 SECONDS=0
-prepsubband -nsub 64 -noscales -nooffsets -nobary -lodm 461.0 -numdms 201 -numout 88473600 -dmstep 1.0 -o ${FITS_ID}_TOPO -zerodm $FITS_FILE >/dev/null
+#CAMBIARE Numout: non si puo hardcode, scrivere funzione per farlo sempre positivo
+prepsubband -nsub 64 -noscales -nooffsets -noweights -nobary -lodm 461.0 -numdms 201 -numout 88473600 -dmstep 1.0 -o ${FITS_ID}_TOPO -zerodm $FITS_FILE >/dev/null
 duration=$SECONDS
 echo ".dat files created. Time taken: $(($duration / 60)) m"
 
@@ -68,6 +68,8 @@ ls *.dat | awk '{printf("realfft %s\n",$1)}' > jobs.txt
 bash $SCRIPT_DIR/parallel.sh jobs.txt $n_cores >/dev/null
 duration=$SECONDS
 echo ".fft files created. Time taken: $(($duration / 60)) m"
+
+#CAMBIARE rednoise
 
 #Create ACCEL files
 echo "ACCEL files creating..."
@@ -94,11 +96,11 @@ echo "Database and plots creating..."
 SECONDS=0
 #Single pulse candidates
 python ${SCRIPT_DIR}/pulse_extract.py -db_name ${FITS_ID}.hdf5 -fits $FITS_FILE -store_events -idL ${FITS_ID}_TOPO -store_dir $OUT_DIR/pulses \
-  -folder $OUT_DIR/TEMP -plot_pulses -plot_statistics
+  -folder $OUT_DIR/TEMP -plot_pulses -plot_statistics      >/dev/null
 #Periodic candidates
-python $SCRIPT_DIR/periodic_candidates_plot.py -folder $OUT_DIR/TEMP -fits $FITS_FILE
+python $SCRIPT_DIR/periodic_candidates_plot.py -folder $OUT_DIR/TEMP -fits $FITS_FILE     >/dev/null
 for plot in `ls *periodic_cand*.ps`; do
-  convert -rotate 90 -background white -alpha remove $plot $OUT_DIR/periodic_cands/${plot%.ps}.png
+  convert -rotate 90 -background white -alpha remove $plot $OUT_DIR/periodic_cands/${plot%.ps}.png     >/dev/null
 done
 duration=$SECONDS
 echo "Database and plots created. Time taken: $(($duration / 60)) m"
