@@ -49,7 +49,7 @@ cd TEMP
 #Create .dat files
 echo ".dat files creating..."
 SECONDS=0
-python prepsubband_call.py -nsub 64 -noscales -nooffsets -noweights -nobary -lodm 461.0 -numdms 201 -numout 88473600 -dmstep 1.0 -o ${FITS_ID}_TOPO -zerodm $FITS_FILE >/dev/null
+python $SCRIPT_DIR/prepsubband_call.py -nsub 64 -noscales -nooffsets -noweights -nobary -lodm 461.0 -numdms 201 -numout 88473600 -dmstep 1.0 -o ${FITS_ID}_TOPO -zerodm $FITS_FILE >/dev/null
 duration=$SECONDS
 echo ".dat files created. Time taken: $(($duration / 60)) m"
 
