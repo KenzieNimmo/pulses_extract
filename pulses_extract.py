@@ -75,7 +75,7 @@ def main():
   
   if args.extract_raw: 
     real_pulses = pulses[pulses.Pulse < 2]
-    extract_subints_from_observation(args.extract_raw, args.store_dir, np.array(real_pulses.Time), -2, 8)
+    extract_subints_from_observation(args.extract_raw, args.store_dir, np.array(real_pulses.Time), -2, 8, pulseID=np.array(real_pulses.index).astype(str))
   
   if args.plot_statistics: 
     if args.pulses_checked: ranked = True
