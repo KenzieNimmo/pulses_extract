@@ -4,6 +4,7 @@ import os
 import sys
 
 import pandas as pd
+pd.options.mode.chained_assignment = None
 import numpy as np
 from scipy import special
 import pyfits
@@ -80,7 +81,9 @@ def main():
     if args.pulses_checked: ranked = True
     else: ranked = False
     obs_id = os.path.splitext(args.db_name)[0]
-    auto_waterfaller.plot_statistics(np.array(pulses.DM), np.array(pulses.Time), np.array(pulses.Sigma), np.array(pulses.Duration), np.array(pulses.Pulse), folder=args.store_dir, observation=obs_id, ranked=ranked)
+    if pulses.shape[0] > 0:
+      auto_waterfaller.plot_statistics(np.array(pulses.DM), np.array(pulses.Time), np.array(pulses.Sigma), np.array(pulses.Duration), np.array(pulses.Pulse), \
+        folder=args.store_dir, observation=obs_id, ranked=ranked)
 
   return
 
