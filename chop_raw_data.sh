@@ -26,12 +26,12 @@ RAW_DIR="/psr_archive/hessels/hessels/AO-FRB/raw_data"
 SCRIPT_DIR="$( cd -P "$( dirname "$0" )" && pwd )"
 OBS_ID="$1"
 OUT_DIR="$GENERAL_OUT_DIR/$OBS_ID"
-DB_FILE="$OUT_DIR/pulses/$OBS_ID.hdf5"
+DB_FILE="$OBS_ID.hdf5"
 CAL_FILE="${OBS_ID:0: -1}$((${OBS_ID: -1} - 1))_cal_0001.fits"
 FITS_NAME="${OBS_ID}_subs_0001.fits"
 
 #Check that database exists
-if [ ! -e $DB_FILE ]; then
+if [ ! -e $OUT_DIR/pulses/$DB_FILE ]; then
   echo ""
   echo "ATTENTION! HDF5 database $DB_FILE not found. Exiting..."
   exit 1

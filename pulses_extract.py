@@ -48,20 +48,20 @@ def main():
     return parser.parse_args()
   args = parser()
   
-  if args.pulses_database: pulses = pd.read_hdf(args.db_name,'pulses')
+  if args.pulses_database: pulses = pd.read_hdf(os.path.join(args.store_dir,args.db_name),'pulses')
   else: 
     header = fits_header(args.fits)
     pulses = pulses_database(args, header)
-    store = pd.HDFStore('{}/{}'.format(args.store_dir,args.db_name), 'a')
+    store = pd.HDFStore(os.path.join(args.store_dir,args.db_name), 'a')
     store.append('pulses',pulses)
     #store.append('pulses_bu',pulses) #Create a back up table in the database
     store.close()
     obs_id = os.path.splitext(args.db_name)[0]
-    pulses.sort_index().to_csv('{}/{}_pulses.txt'.format(args.store_dir,obs_id), sep='\t', columns=['Pulse',], header=['Rank',], index_label='#PulseID')
+    pulses.sort_index().to_csv(os.path.join(args.store_dir,'{}_pulses.txt'.format(obs_id)), sep='\t', columns=['Pulse',], header=['Rank',], index_label='#PulseID')
 
   if args.pulses_checked: 
     pulses_checked(pulses, args.pulses_checked)
-    store = pd.HDFStore('{}/{}'.format(args.store_dir,args.db_name), 'r+')
+    store = pd.HDFStore(os.path.join(args.store_dir,args.db_name), 'r+')
     store.remove('pulses')
     store.append('pulses',pulses)
     store.close()
@@ -90,7 +90,7 @@ def main():
 
 def events_database(args, header):
   #Create events database
-  sp_files = glob.glob("{}/{}*.singlepulse".format(args.folder, args.idL))
+  sp_files = glob.glob(os.path.join(args.folder,'{}*.singlepulse'.format(args.idL)))
   events = pd.concat(pd.read_csv(f, delim_whitespace=True, dtype=np.float64) for f in sp_files)
   events.reset_index(drop=True, inplace=True)
   events.columns = ['DM','Sigma','Time','Sample','Downfact','a','b']
@@ -112,7 +112,7 @@ def events_database(args, header):
   events = events[events.Pulse >= 0]
 
   if args.store_events:
-    store = pd.HDFStore('{}/{}'.format(args.store_dir,args.db_name), 'w')
+    store = pd.HDFStore(os.path.join(args.store_dir,args.db_name), 'w')
     store.append('events',events,data_columns=['Pulse','SAP','BEAM','DM','Time'])
     store.close()
     
@@ -121,7 +121,7 @@ def events_database(args, header):
   
 def pulses_database(args, header, events=None):
   #Create pulses database
-  if args.events_database: events = pd.read_hdf(args.db_name,'events')
+  if args.events_database: events = pd.read_hdf(os.path.join(args.store_dir,args.db_name),'events')
   elif not isinstance(events, pd.DataFrame): events = events_database(args, header)
   gb = events.groupby('Pulse',sort=False)
   pulses = events.loc[gb.Sigma.idxmax()]
