@@ -12,9 +12,9 @@ import sifting
 #From ACCEL_sift.py
 
 # glob for ACCEL files
-globaccel = "*ACCEL_*0"
+globaccel = "*_red_ACCEL_*0"
 # glob for .inf files
-globinf = "*DM*.inf"
+globinf = "*DM*_red.inf"
 # In how many DMs must a candidate be detected to be considered "good"
 min_num_DMs = 2
 # Lowest DM to consider as a "real" pulsar

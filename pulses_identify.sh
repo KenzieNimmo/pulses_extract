@@ -73,6 +73,7 @@ echo "Rednoise removing..."
 SECONDS=0
 ls *.fft | awk '{printf("rednoise %s\n",$1)}' > jobs.txt
 bash $SCRIPT_DIR/parallel.sh jobs.txt $n_cores >/dev/null
+for inf_file in `ls *.inf`; do cp $inf_file ${inf_file%.inf}_red.inf; done
 duration=$SECONDS
 echo "Rednoise removed. Time taken: $(($duration / 60)) m"
 
@@ -101,11 +102,11 @@ echo "Database and plots creating..."
 SECONDS=0
 #Single pulse candidates
 python ${SCRIPT_DIR}/pulse_extract.py -db_name ${FITS_ID}.hdf5 -fits $FITS_FILE -store_events -idL ${FITS_ID}_TOPO -store_dir $OUT_DIR/pulses \
-  -folder $OUT_DIR/TEMP -plot_pulses -plot_statistics      >/dev/null
+  -folder $OUT_DIR/TEMP -plot_pulses -plot_statistics > /dev/null
 #Periodic candidates
-python $SCRIPT_DIR/periodic_candidates_plot.py -folder $OUT_DIR/TEMP -fits $FITS_FILE     >/dev/null
+python $SCRIPT_DIR/periodic_candidates_plot.py -folder $OUT_DIR/TEMP -fits $FITS_FILE > /dev/null
 for plot in `ls *periodic_cand*.ps`; do
-  convert -rotate 90 -background white -alpha remove $plot $OUT_DIR/periodic_cands/${plot%.ps}.png     >/dev/null
+  convert -rotate 90 -background white -alpha remove $plot $OUT_DIR/periodic_cands/${plot%.ps}.png > /dev/null
 done
 duration=$SECONDS
 echo "Database and plots created. Time taken: $(($duration / 60)) m"
