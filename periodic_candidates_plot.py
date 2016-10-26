@@ -40,7 +40,7 @@ def load_cands(folder='.'):
   inffiles = glob.glob(folder + '/' + globinf)
   candfiles = glob.glob(folder + '/' + globaccel)
   # Check to see if this is from a short search
-  dmstrs = [x.split("DM")[-1].split(".inf")[0] for x in inffiles]
+  dmstrs = [x.split("DM")[-1].split("_red.inf")[0] for x in inffiles]
   dms = map(float, dmstrs)
   dms.sort()
   dmstrs = ["%.2f"%x for x in dms]
