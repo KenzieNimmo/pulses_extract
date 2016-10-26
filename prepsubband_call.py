@@ -1,5 +1,6 @@
 import subprocess
 import argparse
+import pyfits
 
 def parser():
   # Command-line options
@@ -31,11 +32,14 @@ def prepsubband(args):
   if args.dmstep: 
     argument_list.append('-dmstep')
     argument_list.append(str(args.dmstep))
-  if args.numout: 
-    numout = args.numout
-    if numout % 2: numout += 1
-    argument_list.append('-numout')
-    argument_list.append(str(numout))
+  if args.numout: numout = args.numout
+  else: 
+    with pyfits.open(args.fits,memmap=True) as fits:
+      header = fits['SUBINT'].header
+      numout = header['NSBLK'] * header['NAXIS2']
+  if numout % 2: numout += 1
+  argument_list.append('-numout')
+  argument_list.append(str(numout))
   if args.numdms: 
     argument_list.append('-numdms')
     argument_list.append(str(args.numdms))

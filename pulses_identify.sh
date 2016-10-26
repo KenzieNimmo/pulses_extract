@@ -49,7 +49,7 @@ cd TEMP
 #Create .dat files
 echo ".dat files creating..."
 SECONDS=0
-python $SCRIPT_DIR/prepsubband_call.py -nsub 64 -noscales -nooffsets -noweights -nobary -lodm 461.0 -numdms 201 -numout 88473600 -dmstep 1.0 -o ${FITS_ID}_TOPO -zerodm $FITS_FILE >/dev/null
+python $SCRIPT_DIR/prepsubband_call.py -nsub 64 -noscales -nooffsets -noweights -nobary -lodm 461.0 -numdms 201 -dmstep 1.0 -o ${FITS_ID}_TOPO -zerodm $FITS_FILE >/dev/null
 duration=$SECONDS
 echo ".dat files created. Time taken: $(($duration / 60)) m"
 
@@ -84,7 +84,7 @@ bash $SCRIPT_DIR/parallel.sh jobs.txt $n_cores >/dev/null
 duration=$SECONDS
 echo "ACCEL files created. Time taken: $(($duration / 60)) m"
 
-#Create ACCEL files
+#Create .singlepulse files
 echo ".singlepulse files creating..."
 SECONDS=0
 ls *.dat | awk '{printf("single_pulse_search.py -t 6.0 -b -m 150 %s\n",$1)}' > jobs.txt
