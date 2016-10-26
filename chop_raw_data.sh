@@ -26,7 +26,7 @@ RAW_DIR="/psr_archive/hessels/hessels/AO-FRB/raw_data"
 SCRIPT_DIR="$( cd -P "$( dirname "$0" )" && pwd )"
 OBS_ID="$1"
 OUT_DIR="$GENERAL_OUT_DIR/$OBS_ID"
-DB_FILE="$OUT_DIR/obs_data/$OBS_ID.hdf5"
+DB_FILE="$OUT_DIR/pulses/$OBS_ID.hdf5"
 CAL_FILE="${OBS_ID:0: -1}$((${OBS_ID: -1} - 1))_cal_0001.fits"
 FITS_NAME="${OBS_ID}_subs_0001.fits"
 
@@ -53,7 +53,7 @@ cp $RAW_DIR/$CAL_FILE $OUT_DIR/obs_data
 cp $SUB_DIR/$FITS_NAME $OUT_DIR/obs_data
 
 #Create raw fits files
-python ${SCRIPT_DIR}/pulse_extract.py -db_name $DB_FILE -pulses_database -pulses_checked ${OUT_DIR}/obs_data/${OBS_ID}_pulses.txt \
+python ${SCRIPT_DIR}/pulses_extract.py -db_name $DB_FILE -pulses_database -pulses_checked ${OUT_DIR}/pulses/${OBS_ID}_pulses.txt \
   -store_dir $OUT_DIR/pulses -extract_raw $RAW_DIR/$OBS_ID
 
 #RFI masks

@@ -203,7 +203,7 @@ def pulses_checked(pulses, filename):
     #return
   
   pulses.Pulse.loc[RFI_list[0]] = RFI_list[1]
-  return pulses
+  return
 
 
 if __name__ == '__main__':
