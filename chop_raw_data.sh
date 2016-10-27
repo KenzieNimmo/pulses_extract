@@ -1,7 +1,7 @@
 #!/bin/bash -x
 
-if [ $# -ne 2 ]; then
-   echo "Pipeline to process Arecibo data of FRB121102."
+if [ $# -ne 1 ]; then
+   echo "Pipeline to process Arecibo data of FRB121102 on DOP263."
    echo "The pipeline uses pulses stored in a HDF5 database to chop raw data around the pulses."
    echo ""
    echo "Usage: bash chop_raw_data.sh OBS_ID"
@@ -22,6 +22,7 @@ date
 SUB_DIR="/psr_archive/hessels/hessels/AO-FRB/subbanded_data"
 GENERAL_OUT_DIR="/psr_archive/hessels/hessels/AO-FRB/pipeline_products"
 RAW_DIR="/psr_archive/hessels/hessels/AO-FRB/raw_data"
+PAR_FILE="/psr_archive/hessels/hessels/AO-FRB/pipeline_products/0531+33.par"
 
 SCRIPT_DIR="$( cd -P "$( dirname "$0" )" && pwd )"
 OBS_ID="$1"
@@ -54,19 +55,29 @@ cp $SUB_DIR/$FITS_NAME $OUT_DIR/obs_data
 
 #Create raw fits files
 python ${SCRIPT_DIR}/pulses_extract.py -db_name $DB_FILE -pulses_database -pulses_checked ${OUT_DIR}/pulses/${OBS_ID}_pulses.txt \
-  -store_dir $OUT_DIR/pulses -extract_raw $RAW_DIR/$OBS_ID
+  -store_dir $OUT_DIR/pulses -extract_raw $RAW_DIR/$OBS_ID -plot_statistics
 
-#RFI masks
-cd $OBS_ID/pulses
-for puls in `ls`; do 
-  if [ -d $puls ]; then
-    cd $puls
-    for fits in `ls *.fits`; do 
-      rfifind -blocks 10 -noweights -noscales -nooffsets -o ${fits%.fits} $fits
-    done
-    cd $OBS_ID/pulses
-  fi    
+#Move RFI folders
+mkdir $OUT_DIR/pulses/RFI_pulses
+mv $OUT_DIR/pulses/[0-9]*/ $OUT_DIR/pulses/RFI_pulses
+for puls in `find $OUT_DIR/pulses/RFI_pulses -name "*.fits" | awk -F/ '{print $(NF-1)}'`; do
+  mv $OUT_DIR/pulses/RFI_pulses/$puls $OUT_DIR/pulses
 done
+  
+# #RFI masks
+# cd $OUT_DIR/pulses
+# for puls in `ls -d [0-9]*/`; do 
+#   cd $puls
+#   for fits in `ls *.fits`; do 
+#     rfifind -blocks 10 -noweights -noscales -nooffsets -o ${fits%.fits} $fits
+#   done
+#   cd $OBS_ID/pulses
+# done
+
+#Add psrchive part
+#dspsr -E /psr_archive/hessels/hessels/AO-FRB/pipeline_products/0531+33.par -b 1024 -fft-bench -K -A -s -O test *.fits
+#paz -mr *.ar
+
 
 date
 echo "Pipeline chop_raw.sh finished"
