@@ -63,7 +63,7 @@ duration=$SECONDS
 echo "Subbanded and calibrator fits files copied. Time taken: $(($duration / 60)) m"
 
 #Create raw fits files
-echo "Raw fits files creating..."
+echo "Raw fits files and diagnostic plots creating..."
 SECONDS=0
 if [ ! -e $OUT_DIR/pulses/RFI_pulses ]; then
   mkdir $OUT_DIR/pulses/RFI_pulses
@@ -75,7 +75,7 @@ python ${SCRIPT_DIR}/pulses_extract.py -db_name $DB_FILE -pulses_database -pulse
 #Move RFI pulses in RFI folder
 mv `awk -F"\t" '$2 == "2" { print $1"\t"$3 }' puppi_57614_C0531+33_0803_pulses.txt` RFI_pulses/
 duration=$SECONDS
-echo "Raw fits files created. Time taken: $(($duration / 60)) m"
+echo "Raw fits files and diagnostic plots created. Time taken: $(($duration / 60)) m"
 
 #Create RFI masks
 # echo ".mask files creating..."
@@ -94,7 +94,7 @@ echo "Raw fits files created. Time taken: $(($duration / 60)) m"
 #Create psrarchive files
 echo "PSRARCHIVE files creating..."
 SECONDS=0
-python ${SCRIPT_DIR}/create_psrchives.py $DB_FILE -obsID $OBS_ID -obsPATH $OUT_DIR/pulses -par_file $PAR_FILE >/dev/null
+python ${SCRIPT_DIR}/create_psrchives.py $OUT_DIR/pulses/$DB_FILE -obsID $OBS_ID -obsPATH $OUT_DIR/pulses -par_file $PAR_FILE >/dev/null
 duration=$SECONDS
 echo "PSRARCHIVE files created. Time taken: $(($duration / 60)) m"
 
