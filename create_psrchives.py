@@ -17,7 +17,7 @@ def parser():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
                                     description="The program create a sinlge-pulse psrchive file.")
     parser.add_argument('db_name', help="Name of the HDF5 database containing single pulses.", default='.')
-    parser.add_argument('-fits_file', help="Root name of fits files (without path).", default='*')
+    parser.add_argument('-fits_file', help="Name of fits file.", default='*')
     parser.add_argument('-obsPATH', help="Path of the observation output folder.", default='.')
     parser.add_argument('-par_file', help="Name of the parameter file for the puls.", default='*.par')
     parser.add_argument('-profile_bins', help="Number of bins within the profile.", default=4096, type=int)
