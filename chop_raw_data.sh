@@ -50,21 +50,32 @@ if [ ! -e $SUB_DIR/$FITS_NAME ]; then
   exit 1
 fi
 
+#Copy subbanded file and calibrator
+echo "Copying subbanded and calibrator fits files..."
+SECONDS=0
 cp $RAW_DIR/$CAL_FILE $OUT_DIR/obs_data
 cp $SUB_DIR/$FITS_NAME $OUT_DIR/obs_data
+duration=$SECONDS
+echo "Subbanded and calibrator fits files copied. Time taken: $(($duration / 60)) m"
 
 #Create raw fits files
+echo "Raw fits files creating..."
+SECONDS=0
 python ${SCRIPT_DIR}/pulses_extract.py -db_name $DB_FILE -pulses_database -pulses_checked ${OUT_DIR}/pulses/${OBS_ID}_pulses.txt \
-  -store_dir $OUT_DIR/pulses -extract_raw $RAW_DIR/$OBS_ID -plot_statistics
-
-#Move RFI folders
+  -store_dir $OUT_DIR/pulses -extract_raw $RAW_DIR/$OBS_ID -plot_statistics >/dev/null
+#Move RFI pulses in RFI folder
 mkdir $OUT_DIR/pulses/RFI_pulses
 mv $OUT_DIR/pulses/[0-9]*/ $OUT_DIR/pulses/RFI_pulses
 for puls in `find $OUT_DIR/pulses/RFI_pulses -name "*.fits" | awk -F/ '{print $(NF-1)}'`; do
   mv $OUT_DIR/pulses/RFI_pulses/$puls $OUT_DIR/pulses
 done
+duration=$SECONDS
+echo "Raw fits files created. Time taken: $(($duration / 60)) m"
+
   
-# #RFI masks
+#Create RFI masks
+# echo ".mask files creating..."
+# SECONDS=0
 # cd $OUT_DIR/pulses
 # for puls in `ls -d [0-9]*/`; do 
 #   cd $puls
@@ -73,11 +84,15 @@ done
 #   done
 #   cd $OBS_ID/pulses
 # done
+# duration=$SECONDS
+# echo ".mask files created. Time taken: $(($duration / 60)) m"
 
-#Add psrchive part
-
+#Create psrarchive files
+echo "PSRARCHIVE files creating..."
+SECONDS=0
 python ${SCRIPT_DIR}/create_psrchives.py $DB_FILE -obsID $OBS_ID -obsPATH $OUT_DIR/pulses -par_file $PAR_FILE >/dev/null
-
+duration=$SECONDS
+echo "PSRARCHIVE files created. Time taken: $(($duration / 60)) m"
 
 date
 echo "Pipeline chop_raw.sh finished"
