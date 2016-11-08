@@ -75,8 +75,8 @@ done
 # done
 
 #Add psrchive part
-#dspsr -E /psr_archive/hessels/hessels/AO-FRB/pipeline_products/0531+33.par -b 1024 -fft-bench -K -A -s -O test *.fits
-#paz -mr *.ar
+
+python ${SCRIPT_DIR}/create_psrchives.py $DB_FILE -obsID $OBS_ID -obsPATH $OUT_DIR/pulses -par_file $PAR_FILE >/dev/null
 
 
 date

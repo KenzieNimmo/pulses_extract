@@ -154,7 +154,7 @@ def extract_subints_from_observation(froot,path,tbursts,isub0,isub1,pulseID=''):
                 # Some logic for dealing with file breaks
                 if isubmin>=0 and isubmax<nsub[i]:
                     # Output filename
-                    fname="%s_%08.3f.fits"%(os.path.join(path,pulseID[idx],os.path.basename(froot)),tburst)
+                    fname="%s_%s.fits"%(os.path.join(path,pulseID[idx],os.path.basename(froot)),pulseID[idx])
                     
                     print "Extracting subints %03d to %03d from %s to %s"%(isubmin,isubmax,files[i],fname) 
                     
