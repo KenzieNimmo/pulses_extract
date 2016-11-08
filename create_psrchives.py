@@ -2,6 +2,7 @@ import subprocess
 from glob import glob
 import os
 import argparse
+import multiprocessing as mp
 
 import psrchive
 import pyfits
@@ -40,15 +41,19 @@ def burst_nsub(puls, profile_bins, fits_file=False):
 
 
 
-def dspsr(puls, par_file, fits_file, profile_bins=4096):
+def dspsr(puls, par_file, fits_file, profile_bins=4096, parallel=False):
   nsub = burst_nsub(puls, profile_bins, fits_file)  #Subintegration number containing the pulse
   archive_name = os.path.splitext(os.path.basename(fits_file))[0]
   
     
   #Fold the fits file to create the archives at two different phases
   if not (os.path.isfile(archive_name+'_p1.ar') or os.path.isfile(archive_name+'_p2.ar')):
-    subprocess.call(['dspsr', '-K', '-b', str(profile_bins), '-s', '-A', '-E', par_file, '-O', archive_name+'_p1', fits_file])
-    subprocess.call(['dspsr', '-K', '-b', str(profile_bins), '-s', '-A', '-E', par_file, '-O', archive_name+'_p2', fits_file])
+    if parallel:
+      subprocess.call(['dspsr', '-t', str(mp.cpu_count()), '-K', '-b', str(profile_bins), '-s', '-A', '-E', par_file, '-O', archive_name+'_p1', fits_file])
+      subprocess.call(['dspsr', '-t', str(mp.cpu_count()), '-K', '-b', str(profile_bins), '-s', '-A', '-E', par_file, '-O', archive_name+'_p2', fits_file])      
+    else:
+      subprocess.call(['dspsr', '-K', '-b', str(profile_bins), '-s', '-A', '-E', par_file, '-O', archive_name+'_p1', fits_file])
+      subprocess.call(['dspsr', '-K', '-b', str(profile_bins), '-s', '-A', '-E', par_file, '-O', archive_name+'_p2', fits_file])
 
     #Select the signle pulse at the two phases
     subprocess.call(['pam', '-m', '-x', '"{} {}"'.format(nsub, nsub), archive_name+'_p1.ar'])
@@ -64,13 +69,19 @@ def dspsr(puls, par_file, fits_file, profile_bins=4096):
   
   #Select the right phase
   if not (os.path.isfile(archive_name+'_p1.downsamp') or os.path.isfile(archive_name+'_p2.downsamp')):
-    subprocess.call(['pam', '-e', 'downsamp', '-b', str(puls.Downfact), archive_name+'_p1.FTp', archive_name+'_p2.FTp'])
+    #Downsample at the closest factor
+    downfact = puls.Downfact
+    while profile_bins % downfact != 0:
+      downfact -= 1
+    subprocess.call(['pam', '-e', 'downsamp', '-b', str(downfact), archive_name+'_p1.FTp', archive_name+'_p2.FTp'])
+    #Find maximum peak
     ar_p1 = psrchive.Archive_load(archive_name+'_p1.downsamp')
     ar_p2 = psrchive.Archive_load(archive_name+'_p2.downsamp')
     ar_p1.remove_baseline()
     ar_p2.remove_baseline()
     ar_p1 = ar_p1.get_data().squeeze()
     ar_p2 = ar_p2.get_data().squeeze()
+    #Remove wrong-phase archive
     if ar_p1.max() > ar_p2.max(): 
       os.remove(archive_name+'_p2.ar')
       os.remove(archive_name+'_p2.paz')
