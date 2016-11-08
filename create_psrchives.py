@@ -23,7 +23,7 @@ def parser():
     parser.add_argument('-profile_bins', help="Number of bins within the profile.", default=4096, type=int)
     return parser.parse_args()
   
-def burst_nsub(puls, fits_file=False):
+def burst_nsub(puls, profile_bins, fits_file=False):
   if not fits_file: fits_file = glob('/psr_archive/hessels/hessels/AO-FRB/pipeline_products/puppi_57614_C0531+33_0803/pulses/{}/*.fits'.format(puls.name))[0]
   with pyfits.open(fits_file) as fits:
     header = fits['SUBINT'].header + fits['Primary'].header
@@ -41,7 +41,7 @@ def burst_nsub(puls, fits_file=False):
 
 
 def dspsr(puls, par_file, fits_file, profile_bins=4096):
-  nsub = burst_nsub(puls, fits_file)  #Subintegration number containing the pulse
+  nsub = burst_nsub(puls, profile_bins, fits_file)  #Subintegration number containing the pulse
   archive_name = os.path.splitext(os.path.basename(fits_file))[0]
   
     
