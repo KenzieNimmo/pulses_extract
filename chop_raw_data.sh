@@ -53,26 +53,30 @@ fi
 #Copy subbanded file and calibrator
 echo "Copying subbanded and calibrator fits files..."
 SECONDS=0
-cp $RAW_DIR/$CAL_FILE $OUT_DIR/obs_data
-cp $SUB_DIR/$FITS_NAME $OUT_DIR/obs_data
+if [ ! -e $RAW_DIR/$CAL_FILE ]; then
+  cp $RAW_DIR/$CAL_FILE $OUT_DIR/obs_data
+fi
+if [ ! -e $SUB_DIR/$FITS_NAME ]; then
+  cp $SUB_DIR/$FITS_NAME $OUT_DIR/obs_data
+fi
 duration=$SECONDS
 echo "Subbanded and calibrator fits files copied. Time taken: $(($duration / 60)) m"
 
 #Create raw fits files
 echo "Raw fits files creating..."
 SECONDS=0
+if [ ! -e $OUT_DIR/pulses/RFI_pulses ]; then
+  mkdir $OUT_DIR/pulses/RFI_pulses
+else
+  mv $OUT_DIR/pulses/RFI_pulses/* $OUT_DIR/pulses/
+fi
 python ${SCRIPT_DIR}/pulses_extract.py -db_name $DB_FILE -pulses_database -pulses_checked ${OUT_DIR}/pulses/${OBS_ID}_pulses.txt \
   -store_dir $OUT_DIR/pulses -extract_raw $RAW_DIR/$OBS_ID -plot_statistics >/dev/null
 #Move RFI pulses in RFI folder
-mkdir $OUT_DIR/pulses/RFI_pulses
-mv $OUT_DIR/pulses/[0-9]*/ $OUT_DIR/pulses/RFI_pulses
-for puls in `find $OUT_DIR/pulses/RFI_pulses -name "*.fits" | awk -F/ '{print $(NF-1)}'`; do
-  mv $OUT_DIR/pulses/RFI_pulses/$puls $OUT_DIR/pulses
-done
+mv `awk -F"\t" '$2 == "2" { print $1"\t"$3 }' puppi_57614_C0531+33_0803_pulses.txt` RFI_pulses/
 duration=$SECONDS
 echo "Raw fits files created. Time taken: $(($duration / 60)) m"
 
-  
 #Create RFI masks
 # echo ".mask files creating..."
 # SECONDS=0

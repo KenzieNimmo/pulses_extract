@@ -156,10 +156,12 @@ def extract_subints_from_observation(froot,path,tbursts,isub0,isub1,pulseID=''):
                     # Output filename
                     fname="%s_%s.fits"%(os.path.join(path,pulseID[idx],os.path.basename(froot)),pulseID[idx])
                     
-                    print "Extracting subints %03d to %03d from %s to %s"%(isubmin,isubmax,files[i],fname) 
+                    if not os.path.isfile(fname):
                     
-                    # Extract subints
-                    extract_subints_from_single_file(files[i],fname,isubmin,isubmax)
+                      print "Extracting subints %03d to %03d from %s to %s"%(isubmin,isubmax,files[i],fname) 
+                    
+                      # Extract subints
+                      extract_subints_from_single_file(files[i],fname,isubmin,isubmax)
                 else:
                     print "Pulse %d extends over a file break and it was not processed."%(pulseID[idx])
                     with open(os.path.join(path, 'ERRORS.txt'), 'w') as error_file:

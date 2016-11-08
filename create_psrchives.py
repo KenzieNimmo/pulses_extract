@@ -44,39 +44,43 @@ def dspsr(puls, par_file, fits_file, profile_bins=4096):
   nsub = burst_nsub(puls, fits_file)  #Subintegration number containing the pulse
   archive_name = os.path.splitext(os.path.basename(fits_file))[0]
   
-  
+    
   #Fold the fits file to create the archives at two different phases
-  subprocess.call(['dspsr', '-K', '-b', str(profile_bins), '-s', '-A', '-E', par_file, '-O', archive_name+'_p1', fits_file])
-  subprocess.call(['dspsr', '-K', '-b', str(profile_bins), '-s', '-A', '-E', par_file, '-O', archive_name+'_p2', fits_file])
+  if not (os.path.isfile(archive_name+'_p1.ar') or os.path.isfile(archive_name+'_p2.ar')):
+    subprocess.call(['dspsr', '-K', '-b', str(profile_bins), '-s', '-A', '-E', par_file, '-O', archive_name+'_p1.ar', fits_file])
+    subprocess.call(['dspsr', '-K', '-b', str(profile_bins), '-s', '-A', '-E', par_file, '-O', archive_name+'_p2.ar', fits_file])
 
-  #Select the signle pulse at the two phases
-  subprocess.call(['pam', '-m', '-x', '"{} {}"'.format(nsub, nsub), archive_name+'_p1.ar'])
-  subprocess.call(['pam', '-m', '-x', '"{} {}"'.format(nsub-1, nsub-1), archive_name+'_p2.ar'])
+    #Select the signle pulse at the two phases
+    subprocess.call(['pam', '-m', '-x', '"{} {}"'.format(nsub, nsub), archive_name+'_p1.ar'])
+    subprocess.call(['pam', '-m', '-x', '"{} {}"'.format(nsub-1, nsub-1), archive_name+'_p2.ar'])
 
   #Clean the archives
-  subprocess.call(['paz', '-e', 'paz', '-r', archive_name+'_p1.ar', archive_name+'_p2.ar'])
+  if not (os.path.isfile(archive_name+'_p1.paz') or os.path.isfile(archive_name+'_p2.paz')):
+    subprocess.call(['paz', '-e', 'paz', '-r', archive_name+'_p1.ar', archive_name+'_p2.ar'])
   
   #Create compressed archives
-  subprocess.call(['pam', '-e', 'FTp', '-FTp', archive_name+'_p1.ar', archive_name+'_p2.ar'])
+  if not (os.path.isfile(archive_name+'_p1.FTp') or os.path.isfile(archive_name+'_p2.FTp')):
+    subprocess.call(['pam', '-e', 'FTp', '-FTp', archive_name+'_p1.paz', archive_name+'_p2.paz'])
   
   #Select the right phase
-  subprocess.call(['pam', '-e', 'downsamp', '-b', str(puls.Downsamp), archive_name+'_p1.FTp', archive_name+'_p2.FTp'])
-  ar_p1 = psrchive.Archive_load(archive_name+'_p1.downsamp')
-  ar_p2 = psrchive.Archive_load(archive_name+'_p2.downsamp')
-  ar_p1.remove_baseline()
-  ar_p2.remove_baseline()
-  ar_p1 = ar_p1.get_data().squeeze()
-  ar_p2 = ar_p2.get_data().squeeze()
-  if ar_p1.max() > ar_p2.max(): 
-    os.remove(archive_name+'_p2.ar')
-    os.remove(archive_name+'_p2.paz')
-    os.remove(archive_name+'_p2.FTp')
-    os.remove(archive_name+'_p2.downsamp')
-  else:
-    os.remove(archive_name+'_p1.ar')
-    os.remove(archive_name+'_p1.paz')
-    os.remove(archive_name+'_p1.FTp')
-    os.remove(archive_name+'_p1.downsamp')
+  if not (os.path.isfile(archive_name+'_p1.downsamp') or os.path.isfile(archive_name+'_p2.downsamp')):
+    subprocess.call(['pam', '-e', 'downsamp', '-b', str(puls.Downsamp), archive_name+'_p1.FTp', archive_name+'_p2.FTp'])
+    ar_p1 = psrchive.Archive_load(archive_name+'_p1.downsamp')
+    ar_p2 = psrchive.Archive_load(archive_name+'_p2.downsamp')
+    ar_p1.remove_baseline()
+    ar_p2.remove_baseline()
+    ar_p1 = ar_p1.get_data().squeeze()
+    ar_p2 = ar_p2.get_data().squeeze()
+    if ar_p1.max() > ar_p2.max(): 
+      os.remove(archive_name+'_p2.ar')
+      os.remove(archive_name+'_p2.paz')
+      os.remove(archive_name+'_p2.FTp')
+      os.remove(archive_name+'_p2.downsamp')
+    else:
+      os.remove(archive_name+'_p1.ar')
+      os.remove(archive_name+'_p1.paz')
+      os.remove(archive_name+'_p1.FTp')
+      os.remove(archive_name+'_p1.downsamp')
 
   return
 
