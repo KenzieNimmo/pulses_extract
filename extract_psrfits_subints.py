@@ -135,6 +135,10 @@ def extract_subints_from_observation(froot,path,tbursts,isub0,isub1,pulseID=''):
 
     # Loop over bursts
     for idx, tburst in enumerate(tbursts):
+        # Output filename
+        fname="%s_%s.fits"%(os.path.join(path,pulseID[idx],os.path.basename(froot)),pulseID[idx])
+        if os.path.isfile(fname): continue
+
         # Skip bursts outside of observation
         if tburst<0.0 or tburst>np.max(tend):
             print "Burst time %f not in range of observation!"%tburst
@@ -153,15 +157,10 @@ def extract_subints_from_observation(froot,path,tbursts,isub0,isub1,pulseID=''):
 
                 # Some logic for dealing with file breaks
                 if isubmin>=0 and isubmax<nsub[i]:
-                    # Output filename
-                    fname="%s_%s.fits"%(os.path.join(path,pulseID[idx],os.path.basename(froot)),pulseID[idx])
-                    
-                    if not os.path.isfile(fname):
-                    
-                      print "Extracting subints %03d to %03d from %s to %s"%(isubmin,isubmax,files[i],fname) 
-                    
-                      # Extract subints
-                      extract_subints_from_single_file(files[i],fname,isubmin,isubmax)
+                    print "Extracting subints %03d to %03d from %s to %s"%(isubmin,isubmax,files[i],fname) 
+                  
+                    # Extract subints
+                    extract_subints_from_single_file(files[i],fname,isubmin,isubmax)
                 else:
                     print "Pulse %d extends over a file break and it was not processed."%(pulseID[idx])
                     with open(os.path.join(path, 'ERRORS.txt'), 'w') as error_file:
