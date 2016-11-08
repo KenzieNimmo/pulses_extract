@@ -94,7 +94,7 @@ echo "Raw fits files and diagnostic plots created. Time taken: $(($duration / 60
 #Create psrarchive files
 echo "PSRARCHIVE files creating..."
 SECONDS=0
-python ${SCRIPT_DIR}/create_psrchives.py $OUT_DIR/pulses/$DB_FILE -obsID $OBS_ID -obsPATH $OUT_DIR/pulses -par_file $PAR_FILE >/dev/null
+python ${SCRIPT_DIR}/create_psrchives.py $OUT_DIR/pulses/$DB_FILE -fits_file $OBS_ID -obsPATH $OUT_DIR/pulses -par_file $PAR_FILE >/dev/null
 duration=$SECONDS
 echo "PSRARCHIVE files created. Time taken: $(($duration / 60)) m"
 
