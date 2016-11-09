@@ -43,7 +43,7 @@ def burst_nsub(puls, profile_bins, fits_file=False):
 
 def dspsr(puls, par_file, fits_file, profile_bins=4096, parallel=False):
   nsub = burst_nsub(puls, profile_bins, fits_file)  #Subintegration number containing the pulse
-  archive_name = os.path.splitext(os.path.basename(fits_file))[0]
+  archive_name = os.path.splitext(fits_file)[0]
   
     
   #Fold the fits file to create the archives at two different phases
