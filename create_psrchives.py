@@ -121,19 +121,19 @@ if __name__ == '__main__':
 
 
 
-#TO_TEST
-burst_start = (puls.SMJD - mjds_chop) % 84000
+##TO_TEST
+#burst_start = (puls.SMJD - mjds_chop) % 84000
 
-offset = period / 2.
+#offset = period / 2.
 
-fits_duration = 3.0408704
-starting_phase = (burst_start - offset) / fits_duration
+#fits_duration = 3.0408704
+#starting_phase = (burst_start - offset) / fits_duration
 
-DM_delay = psr_utils.delay_from_DM(560, 1380.78125-400) - psr_utils.delay_from_DM(560, 1380.78125+400)
-duration = DM_delay + offset
+#DM_delay = psr_utils.delay_from_DM(560, 1380.78125-400) - psr_utils.delay_from_DM(560, 1380.78125+400)
+#duration = DM_delay + offset
 
-dspsr -E 0531+33.par -A -O test -p starting_phase -T duration puppi_57614_C0531+33_0803_33.fits
-#Check if it is fine for timing
+#dspsr -E 0531+33.par -A -O test -p starting_phase -T duration puppi_57614_C0531+33_0803_33.fits
+##Check if it is fine for timing
 
 
 
