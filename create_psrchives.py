@@ -45,11 +45,11 @@ def dspsr(puls, par_file, fits_file, profile_bins=4096, parallel=False):
   nsub = burst_nsub(puls, profile_bins, fits_file)  #Subintegration number containing the pulse
   archive_name = os.path.splitext(fits_file)[0]
   
-  #Create unfolded archive for timing
-  if parallel:
-    subprocess.call(['dspsr', '-t', str(mp.cpu_count()), '-K', '-b', str(profile_bins), '-s', '-A', '-E', par_file, '-O', archive_name+'_p1', fits_file])
-  else:
-    subprocess.call(['dspsr', '-N',  '-A', '-O', archive_name+'_timing', fits_file])
+  ##Create unfolded archive for timing
+  #if parallel:
+    #subprocess.call(['dspsr', '-t', str(mp.cpu_count()), '-K', '-b', str(profile_bins), '-s', '-A', '-E', par_file, '-O', archive_name+'_p1', fits_file])
+  #else:
+    #subprocess.call(['dspsr', '-N',  '-A', '-O', archive_name+'_timing', fits_file])
       
   #Fold the fits file to create the archives at two different phases
   if not (os.path.isfile(archive_name+'_p1.ar') or os.path.isfile(archive_name+'_p2.ar')):
