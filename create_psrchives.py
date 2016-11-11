@@ -45,7 +45,12 @@ def dspsr(puls, par_file, fits_file, profile_bins=4096, parallel=False):
   nsub = burst_nsub(puls, profile_bins, fits_file)  #Subintegration number containing the pulse
   archive_name = os.path.splitext(fits_file)[0]
   
-    
+  #Create unfolded archive for timing
+  if parallel:
+    subprocess.call(['dspsr', '-t', str(mp.cpu_count()), '-K', '-b', str(profile_bins), '-s', '-A', '-E', par_file, '-O', archive_name+'_p1', fits_file])
+  else:
+    subprocess.call(['dspsr', '-N',  '-A', '-O', archive_name+'_timing', fits_file])
+      
   #Fold the fits file to create the archives at two different phases
   if not (os.path.isfile(archive_name+'_p1.ar') or os.path.isfile(archive_name+'_p2.ar')):
     if parallel:
@@ -113,5 +118,22 @@ if __name__ == '__main__':
     fits_file = fits_path.format(idx_p) 
     if '*' in fits_file: fits_file = glob(fits_file)[0]
     dspsr(puls, par_file, fits_file, profile_bins=args.profile_bins)
+
+
+
+#TO_TEST
+burst_start = (puls.SMJD - mjds_chop) % 84000
+
+offset = period / 2.
+
+fits_duration = 3.0408704
+starting_phase = (burst_start - offset) / fits_duration
+
+DM_delay = psr_utils.delay_from_DM(560, 1380.78125-400) - psr_utils.delay_from_DM(560, 1380.78125+400)
+duration = DM_delay + offset
+
+dspsr -E 0531+33.par -A -O test -p starting_phase -T duration puppi_57614_C0531+33_0803_33.fits
+#Check if it is fine for timing
+
 
 
