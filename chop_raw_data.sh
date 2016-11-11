@@ -73,7 +73,9 @@ fi
 python ${SCRIPT_DIR}/pulses_extract.py -db_name $DB_FILE -pulses_database -pulses_checked ${OUT_DIR}/pulses/${OBS_ID}_pulses.txt \
   -store_dir $OUT_DIR/pulses -extract_raw $RAW_DIR/$OBS_ID -plot_statistics >/dev/null
 #Move RFI pulses in RFI folder
-mv `awk -F"\t" '$2 == "2" { print $1"\t"$3 }' puppi_57614_C0531+33_0803_pulses.txt` RFI_pulses/
+for PULS in `awk -F"\t" '$2 == "2" { print $1"\t"$3 }' $OUT_DIR/pulses/${OBS_ID}_pulses.txt`; do
+  mv $OUT_DIR/pulses/$PULS $OUT_DIR/pulses/RFI_pulses/
+done
 duration=$SECONDS
 echo "Raw fits files and diagnostic plots created. Time taken: $(($duration / 60)) m"
 
