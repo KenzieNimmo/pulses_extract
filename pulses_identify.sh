@@ -1,7 +1,7 @@
 #!/bin/bash -x
 
 if [ $# -ne 1 ] && [ $# -ne 2 ]; then
-   echo "Pipeline to process Arecibo data of FRB121102."
+   echo "Pipeline to process Arecibo data of FRB121102 on DRAGNET."
    echo "The pipeline identify interesting pulses, store them in a SinglePulse.hdf5 database and produces diagnostic plots."
    echo ""
    echo "Usage: bash pulses_identify.sh fits_filename"

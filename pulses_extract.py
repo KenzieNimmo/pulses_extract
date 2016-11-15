@@ -71,11 +71,11 @@ def main():
     if real_pulses.shape[0] > 0:
       auto_waterfaller.main(args.fits, np.array(real_pulses.Time), np.array(real_pulses.DM), np.array(real_pulses.Sigma), \
                                              np.array(real_pulses.Duration), top_freq=real_pulses.top_Freq.iloc[0], \
-                                             downsamp=np.array(real_pulses.Downfact), directory=args.store_dir, pulse_id=np.array(real_pulses.index))
+                                             downsamp=np.clip(np.array(real_pulses.Downfact) / 5, 1, 1000), directory=args.store_dir, pulse_id=np.array(real_pulses.index))
   
   if args.extract_raw: 
     real_pulses = pulses[pulses.Pulse < 2]
-    extract_subints_from_observation(args.extract_raw, args.store_dir, np.array(real_pulses.Time), -2, 8)
+    extract_subints_from_observation(args.extract_raw, args.store_dir, np.array(real_pulses.Time), -2, 8, pulseID=np.array(real_pulses.index).astype(str))
   
   if args.plot_statistics: 
     if args.pulses_checked: ranked = True
@@ -130,7 +130,7 @@ def pulses_database(args, header, events=None):
   pulses = pulses.loc[:,['DM','Sigma','Time','Sample','Downfact']]
   pulses.index.name = 'idx'
   pulses['IMJD'] = header['STT_IMJD']
-  pulses['SMJD'] = header['STT_SMJD'] + pulses.Time
+  pulses['SMJD'] = header['STT_SMJD'] + header['STT_OFFS'] + header['NSUBOFFS'] * header['NSBLK'] * header['TBIN'] + pulses.Time
   pulses['Duration'] = pulses.Downfact * header['TBIN']
   pulses['top_Freq'] = header['OBSFREQ'] + abs(header['OBSBW']) / 2.
   pulses['Pulse'] = 0
