@@ -20,6 +20,8 @@ import os
 import pandas as pd
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
+from matplotlib import ticker
+from math import ceil
 
 def plotter(data, start, plot_duration, t, DM, IMJD, SMJD, duration, top_freq, sigma, 
 			directory, FRB_name, observation, pulse_id, zoom=True, idx='', downsamp=True):
@@ -75,13 +77,19 @@ def histogram(data, ax, title='', xlabel='', color='', bins=None, stacked=False)
 	if not bins:
                 lenght = sum(len(x) for x in data)
 		bins = int(2 * np.sqrt(lenght))
+	#attempt at logarithmic xaxis scale:
+	#MIN = ceil(np.amin(data[0])/1) #round up to nearest integer value
+	#MAX = ceil(np.amax(data[0])/1)
+	#ax.hist(data, bins=10.0 ** np.linspace(np.log10(MIN), np.log10(MAX), bins), color=color, histtype='step', lw=2, stacked=stacked)
 	ax.hist(data, bins=bins, color=color, histtype='step', lw=2, stacked=stacked)
 	ax.set_xlabel(xlabel, fontsize=8)
 	ax.set_ylabel('Counts', fontsize=8)
 	t = ax.set_title(title, fontsize=8)
 	t.set_y(1.09)
+	#ax.set_xscale('log')
 	ax.tick_params(axis='x', labelsize=8)
 	ax.tick_params(axis='y', labelsize=8)
+
 
 def toa_plotter(time, SN, duration, Rank, observation, ax=None):
 	"""
@@ -155,13 +163,15 @@ def plot_statistics(dm, time, SNR, duration, Rank, folder='.', observation='', r
 									 xlabel='Duration (ms)', ylabel=(r'DM (pc cm$^{-3}$)'), Rank=Rank)
 	ax5.locator_params(axis='x',nbins=8)
 	ax7.locator_params(axis='y', nbins=8)
+	#ax1.plt.ticker.LogLocator()locator_params(axis='x', nbins=5)
+	#ax1.xaxis.set_major_locator(ticker.LogLocator(base=10.0,))#view_limits=(np.amin(dm), np.amax(dm))))
 	plt.tight_layout(w_pad = 0.3, h_pad = 0.1)
 	if ranked:
 		rank = '_ranked'
 		red_artist = plt.Line2D((0,1),(0,0), color='red')
 		green_artist = plt.Line2D((0,1),(0,0), color='green')
 		yellow_artist = plt.Line2D((0,1),(0,0), color='#D4AC0D')
-		ax4.legend([green_artist, yellow_artist, red_artist],['Rank 0','Rank 1','Rank 2'], loc=3, bbox_to_anchor=(0, 1), ncol=1,fontsize=8, frameon=False)
+		ax4.legend([green_artist, yellow_artist, red_artist],['Rank 0: likely real','Rank 1: maybe real','Rank 2: likely RFI'], loc=3, bbox_to_anchor=(0, 1), ncol=1,fontsize=8, frameon=False)
 
 	else:
 		rank = ''
@@ -228,7 +238,7 @@ if __name__ == '__main__':
 	#DM, sigma, time, downfact = np.loadtxt(sys.argv[2], usecols=(0,1,2,4), unpack=True)
 	#downsamp = np.zeros(len(downfact)) + 1. #just a place holder so my code runs upon testing.
 	#main(sys.argv[1],time, DM, sigma, downsamp = downsamp)
-	database = '/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/TEST/SinglePulses.hdf5'#'/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/output/puppi_57614_C0531+33_0803/OLD/SinglePulses.hdf5'
+	database = '/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/output/puppi_57614_C0531+33_0803/pulses/puppi_57614_C0531+33_0803.hdf5'#'/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/TEST/SinglePulses.hdf5'#'/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/output/puppi_57614_C0531+33_0803/OLD/SinglePulses.hdf5'
 
 	pulses = pd.read_hdf(database,'pulses')
 	dm = np.array(pulses.DM)
@@ -236,7 +246,8 @@ if __name__ == '__main__':
 	time = np.array(pulses.Time)
 	duration = np.array(pulses.Duration)
 	observation = "test_observation"
-	Rank = np.random.randint(0,3,len(time))
+	#Rank = np.random.randint(0,3,len(time))
+	Rank = np.loadtxt('/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/TEST/puppi_57614_C0531+33_0803_pulses.txt', usecols=(1,), dtype='int')
 	plot_statistics(dm, time, SNR, duration, Rank, folder='', observation=observation, ranked=True)
 	#plt.savefig('test_stat_plot.png', bbox_inches='tight', dpi=300)
 
