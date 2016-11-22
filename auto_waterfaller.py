@@ -22,6 +22,7 @@ import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
 from matplotlib import ticker
 from math import ceil
+import subprocess
 
 def plotter(data, start, plot_duration, t, DM, IMJD, SMJD, duration, top_freq, sigma, 
 			directory, FRB_name, observation, pulse_id, zoom=True, idx='', downsamp=True):
@@ -65,7 +66,7 @@ def plotter(data, start, plot_duration, t, DM, IMJD, SMJD, duration, top_freq, s
 	fig.clf()
 	plt.close('all')
 
-def histogram(data, ax, title='', xlabel='', color='', bins=None, stacked=False): #optionally choose number of bins. Currently: 2*sqrt(counts)
+def histogram(data, ax, title='', xlabel='', color='', bins=None, stacked=False, logy=False, logx=False):
 	"""
 	Creates a histogram of a given burst property. 
 
@@ -77,16 +78,23 @@ def histogram(data, ax, title='', xlabel='', color='', bins=None, stacked=False)
 	if not bins:
                 lenght = sum(len(x) for x in data)
 		bins = int(2 * np.sqrt(lenght))
-	#attempt at logarithmic xaxis scale:
+
+	#logarithmic xaxis scale:
 	#MIN = ceil(np.amin(data[0])/1) #round up to nearest integer value
 	#MAX = ceil(np.amax(data[0])/1)
-	#ax.hist(data, bins=10.0 ** np.linspace(np.log10(MIN), np.log10(MAX), bins), color=color, histtype='step', lw=2, stacked=stacked)
-	ax.hist(data, bins=bins, color=color, histtype='step', lw=2, stacked=stacked)
+	#ax.hist(data, bins=(10.0 ** np.linspace(np.log10(MIN), np.log10(MAX), bins)), color=color, histtype='step', lw=2, stacked=stacked, log=logy)
+	#ax.hist(data, bins=bins, color=color, histtype='step', lw=2, stacked=stacked, log=log)
+	#ax.set_xscale('log')
+	#ax.set_xlim([MIN,MAX])
+	#if not logx:
+		#n, bin_edges, patches = ax.hist(data, bins=bins, color=color, histtype='step', lw=2, stacked=stacked, log=logy)
+		#ax.set_xscale('linear')
+		#ax.set_xlim([np.amin(bin_edges), np.amax(bin_edges)])
+	ax.hist(data, bins=bins, color=color, histtype='step', lw=2, stacked=stacked, log=logy)
 	ax.set_xlabel(xlabel, fontsize=8)
 	ax.set_ylabel('Counts', fontsize=8)
 	t = ax.set_title(title, fontsize=8)
 	t.set_y(1.09)
-	#ax.set_xscale('log')
 	ax.tick_params(axis='x', labelsize=8)
 	ax.tick_params(axis='y', labelsize=8)
 
@@ -149,7 +157,7 @@ def plot_statistics(dm, time, SNR, duration, Rank, folder='.', observation='', r
 
 	SNRs = [SNR[Rank==0], SNR[Rank==1], SNR[Rank>=2]]
 	histogram(SNRs, ax= ax2, title='Distribution of Signal to Noise Ratios',\
-	                                            xlabel='S/N', color=colors)
+	                                            xlabel='S/N', color=colors, logy=True)
 
 	durations = [duration[Rank==0]*1000., duration[Rank==1]*1000., duration[Rank>=2]*1000.]
 	histogram(durations, ax=ax3, title='Distribution of Burst Durations',\
@@ -163,8 +171,6 @@ def plot_statistics(dm, time, SNR, duration, Rank, folder='.', observation='', r
 									 xlabel='Duration (ms)', ylabel=(r'DM (pc cm$^{-3}$)'), Rank=Rank)
 	ax5.locator_params(axis='x',nbins=8)
 	ax7.locator_params(axis='y', nbins=8)
-	#ax1.plt.ticker.LogLocator()locator_params(axis='x', nbins=5)
-	#ax1.xaxis.set_major_locator(ticker.LogLocator(base=10.0,))#view_limits=(np.amin(dm), np.amax(dm))))
 	plt.tight_layout(w_pad = 0.3, h_pad = 0.1)
 	if ranked:
 		rank = '_ranked'
@@ -176,6 +182,35 @@ def plot_statistics(dm, time, SNR, duration, Rank, folder='.', observation='', r
 	else:
 		rank = ''
 	plt.savefig('%s/statistical_plots_%s%s.png'%(folder,observation,rank), bbox_inches='tight')
+
+def psrchive_plots(psrchives_path):
+	for dirpath, dirnames, filenames in os.walk(psrchives_path):
+		for archive in [archives for archives in filenames if archives.endswith(".ar")]:
+			full_path = str(os.path.join(psrchives_path,archive))
+			full_path_no_ext = os.path.splitext(full_path)[0]
+			#produce dynamic spectrum
+			subprocess.call(['pav','-GTp','-g',"%s_DS.ps /CPS"%full_path_no_ext,full_path])
+			subprocess.call(['convert', '%s_DS.ps'%full_path_no_ext,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s_DS.png'%full_path_no_ext])
+			#produce pulse profile	
+			subprocess.call(['pav','-DFp','-g',"%s_profile.ps /CPS"%full_path_no_ext,full_path])
+			subprocess.call(['convert', '%s_profile.ps'%full_path_no_ext,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s_profile.png'%full_path_no_ext])
+
+#NEEDS TO BE TESTED:
+"""
+def psrchive_plots(psrchive_paths, archive_name): #assuming: (path to directory containing the .ar file, .ar filename (including ext))
+	for path in psrchive_paths:
+		full_path = str(os.path.join(psrchive_paths,archive_name)) #path+file
+		archive_name = os.path.splitext(full_path)[0] #remove extension from path
+		#produce dynamic spectrum
+		subprocess.call(['pav','-GTp','-g',"%s_DS.ps /CPS"%archive_name, full_path])
+		subprocess.call(['convert', '%s_DS.ps'%archive_name,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s_DS.png'%archive_name])
+		#produce pulse profile	
+		subprocess.call(['pav','-DFp','-g',"%s_profile.ps /CPS"%archive_name,full_path])
+		subprocess.call(['convert', '%s_profile.ps'%archive_name,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s_profile.png'%archive_name])
+
+"""
+
+
 
 def main(fits, time, DM=560., sigma=0., duration=0.01, pulse_id=0, top_freq=0., directory='.',\
 		  FRB_name='FRB121102', downsamp=1.):
@@ -238,16 +273,20 @@ if __name__ == '__main__':
 	#DM, sigma, time, downfact = np.loadtxt(sys.argv[2], usecols=(0,1,2,4), unpack=True)
 	#downsamp = np.zeros(len(downfact)) + 1. #just a place holder so my code runs upon testing.
 	#main(sys.argv[1],time, DM, sigma, downsamp = downsamp)
-	database = '/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/output/puppi_57614_C0531+33_0803/pulses/puppi_57614_C0531+33_0803.hdf5'#'/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/TEST/SinglePulses.hdf5'#'/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/output/puppi_57614_C0531+33_0803/OLD/SinglePulses.hdf5'
-
-	pulses = pd.read_hdf(database,'pulses')
-	dm = np.array(pulses.DM)
-	SNR = np.array(pulses.Sigma)
-	time = np.array(pulses.Time)
-	duration = np.array(pulses.Duration)
-	observation = "test_observation"
+	#database = '/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/output/puppi_57614_C0531+33_0803/pulses/puppi_57614_C0531+33_0803.hdf5'#'/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/TEST/SinglePulses.hdf5'#'/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/output/puppi_57614_C0531+33_0803/OLD/SinglePulses.hdf5'
+	#pulses = pd.read_hdf(database,'pulses')
+	#dm = np.array(pulses.DM)
+	#SNR = np.array(pulses.Sigma)
+	#time = np.array(pulses.Time)
+	#duration = np.array(pulses.Duration)
+	#observation = "test_observation"
 	#Rank = np.random.randint(0,3,len(time))
-	Rank = np.loadtxt('/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/TEST/puppi_57614_C0531+33_0803_pulses.txt', usecols=(1,), dtype='int')
-	plot_statistics(dm, time, SNR, duration, Rank, folder='', observation=observation, ranked=True)
+	#Rank = np.loadtxt('/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/TEST/puppi_57614_C0531+33_0803_pulses.txt', usecols=(1,), dtype='int')
+	#plot_statistics(dm, time, SNR, duration, Rank, folder='', observation=observation, ranked=True)
 	#plt.savefig('test_stat_plot.png', bbox_inches='tight', dpi=300)
+	
+	psrchive_plots('psrchives')
+	
+
+
 
