@@ -3,6 +3,7 @@ from glob import glob
 import os
 import argparse
 import multiprocessing as mp
+import shutil
 
 import psrchive
 import pyfits
@@ -23,84 +24,77 @@ def parser():
     parser.add_argument('-par_file', help="Name of the parameter file for the puls.", default='*.par')
     parser.add_argument('-profile_bins', help="Number of bins within the profile.", default=4096, type=int)
     return parser.parse_args()
-  
-def burst_nsub(puls, profile_bins, fits_file=False):
-  if not fits_file: fits_file = glob('/psr_archive/hessels/hessels/AO-FRB/pipeline_products/puppi_57614_C0531+33_0803/pulses/{}/*.fits'.format(puls.name))[0]
+
+def read_fits(fits_file):
   with pyfits.open(fits_file) as fits:
     header = fits['SUBINT'].header + fits['Primary'].header
     #MJD seconds of the beginning of the fits file
     mjds_chop = header['STT_SMJD'] + header['STT_OFFS'] + header['NSUBOFFS'] * header['NSBLK'] * header['TBIN']
     #Time resolution of the fits file
     time_resolution = header['TBIN']
+    freq_c = header['OBSFREQ']
+    bandwidth = abs(header['OBSBW'])
     
-  burst_start = (puls.SMJD - mjds_chop) % 84000  #PRESTO reference with respect beginning of raw chopped fits file
+  return {'time_resolution': time_resolution, 'freq_c': freq_c, 'bandwidth': bandwidth}
 
-  period = time_resolution * profile_bins  #Folding period for the archive
-  nsub = int(burst_start / period)  #Subintegration number in the archive
-  return nsub  
-
-
-
+  
 def dspsr(puls, par_file, fits_file, profile_bins=4096, parallel=False):
-  nsub = burst_nsub(puls, profile_bins, fits_file)  #Subintegration number containing the pulse
-  archive_name = os.path.splitext(fits_file)[0]
-  
-  ##Create unfolded archive for timing
-  #if parallel:
-    #subprocess.call(['dspsr', '-t', str(mp.cpu_count()), '-K', '-b', str(profile_bins), '-s', '-A', '-E', par_file, '-O', archive_name+'_p1', fits_file])
-  #else:
-    #subprocess.call(['dspsr', '-N',  '-A', '-O', archive_name+'_timing', fits_file])
-      
-  #Fold the fits file to create the archives at two different phases
-  if not (os.path.isfile(archive_name+'_p1.ar') or os.path.isfile(archive_name+'_p2.ar')):
-    if parallel:
-      subprocess.call(['dspsr', '-t', str(mp.cpu_count()), '-K', '-b', str(profile_bins), '-s', '-A', '-E', par_file, '-O', archive_name+'_p1', fits_file])
-      subprocess.call(['dspsr', '-t', str(mp.cpu_count()), '-K', '-b', str(profile_bins), '-s', '-A', '-E', par_file, '-O', archive_name+'_p2', fits_file])      
-    else:
-      subprocess.call(['dspsr', '-K', '-b', str(profile_bins), '-s', '-A', '-E', par_file, '-O', archive_name+'_p1', fits_file])
-      subprocess.call(['dspsr', '-K', '-b', str(profile_bins), '-s', '-A', '-E', par_file, '-O', archive_name+'_p2', fits_file])
+  if not os.path.isfile(archive_name + '.ar'):
+    archive_name = os.path.splitext(fits_file)[0]
+    readfile = read_fits(fits_file)
+    period = readfile['time_resolution'] * profile_bins
+    
+    #Fold the fits file to create single-pulse archives
+    subprocess.call(['dspsr', '-D', str(puls.DM), '-K', '-b', str(profile_bins), '-s', '-E', par_file, fits_file])
+    
+    #Lists of archive names and starting times (s)
+    archive_list = np.array(glob('pulse_*.ar'))
+    archive_time_list = np.array([psrchive.Archive_load(ar).start_time().get_secs() + psrchive.Archive_load(ar).start_time().get_fracsec() for ar in archive_list])
+    idx_sorted = np.argsort(archive_list)
+    archive_list = archive_list[idx_sorted]
+    archive_time_list = archive_time_list[idx_sorted]
+    
+    #Find archive where dispersed pulse would start
+    start_dispersed_puls = puls.SMJD - archive_time_list
+    idx_puls = np.where( (start_dispersed_puls > 0) & (start_dispersed_puls < period))[0]
+    
+    #Check that puls is centered
+    phase = start_dispersed_puls[idx_puls] / period
+    if abs(phase - 0.5) > 0.5: 
+      for ar in archive_list: os.remove(ar)
+      subprocess.call(['dspsr', '-S', '0.5', '-D', str(puls.DM), '-K', '-b', str(profile_bins), '-s', '-E', par_file, '-O', archive_name, fits_file])
+      archive_list = np.array(glob('pulse_*.ar'))
+      archive_time_list = np.array([psrchive.Archive_load(ar).start_time().get_secs() + psrchive.Archive_load(ar).start_time().get_fracsec() for ar in archive_list])
+      idx_sorted = np.argsort(archive_list)
+      archive_list = archive_list[idx_sorted]
+      archive_time_list = archive_time_list[idx_sorted]
+      start_dispersed_puls = puls.SMJD - archive_time_list
+      idx_puls = np.where( (start_dispersed_puls > 0) & (start_dispersed_puls < period))[0]
+    
+    #Delay between maximum and central frequencies
+    DM_delay = psr_utils.delay_from_DM(puls.DM, readfile['freq_c']) - psr_utils.delay_from_DM(puls.DM, readfile['freq_c'] + readfile['bandwidth'] / 2. )
+    
+    n_puls = int(DM_delay / period)
+    idx_puls += n_puls
+    
+    shutil.copyfile(archive_list[idx_puls], archive_name + '.ar')
 
-    #Select the signle pulse at the two phases
-    subprocess.call(['pam', '-m', '-x', '"{} {}"'.format(nsub, nsub), archive_name+'_p1.ar'])
-    subprocess.call(['pam', '-m', '-x', '"{} {}"'.format(nsub-1, nsub-1), archive_name+'_p2.ar'])
-
-  #Clean the archives
-  if not (os.path.isfile(archive_name+'_p1.paz') or os.path.isfile(archive_name+'_p2.paz')):
-    subprocess.call(['paz', '-e', 'paz', '-r', archive_name+'_p1.ar', archive_name+'_p2.ar'])
+  #Clean the archive
+  if not os.path.isfile(archive_name + '.paz'):
+    subprocess.call(['paz', '-e', 'paz', '-r', archive_name + '.ar'])
   
-  #Create compressed archives
-  if not (os.path.isfile(archive_name+'_p1.FTp') or os.path.isfile(archive_name+'_p2.FTp')):
-    subprocess.call(['pam', '-e', 'FTp', '-FTp', archive_name+'_p1.paz', archive_name+'_p2.paz'])
+  #Create compressed archive
+  if not os.path.isfile(archive_name + '.FTp'):
+    subprocess.call(['pam', '-e', 'FTp', '-FTp', archive_name + '.paz'])
   
-  #Select the right phase
-  if not (os.path.isfile(archive_name+'_p1.downsamp') or os.path.isfile(archive_name+'_p2.downsamp')):
-    #Downsample at the closest factor
+  #Create downsampled archive at the closest factor
+  if not os.path.isfile(archive_name + '.downsamp'):
     downfact = puls.Downfact
     while profile_bins % downfact != 0:
       downfact -= 1
-    subprocess.call(['pam', '-e', 'downsamp', '-b', str(downfact), archive_name+'_p1.FTp', archive_name+'_p2.FTp'])
-    #Find maximum peak
-    ar_p1 = psrchive.Archive_load(archive_name+'_p1.downsamp')
-    ar_p2 = psrchive.Archive_load(archive_name+'_p2.downsamp')
-    ar_p1.remove_baseline()
-    ar_p2.remove_baseline()
-    ar_p1 = ar_p1.get_data().squeeze()
-    ar_p2 = ar_p2.get_data().squeeze()
-    #Remove wrong-phase archive
-    if ar_p1.max() > ar_p2.max(): 
-      os.remove(archive_name+'_p2.ar')
-      os.remove(archive_name+'_p2.paz')
-      os.remove(archive_name+'_p2.FTp')
-      os.remove(archive_name+'_p2.downsamp')
-    else:
-      os.remove(archive_name+'_p1.ar')
-      os.remove(archive_name+'_p1.paz')
-      os.remove(archive_name+'_p1.FTp')
-      os.remove(archive_name+'_p1.downsamp')
-
-  return
-
-  
+    subprocess.call(['pam', '-e', 'downsamp', '-b', str(downfact), archive_name + '.FTp'])
+    
+    
 
   
 if __name__ == '__main__':
@@ -118,22 +112,5 @@ if __name__ == '__main__':
     fits_file = fits_path.format(idx_p) 
     if '*' in fits_file: fits_file = glob(fits_file)[0]
     dspsr(puls, par_file, fits_file, profile_bins=args.profile_bins)
-
-
-
-##TO_TEST
-#burst_start = (puls.SMJD - mjds_chop) % 84000
-
-#offset = period / 2.
-
-#fits_duration = 3.0408704
-#starting_phase = (burst_start - offset) / fits_duration
-
-#DM_delay = psr_utils.delay_from_DM(560, 1380.78125-400) - psr_utils.delay_from_DM(560, 1380.78125+400)
-#duration = DM_delay + offset
-
-#dspsr -E 0531+33.par -A -O test -p starting_phase -T duration puppi_57614_C0531+33_0803_33.fits
-##Check if it is fine for timing
-
 
 
