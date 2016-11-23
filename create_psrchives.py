@@ -98,8 +98,7 @@ def dspsr(puls, par_file, fits_file, profile_bins=4096, parallel=False):
   if not os.path.isfile(archive_name + '.ar.paz.pb'+str(downfact)):  
     subprocess.call(['pam', '-e', 'paz.pb'+str(downfact), '-p', '-b', str(downfact), archive_name + '.ar.paz'], cwd=puls_folder)  
     #Plot the archive
-    print os.path.join(puls_folder, archive_name + '.paz.pb'+str(downfact))
-    psrchive_plots(os.path.join(puls_folder, archive_name + '.paz.pb'+str(downfact)))
+    psrchive_plots(os.path.join(puls_folder, archive_name + '.ar.paz.pb'+str(downfact)))
   
   #Create compressed archive
   if not os.path.isfile(archive_name + '.ar.paz.Fpb'+str(downfact)):
