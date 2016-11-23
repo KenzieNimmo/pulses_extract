@@ -51,11 +51,13 @@ def dspsr(puls, par_file, fits_file, profile_bins=4096, parallel=False):
 
     temp_folder = os.path.join('/dev/shm', os.path.basename(archive_name))
         
-    def archive_creation(start=0):
+    def archive_creation(phase_start=0):
       if os.path.exists(temp_folder): shutil.rmtree(temp_folder)
       os.makedirs(temp_folder)
-    
+      
       #Fold the fits file to create single-pulse archives
+      if phase_start: start = period / 2.
+      else: start = 0
       _ = subprocess.call(['dspsr', '-S', str(start), '-D', str(puls.DM), '-K', '-b', str(profile_bins), '-s', '-E', par_file, fits_file], cwd=temp_folder)
     
       #Lists of archive names and starting times (s)
@@ -73,13 +75,13 @@ def dspsr(puls, par_file, fits_file, profile_bins=4096, parallel=False):
       phase = start_dispersed_puls[idx_puls] / period - start / period
       
       idx_puls += n_puls
-      if start > 0: idx_puls += 1
+      if phase_start > 0.75: idx_puls += 1
       
       return phase, archive_list[idx_puls]
     
     phase, archive = archive_creation()
     
-    if abs(phase - 0.5) > 0.25: phase, archive = archive_creation(start=period/2.)
+    if abs(phase - 0.5) > 0.25: phase, archive = archive_creation(phase=phase)
    
     shutil.copyfile(os.path.join(temp_folder,archive), archive_name + '.ar')
     shutil.rmtree(temp_folder)
