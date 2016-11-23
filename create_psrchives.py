@@ -48,9 +48,10 @@ def dspsr(puls, par_file, fits_file, profile_bins=4096, parallel=False):
     #Delay between maximum and central frequencies
     DM_delay = psr_utils.delay_from_DM(puls.DM, readfile['freq_c']) - psr_utils.delay_from_DM(puls.DM, readfile['freq_c'] + readfile['bandwidth'] / 2. )
     n_puls = int(DM_delay / period)
+
+    temp_folder = os.path.join('/dev/shm', os.path.basename(archive_name))
         
     def archive_creation(p=0):
-      temp_folder = os.path.join('/dev/shm', os.path.basename(archive_name))
       if os.path.exists(temp_folder): shutil.rmtree(temp_folder)
       os.makedirs(temp_folder)
     
