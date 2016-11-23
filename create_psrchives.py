@@ -91,7 +91,7 @@ def dspsr(puls, par_file, fits_file, profile_bins=4096, parallel=False):
     subprocess.call(['paz', '-e', 'ar.paz', '-r', archive_name + '.ar'], cwd=puls_folder)
   
   #Create downsampled archive at the closest factor scrunched in polarisation
-  downfact = puls.Downfact
+  downfact = int(puls.Downfact)
   while profile_bins % downfact != 0:
     downfact -= 1
   
