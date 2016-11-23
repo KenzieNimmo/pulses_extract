@@ -39,16 +39,21 @@ def read_fits(fits_file):
 
   
 def dspsr(puls, par_file, fits_file, profile_bins=4096, parallel=False):
+  archive_name = os.path.splitext(fits_file)[0]
+  puls_folder = os.path.split(archive_name)[0]
   if not os.path.isfile(archive_name + '.ar'):
-    archive_name = os.path.splitext(fits_file)[0]
     readfile = read_fits(fits_file)
     period = readfile['time_resolution'] * profile_bins
     
+    temp_folder = os.path.join('/dev/shm', os.path.basename(archive_name))
+    if os.path.exists(temp_folder): shutil.rmtree(temp_folder)
+    os.makedirs(temp_folder)
+    
     #Fold the fits file to create single-pulse archives
-    subprocess.call(['dspsr', '-D', str(puls.DM), '-K', '-b', str(profile_bins), '-s', '-E', par_file, fits_file])
+    _ = subprocess.call(['dspsr', '-D', str(puls.DM), '-K', '-b', str(profile_bins), '-s', '-E', par_file, fits_file], cwd=temp_folder)
     
     #Lists of archive names and starting times (s)
-    archive_list = np.array(glob('pulse_*.ar'))
+    archive_list = np.array(glob(os.path.join(temp_folder,'pulse_*.ar')))
     archive_time_list = np.array([psrchive.Archive_load(ar).start_time().get_secs() + psrchive.Archive_load(ar).start_time().get_fracsec() for ar in archive_list])
     idx_sorted = np.argsort(archive_list)
     archive_list = archive_list[idx_sorted]
@@ -56,7 +61,7 @@ def dspsr(puls, par_file, fits_file, profile_bins=4096, parallel=False):
     
     #Find archive where dispersed pulse would start
     start_dispersed_puls = puls.SMJD - archive_time_list
-    idx_puls = np.where( (start_dispersed_puls > 0) & (start_dispersed_puls < period))[0]
+    idx_puls = np.where( (start_dispersed_puls > 0) & (start_dispersed_puls < period))[0][0]
     
     #Check that puls is centered
     phase = start_dispersed_puls[idx_puls] / period
@@ -77,23 +82,23 @@ def dspsr(puls, par_file, fits_file, profile_bins=4096, parallel=False):
     n_puls = int(DM_delay / period)
     idx_puls += n_puls
     
-    shutil.copyfile(archive_list[idx_puls], archive_name + '.ar')
-    for ar in archive_list: os.remove(ar)
+    shutil.copyfile(os.path.join(temp_folder,archive_list[idx_puls]), archive_name + '.ar')
+    shutil.rmtree(temp_folder)
     
   #Clean the archive
   if not os.path.isfile(archive_name + '.paz'):
-    subprocess.call(['paz', '-e', 'paz', '-r', archive_name + '.ar'])
+    subprocess.call(['paz', '-e', 'paz', '-r', archive_name + '.ar'], cwd=puls_folder)
   
   #Create compressed archive
   if not os.path.isfile(archive_name + '.FTp'):
-    subprocess.call(['pam', '-e', 'FTp', '-FTp', archive_name + '.paz'])
+    subprocess.call(['pam', '-e', 'FTp', '-FTp', archive_name + '.paz'], cwd=puls_folder)
   
   #Create downsampled archive at the closest factor
   if not os.path.isfile(archive_name + '.downsamp'):
     downfact = puls.Downfact
     while profile_bins % downfact != 0:
       downfact -= 1
-    subprocess.call(['pam', '-e', 'downsamp', '-b', str(downfact), archive_name + '.FTp'])
+    subprocess.call(['pam', '-e', 'downsamp', '-b', str(downfact), archive_name + '.FTp'], cwd=puls_folder)
     
   return
 
