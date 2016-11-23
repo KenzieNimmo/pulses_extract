@@ -44,45 +44,42 @@ def dspsr(puls, par_file, fits_file, profile_bins=4096, parallel=False):
   if not os.path.isfile(archive_name + '.ar'):
     readfile = read_fits(fits_file)
     period = readfile['time_resolution'] * profile_bins
+
+    #Delay between maximum and central frequencies
+    DM_delay = psr_utils.delay_from_DM(puls.DM, readfile['freq_c']) - psr_utils.delay_from_DM(puls.DM, readfile['freq_c'] + readfile['bandwidth'] / 2. )
+    n_puls = int(DM_delay / period)
+        
+    def archive_creation(p=0):
+      temp_folder = os.path.join('/dev/shm', os.path.basename(archive_name))
+      if os.path.exists(temp_folder): shutil.rmtree(temp_folder)
+      os.makedirs(temp_folder)
     
-    temp_folder = os.path.join('/dev/shm', os.path.basename(archive_name))
-    if os.path.exists(temp_folder): shutil.rmtree(temp_folder)
-    os.makedirs(temp_folder)
+      #Fold the fits file to create single-pulse archives
+      _ = subprocess.call(['dspsr', '-p', str(p), '-D', str(puls.DM), '-K', '-b', str(profile_bins), '-s', '-E', par_file, fits_file], cwd=temp_folder)
     
-    #Fold the fits file to create single-pulse archives
-    _ = subprocess.call(['dspsr', '-D', str(puls.DM), '-K', '-b', str(profile_bins), '-s', '-E', par_file, fits_file], cwd=temp_folder)
-    
-    #Lists of archive names and starting times (s)
-    archive_list = np.array(glob(os.path.join(temp_folder,'pulse_*.ar')))
-    archive_time_list = np.array([psrchive.Archive_load(ar).start_time().get_secs() + psrchive.Archive_load(ar).start_time().get_fracsec() for ar in archive_list])
-    idx_sorted = np.argsort(archive_list)
-    archive_list = archive_list[idx_sorted]
-    archive_time_list = archive_time_list[idx_sorted]
-    
-    #Find archive where dispersed pulse would start
-    start_dispersed_puls = puls.SMJD - archive_time_list
-    idx_puls = np.where( (start_dispersed_puls > 0) & (start_dispersed_puls < period))[0][0]
-    
-    #Check that puls is centered
-    phase = start_dispersed_puls[idx_puls] / period
-    if abs(phase - 0.5) > 0.5: 
-      for ar in archive_list: os.remove(ar)
-      subprocess.call(['dspsr', '-S', '0.5', '-D', str(puls.DM), '-K', '-b', str(profile_bins), '-s', '-E', par_file, '-O', archive_name, fits_file])
-      archive_list = np.array(glob('pulse_*.ar'))
+      #Lists of archive names and starting times (s)
+      archive_list = np.array(glob(os.path.join(temp_folder,'pulse_*.ar')))
       archive_time_list = np.array([psrchive.Archive_load(ar).start_time().get_secs() + psrchive.Archive_load(ar).start_time().get_fracsec() for ar in archive_list])
       idx_sorted = np.argsort(archive_list)
       archive_list = archive_list[idx_sorted]
       archive_time_list = archive_time_list[idx_sorted]
+    
+      #Find archive where dispersed pulse would start
       start_dispersed_puls = puls.SMJD - archive_time_list
-      idx_puls = np.where( (start_dispersed_puls > 0) & (start_dispersed_puls < period))[0]
+      idx_puls = np.where( (start_dispersed_puls > 0) & (start_dispersed_puls < period))[0][0]
     
-    #Delay between maximum and central frequencies
-    DM_delay = psr_utils.delay_from_DM(puls.DM, readfile['freq_c']) - psr_utils.delay_from_DM(puls.DM, readfile['freq_c'] + readfile['bandwidth'] / 2. )
+      #Check that puls is centered
+      phase = start_dispersed_puls[idx_puls] / period
+      
+      idx_puls += n_puls + int(p + 0.501)
+      
+      return phase, archive_list[idx_puls]
     
-    n_puls = int(DM_delay / period)
-    idx_puls += n_puls
+    phase, archive = archive_creation()
     
-    shutil.copyfile(os.path.join(temp_folder,archive_list[idx_puls]), archive_name + '.ar')
+    if abs(phase - 0.5) > 0.25: phase, archive = archive_creation(p=0.5)
+   
+    shutil.copyfile(os.path.join(temp_folder,archive), archive_name + '.ar')
     shutil.rmtree(temp_folder)
     
   #Clean the archive
