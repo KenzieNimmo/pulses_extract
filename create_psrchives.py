@@ -78,7 +78,8 @@ def dspsr(puls, par_file, fits_file, profile_bins=4096, parallel=False):
     idx_puls += n_puls
     
     shutil.copyfile(archive_list[idx_puls], archive_name + '.ar')
-
+    for ar in archive_list: os.remove(ar)
+    
   #Clean the archive
   if not os.path.isfile(archive_name + '.paz'):
     subprocess.call(['paz', '-e', 'paz', '-r', archive_name + '.ar'])
@@ -94,7 +95,7 @@ def dspsr(puls, par_file, fits_file, profile_bins=4096, parallel=False):
       downfact -= 1
     subprocess.call(['pam', '-e', 'downsamp', '-b', str(downfact), archive_name + '.FTp'])
     
-    
+  return
 
   
 if __name__ == '__main__':
