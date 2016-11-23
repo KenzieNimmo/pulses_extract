@@ -81,7 +81,7 @@ def dspsr(puls, par_file, fits_file, profile_bins=4096, parallel=False):
     
     phase, archive = archive_creation()
     
-    if abs(phase - 0.5) > 0.25: phase, archive = archive_creation(phase=phase)
+    if abs(phase - 0.5) > 0.25: phase, archive = archive_creation(phase_start=phase)
    
     shutil.copyfile(os.path.join(temp_folder,archive), archive_name + '.ar')
     shutil.rmtree(temp_folder)
