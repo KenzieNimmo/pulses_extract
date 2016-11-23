@@ -183,32 +183,31 @@ def plot_statistics(dm, time, SNR, duration, Rank, folder='.', observation='', r
 		rank = ''
 	plt.savefig('%s/statistical_plots_%s%s.png'%(folder,observation,rank), bbox_inches='tight')
 
-def psrchive_plots(psrchives_path):
-	for dirpath, dirnames, filenames in os.walk(psrchives_path):
-		for archive in [archives for archives in filenames if archives.endswith(".ar")]:
-			full_path = str(os.path.join(psrchives_path,archive))
-			full_path_no_ext = os.path.splitext(full_path)[0]
-			#produce dynamic spectrum
-			subprocess.call(['pav','-GTp','-g',"%s_DS.ps /CPS"%full_path_no_ext,full_path])
-			subprocess.call(['convert', '%s_DS.ps'%full_path_no_ext,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s_DS.png'%full_path_no_ext])
-			#produce pulse profile	
-			subprocess.call(['pav','-DFp','-g',"%s_profile.ps /CPS"%full_path_no_ext,full_path])
-			subprocess.call(['convert', '%s_profile.ps'%full_path_no_ext,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s_profile.png'%full_path_no_ext])
+#def psrchive_plots(psrchives_path):
+	#for dirpath, dirnames, filenames in os.walk(psrchives_path):
+		#for archive in [archives for archives in filenames if archives.endswith(".ar")]:
+			#full_path = str(os.path.join(psrchives_path,archive))
+			#full_path_no_ext = os.path.splitext(full_path)[0]
+			##produce dynamic spectrum
+			#subprocess.call(['pav','-GTp','-g',"%s_DS.ps /CPS"%full_path_no_ext,full_path])
+			#subprocess.call(['convert', '%s_DS.ps'%full_path_no_ext,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s_DS.png'%full_path_no_ext])
+			##produce pulse profile	
+			#subprocess.call(['pav','-DFp','-g',"%s_profile.ps /CPS"%full_path_no_ext,full_path])
+			#subprocess.call(['convert', '%s_profile.ps'%full_path_no_ext,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s_profile.png'%full_path_no_ext])
 
-#NEEDS TO BE TESTED:
-"""
-def psrchive_plots(psrchive_paths, archive_name): #assuming: (path to directory containing the .ar file, .ar filename (including ext))
-	for path in psrchive_paths:
-		full_path = str(os.path.join(psrchive_paths,archive_name)) #path+file
-		archive_name = os.path.splitext(full_path)[0] #remove extension from path
+
+def psrchive_plots(archive_name): #assuming: (full name of the archive with path)
+		folder, plot_name = os.path.split(archive_name)
+		plot_name = os.path.splitext(plot_name)[0]
 		#produce dynamic spectrum
-		subprocess.call(['pav','-GTp','-g',"%s_DS.ps /CPS"%archive_name, full_path])
-		subprocess.call(['convert', '%s_DS.ps'%archive_name,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s_DS.png'%archive_name])
+		subprocess.call(['pav','-GTpd','-g',"%s_DS.ps /CPS"%plot_name, archive_name], cwd=folder)
+		subprocess.call(['convert', '%s_DS.ps'%plot_name,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s_DS.png'%plot_name], cwd=folder)
+		os.remove('%s_DS.ps'%os.path.join(folder,plot_name))
 		#produce pulse profile	
-		subprocess.call(['pav','-DFp','-g',"%s_profile.ps /CPS"%archive_name,full_path])
-		subprocess.call(['convert', '%s_profile.ps'%archive_name,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s_profile.png'%archive_name])
+		subprocess.call(['pav','-DFpTd','-g',"%s_profile.ps /CPS"%plot_name,archive_name], cwd=folder)
+		subprocess.call(['convert', '%s_profile.ps'%plot_name,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s_profile.png'%plot_name], cwd=folder)
+		os.remove('%s_profile.ps'%os.path.join(folder,plot_name))
 
-"""
 
 
 

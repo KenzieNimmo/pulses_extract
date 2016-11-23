@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 from presto import psr_utils
 
-
+from auto_waterfaller import psrchive_plots
 
 
 def parser():
@@ -87,20 +87,23 @@ def dspsr(puls, par_file, fits_file, profile_bins=4096, parallel=False):
     shutil.rmtree(temp_folder)
     
   #Clean the archive
-  if not os.path.isfile(archive_name + '.paz'):
-    subprocess.call(['paz', '-e', 'paz', '-r', archive_name + '.ar'], cwd=puls_folder)
+  if not os.path.isfile(archive_name + '.ar.paz'):
+    subprocess.call(['paz', '-e', 'ar.paz', '-r', archive_name + '.ar'], cwd=puls_folder)
+  
+  #Create downsampled archive at the closest factor scrunched in polarisation
+  downfact = puls.Downfact
+  while profile_bins % downfact != 0:
+    downfact -= 1
+  
+  if not os.path.isfile(archive_name + '.ar.paz.pb'+str(downfact)):  
+    subprocess.call(['pam', '-e', 'paz.pb'+str(downfact), '-p', '-b', str(downfact), archive_name + '.ar.paz'], cwd=puls_folder)  
+    #Plot the archive
+    psrchive_plots(os.path.join(puls_folder, archive_name + '.paz.pb'+str(downfact)))
   
   #Create compressed archive
-  if not os.path.isfile(archive_name + '.FTp'):
-    subprocess.call(['pam', '-e', 'FTp', '-FTp', archive_name + '.paz'], cwd=puls_folder)
-  
-  #Create downsampled archive at the closest factor
-  if not os.path.isfile(archive_name + '.downsamp'):
-    downfact = puls.Downfact
-    while profile_bins % downfact != 0:
-      downfact -= 1
-    subprocess.call(['pam', '-e', 'downsamp', '-b', str(downfact), archive_name + '.FTp'], cwd=puls_folder)
-    
+  if not os.path.isfile(archive_name + '.ar.paz.Fpb'+str(downfact)):
+    subprocess.call(['pam', '-e', 'Fpb'+str(downfact), '-F',  archive_name + '.ar.paz.pb'+str(downfact)], cwd=puls_folder)  
+
   return
 
   
