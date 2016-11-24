@@ -184,10 +184,14 @@ def plot_statistics(dm, time, SNR, duration, Rank, folder='.', observation='', r
 	plt.savefig('%s/statistical_plots_%s%s.png'%(folder,observation,rank), bbox_inches='tight')
 
 #def psrchive_plots(psrchives_path):
+	#run auto_waterfaller in /TEST
 	#for dirpath, dirnames, filenames in os.walk(psrchives_path):
-		#for archive in [archives for archives in filenames if archives.endswith(".ar")]:
+		#for archive in [archives for archives in filenames if archives.endswith("6085.ar")]:
 			#full_path = str(os.path.join(psrchives_path,archive))
 			#full_path_no_ext = os.path.splitext(full_path)[0]
+			#psrplot version
+			#subprocess.call(['psrplot','-p','freq+','-c','psd=0','-c','above:l=','-c','above:c=%s'%full_path_no_ext,'-D', "%s.ps /CPS"%full_path_no_ext, full_path])
+			#subprocess.call(['convert', '%s.ps'%full_path_no_ext,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s.png'%full_path_no_ext])
 			##produce dynamic spectrum
 			#subprocess.call(['pav','-GTp','-g',"%s_DS.ps /CPS"%full_path_no_ext,full_path])
 			#subprocess.call(['convert', '%s_DS.ps'%full_path_no_ext,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s_DS.png'%full_path_no_ext])
@@ -195,21 +199,19 @@ def plot_statistics(dm, time, SNR, duration, Rank, folder='.', observation='', r
 			#subprocess.call(['pav','-DFp','-g',"%s_profile.ps /CPS"%full_path_no_ext,full_path])
 			#subprocess.call(['convert', '%s_profile.ps'%full_path_no_ext,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s_profile.png'%full_path_no_ext])
 
-
 def psrchive_plots(archive_name): #assuming: (full name of the archive with path)
 		folder, plot_name = os.path.split(archive_name)
 		plot_name = os.path.splitext(plot_name)[0]
 		#produce dynamic spectrum
-		subprocess.call(['pav','-GTpd','-g',"%s_DS.ps /CPS"%plot_name, archive_name], cwd=folder)
-		subprocess.call(['convert', '%s_DS.ps'%plot_name,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s_DS.png'%plot_name], cwd=folder)
+		#subprocess.call(['pav','-GTpd','-g',"%s_DS.ps /CPS"%plot_name, archive_name], cwd=folder)
+		subprocess.call(['psrplot','-p','freq+','-c','psd=0','-c','above:l=','-c','above:c=%s'%plot_name,'-D', "%s.ps /CPS"%plot_name, archive_name], cwd=folder)
+		subprocess.call(['convert', '%s.ps'%plot_name,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s.png'%plot_name], cwd=folder)
 		os.remove('%s_DS.ps'%os.path.join(folder,plot_name))
 		#produce pulse profile	
-		subprocess.call(['pav','-DFpTd','-g',"%s_profile.ps /CPS"%plot_name,archive_name], cwd=folder)
-		subprocess.call(['convert', '%s_profile.ps'%plot_name,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s_profile.png'%plot_name], cwd=folder)
-		os.remove('%s_profile.ps'%os.path.join(folder,plot_name))
-
-
-
+		#subprocess.call(['pav','-DFpTd','-g',"%s_profile.ps /CPS"%plot_name,archive_name], cwd=folder)
+		#subprocess.call(['convert', '%s_profile.ps'%plot_name,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s_profile.png'%plot_name], cwd=folder)
+		#os.remove('%s_profile.ps'%os.path.join(folder,plot_name))
+		#psrplot -p freq+ -c psd=0 archive.ar
 
 def main(fits, time, DM=560., sigma=0., duration=0.01, pulse_id=0, top_freq=0., directory='.',\
 		  FRB_name='FRB121102', downsamp=1.):
