@@ -71,7 +71,7 @@ if [ ! -e $OUT_DIR/pulses/RFI_pulses ]; then
 else
   mv $OUT_DIR/pulses/RFI_pulses/* $OUT_DIR/pulses/
 fi
-cp ${OUT_DIR}/pulses/${OBS_ID}_pulses.txt /pulses/${OBS_ID}_pulses.txt $RANKING_BU
+cp ${OUT_DIR}/pulses/${OBS_ID}_pulses.txt $RANKING_BU
 python ${SCRIPT_DIR}/pulses_extract.py -db_name $DB_FILE -pulses_database -pulses_checked ${OUT_DIR}/pulses/${OBS_ID}_pulses.txt \
   -store_dir $OUT_DIR/pulses -extract_raw $RAW_DIR/$OBS_ID -plot_statistics >/dev/null
 #Move RFI pulses in RFI folder
