@@ -90,8 +90,9 @@ def histogram(data, ax, title='', xlabel='', color='', bins=None, stacked=False,
 		#n, bin_edges, patches = ax.hist(data, bins=bins, color=color, histtype='step', lw=2, stacked=stacked, log=logy)
 		#ax.set_xscale('linear')
 		#ax.set_xlim([np.amin(bin_edges), np.amax(bin_edges)])
-	ax.hist(data, bins=bins, color=color, histtype='step', lw=2, stacked=stacked, log=logy)
-	ax.set_xlabel(xlabel, fontsize=8)
+	try: ax.hist(data, bins=bins, color=color, histtype='step', lw=2, stacked=stacked, log=logy)
+	except ValueError: pass
+        ax.set_xlabel(xlabel, fontsize=8)
 	ax.set_ylabel('Counts', fontsize=8)
 	t = ax.set_title(title, fontsize=8)
 	t.set_y(1.09)
@@ -223,8 +224,8 @@ def main(fits, time, DM=560., sigma=0., duration=0.01, pulse_id=0, top_freq=0., 
         if isinstance(downsamp, float) or isinstance(downsamp, int): downsamp = np.zeros(num_elements) + downsamp
         
 	rawdata = psrfits.PsrfitsFile(fits)
-	observation = str(fits)[:-5]
-	observation = os.path.basename(observation)
+	observation = os.path.basename(fits)
+	observation = observation[:observation.find('_subs_')]	
 
 	#Open header of the fits file
 	with psrfits.pyfits.open(fits, memmap=True) as fn:
