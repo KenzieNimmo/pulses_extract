@@ -66,6 +66,10 @@ def main():
     store.append('pulses',pulses)
     store.close()
     
+    pulses[pulses.Pulse <= 1].sort_index().to_csv(os.path.join(args.store_dir,'{}_realPulses_info.txt'.format(obs_id)), sep='\t', \
+      columns=['Sigma','DM','Time','Sample','IMJD','SMJD','Downfact','Duration','top_Freq','N_events','dDM','Pulse'], \
+      header= ['SNR',  'DM','Time','Sample','IMJD','SMJD','Downfact','Duration','top_Freq','N_events','dDM','Rank'], index_label='#PulseID')
+    
   if args.plot_pulses: 
     real_pulses = pulses[pulses.Pulse < 2]
     if real_pulses.shape[0] > 0:
