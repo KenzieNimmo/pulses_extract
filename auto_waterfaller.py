@@ -91,8 +91,9 @@ def histogram(data, ax, title='', xlabel='', color='', bins=None, stacked=False,
 		#n, bin_edges, patches = ax.hist(data, bins=bins, color=color, histtype='step', lw=2, stacked=stacked, log=logy)
 		#ax.set_xscale('linear')
 		#ax.set_xlim([np.amin(bin_edges), np.amax(bin_edges)])
-	ax.hist(data, bins=bins, color=color, histtype='step', lw=2, stacked=stacked, log=logy)
-	ax.set_xlabel(xlabel, fontsize=8)
+	try: ax.hist(data, bins=bins, color=color, histtype='step', lw=2, stacked=stacked, log=logy)
+	except ValueError: pass
+        ax.set_xlabel(xlabel, fontsize=8)
 	ax.set_ylabel('Counts', fontsize=8)
 	t = ax.set_title(title, fontsize=8)
 	t.set_y(1.09)
@@ -202,32 +203,29 @@ def plot_statistics(dm, time, SNR, duration, Rank, folder='.', observation='', r
 
 def psrchive_plots(archive_name): #assuming: (full name of the archive with path)
 		folder, plot_name = os.path.split(archive_name)
-		print folder
-		print plot_name
 		plot_name = os.path.splitext(plot_name)[0]
-		#produce dynamic spectrum
 		#subprocess.call(['pav','-GTpd','-g',"%s_DS.ps /CPS"%plot_name, archive_name], cwd=folder)
-		subprocess.call(['psrplot','-p','freq+','-c','psd=0','-c','above:l=','-c','above:c=%s'%plot_name,'-D', "%s.ps /CPS"%plot_name, archive_name], cwd=folder)
+		subprocess.call(['psrplot','-p','freq+','-c','psd=0','-c','above:l=','-c','above:c=%s'%plot_name,'-D', "%s.ps /CPS"%plot_name, '%s.ar'%plot_name], cwd=folder)
 		subprocess.call(['convert', '%s.ps'%plot_name,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s.png'%plot_name], cwd=folder)
-		#pav -SFT -g "12_sft.ps /CPS" 12.ar
-		subprocess.call(['pav','-SFT','-g',"%s_stokes.ps /CPS"%plot_name, archive_name], cwd=folder)
+		subprocess.call(['pav','-SFT','-g',"%s_stokes.ps /CPS"%plot_name, '%s.ar'%plot_name], cwd=folder)
 		subprocess.call(['convert', '%s_stokes.ps'%plot_name,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s_stokes.png'%plot_name], cwd=folder)
 		
-		stokes = Image.open(folder + '%s_stokes.png'%plot_name)
-		DS = Image.open(folder + '%s.png'%plot_name)
+		stokes = Image.open(folder + '/' + '%s_stokes.png'%plot_name)
+		DS = Image.open(folder + '/' + '%s.png'%plot_name)
 		width_stokes, height_stokes = stokes.size
 		width_DS, height_DS = DS.size
 		width = width_stokes + width_DS
 		height = max(height_stokes,height_DS)
-		diagnostic = Image.new('RGB', (width, height))
+		diagnostic = Image.new('RGB', (width, height), 'white')
 		diagnostic.paste(im=stokes, box=(0,0))
-		diagnostic.paste(im=DS, box=(width_stokes,0))
-		diagnostic.save(folder+'%s_diagnostic.png'%plot_name)
+		diagnostic.paste(im=DS, box=(width_stokes,(height_stokes-height_DS)))
+		diagnostic.save(folder + '/' +'%s_diagnostic.png'%plot_name)
 
 		os.remove('%s.ps'%os.path.join(folder,plot_name))
 		os.remove('%s.png'%os.path.join(folder,plot_name))
 		os.remove('%s_stokes.ps'%os.path.join(folder,plot_name))
 		os.remove('%s_stokes.png'%os.path.join(folder,plot_name))
+		#os.remove('%s_DS.ps'%os.path.join(folder,plot_name))
 		#produce pulse profile	
 		#subprocess.call(['pav','-DFpTd','-g',"%s_profile.ps /CPS"%plot_name,archive_name], cwd=folder)
 		#subprocess.call(['convert', '%s_profile.ps'%plot_name,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s_profile.png'%plot_name], cwd=folder)
@@ -244,8 +242,8 @@ def main(fits, time, DM=560., sigma=0., duration=0.01, pulse_id=0, top_freq=0., 
         if isinstance(downsamp, float) or isinstance(downsamp, int): downsamp = np.zeros(num_elements) + downsamp
         
 	rawdata = psrfits.PsrfitsFile(fits)
-	observation = str(fits)[:-5]
-	observation = os.path.basename(observation)
+	observation = os.path.basename(fits)
+	observation = observation[:observation.find('_subs_')]	
 
 	#Open header of the fits file
 	with psrfits.pyfits.open(fits, memmap=True) as fn:

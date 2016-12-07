@@ -58,7 +58,9 @@ def dspsr(puls, par_file, fits_file, profile_bins=4096, parallel=False):
       #Fold the fits file to create single-pulse archives
       if phase_start: start = period / 2.
       else: start = 0
-      _ = subprocess.call(['dspsr', '-S', str(start), '-D', str(puls.DM), '-K', '-b', str(profile_bins), '-s', '-E', par_file, fits_file], cwd=temp_folder)
+      
+      with open(os.devnull, 'w') as FNULL:
+        _ = subprocess.call(['dspsr', '-S', str(start), '-D', str(puls.DM), '-K', '-b', str(profile_bins), '-s', '-E', par_file, fits_file], cwd=temp_folder, stdout=FNULL)
     
       #Lists of archive names and starting times (s)
       archive_list = np.array(glob(os.path.join(temp_folder,'pulse_*.ar')))

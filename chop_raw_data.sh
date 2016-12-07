@@ -23,6 +23,7 @@ SUB_DIR="/psr_archive/hessels/hessels/AO-FRB/subbanded_data"
 GENERAL_OUT_DIR="/psr_archive/hessels/hessels/AO-FRB/pipeline_products"
 RAW_DIR="/psr_archive/hessels/hessels/AO-FRB/raw_data"
 PAR_FILE="/psr_archive/hessels/hessels/AO-FRB/pipeline_products/0531+33.par"
+RANKING_BU="/psr_archive/hessels/hessels/AO-FRB/pipeline_products/pulses_rank_BU"
 
 SCRIPT_DIR="$( cd -P "$( dirname "$0" )" && pwd )"
 OBS_ID="$1"
@@ -70,6 +71,7 @@ if [ ! -e $OUT_DIR/pulses/RFI_pulses ]; then
 else
   mv $OUT_DIR/pulses/RFI_pulses/* $OUT_DIR/pulses/
 fi
+cp ${OUT_DIR}/pulses/${OBS_ID}_pulses.txt $RANKING_BU
 python ${SCRIPT_DIR}/pulses_extract.py -db_name $DB_FILE -pulses_database -pulses_checked ${OUT_DIR}/pulses/${OBS_ID}_pulses.txt \
   -store_dir $OUT_DIR/pulses -extract_raw $RAW_DIR/$OBS_ID -plot_statistics >/dev/null
 #Move RFI pulses in RFI folder
