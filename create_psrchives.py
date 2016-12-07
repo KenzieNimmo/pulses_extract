@@ -113,7 +113,7 @@ if __name__ == '__main__':
   args = parser()
   
   pulses = pd.read_hdf(args.db_name,'pulses')
-  pulses = pulses[pulses.Pulse <= 1]
+  pulses = pulses[(pulses.Pulse == 0) | (pulses.Pulse == 1)]
   
   if '*' in args.par_file: par_file = glob(args.par_file)[0]
   else: par_file = args.par_file

@@ -72,14 +72,14 @@ def main():
       header= ['SNR',  'DM','Time','Sample','IMJD','SMJD','Downfact','Duration','top_Freq','N_events','dDM','Rank'], index_label='#PulseID')
     
   if args.plot_pulses: 
-    real_pulses = pulses[pulses.Pulse < 2]
+    real_pulses = pulses[(pulses.Pulse == 0) | (pulses.Pulse == 1)]
     if real_pulses.shape[0] > 0:
       auto_waterfaller.main(args.fits, np.array(real_pulses.Time), np.array(real_pulses.DM), np.array(real_pulses.Sigma), \
                                              np.array(real_pulses.Duration), top_freq=real_pulses.top_Freq.iloc[0], \
                                              downsamp=np.clip(np.array(real_pulses.Downfact) / 5, 1, 1000), directory=args.store_dir, pulse_id=np.array(real_pulses.index))
   
   if args.extract_raw: 
-    real_pulses = pulses[pulses.Pulse < 2]
+    real_pulses = pulses[(pulses.Pulse == 0) | (pulses.Pulse == 1)]
     extract_subints_from_observation(args.extract_raw, args.store_dir, np.array(real_pulses.Time), -2, 8, pulseID=np.array(real_pulses.index).astype(str))
   
   if args.plot_statistics: 
