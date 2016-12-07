@@ -23,6 +23,7 @@ import matplotlib.patches as mpatches
 from matplotlib import ticker
 from math import ceil
 import subprocess
+import Image
 
 def plotter(data, start, plot_duration, t, DM, IMJD, SMJD, duration, top_freq, sigma, 
 			directory, FRB_name, observation, pulse_id, zoom=True, idx='', downsamp=True):
@@ -201,12 +202,32 @@ def plot_statistics(dm, time, SNR, duration, Rank, folder='.', observation='', r
 
 def psrchive_plots(archive_name): #assuming: (full name of the archive with path)
 		folder, plot_name = os.path.split(archive_name)
+		print folder
+		print plot_name
 		plot_name = os.path.splitext(plot_name)[0]
 		#produce dynamic spectrum
 		#subprocess.call(['pav','-GTpd','-g',"%s_DS.ps /CPS"%plot_name, archive_name], cwd=folder)
 		subprocess.call(['psrplot','-p','freq+','-c','psd=0','-c','above:l=','-c','above:c=%s'%plot_name,'-D', "%s.ps /CPS"%plot_name, archive_name], cwd=folder)
 		subprocess.call(['convert', '%s.ps'%plot_name,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s.png'%plot_name], cwd=folder)
-		os.remove('%s_DS.ps'%os.path.join(folder,plot_name))
+		#pav -SFT -g "12_sft.ps /CPS" 12.ar
+		subprocess.call(['pav','-SFT','-g',"%s_stokes.ps /CPS"%plot_name, archive_name], cwd=folder)
+		subprocess.call(['convert', '%s_stokes.ps'%plot_name,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s_stokes.png'%plot_name], cwd=folder)
+		
+		stokes = Image.open(folder + '%s_stokes.png'%plot_name)
+		DS = Image.open(folder + '%s.png'%plot_name)
+		width_stokes, height_stokes = stokes.size
+		width_DS, height_DS = DS.size
+		width = width_stokes + width_DS
+		height = max(height_stokes,height_DS)
+		diagnostic = Image.new('RGB', (width, height))
+		diagnostic.paste(im=stokes, box=(0,0))
+		diagnostic.paste(im=DS, box=(width_stokes,0))
+		diagnostic.save(folder+'%s_diagnostic.png'%plot_name)
+
+		os.remove('%s.ps'%os.path.join(folder,plot_name))
+		os.remove('%s.png'%os.path.join(folder,plot_name))
+		os.remove('%s_stokes.ps'%os.path.join(folder,plot_name))
+		os.remove('%s_stokes.png'%os.path.join(folder,plot_name))
 		#produce pulse profile	
 		#subprocess.call(['pav','-DFpTd','-g',"%s_profile.ps /CPS"%plot_name,archive_name], cwd=folder)
 		#subprocess.call(['convert', '%s_profile.ps'%plot_name,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s_profile.png'%plot_name], cwd=folder)
@@ -286,7 +307,7 @@ if __name__ == '__main__':
 	#plot_statistics(dm, time, SNR, duration, Rank, folder='', observation=observation, ranked=True)
 	#plt.savefig('test_stat_plot.png', bbox_inches='tight', dpi=300)
 	
-	psrchive_plots('psrchives')
+	psrchive_plots('psrchives/12.ar')
 	
 
 
