@@ -202,10 +202,10 @@ def plot_statistics(dm, time, SNR, duration, Rank, folder='.', observation='', r
 			#subprocess.call(['convert', '%s_profile.ps'%full_path_no_ext,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s_profile.png'%full_path_no_ext])
 
 def psrchive_plots(archive_name): #assuming: (full name of the archive with path)
-		folder, plot_name = os.path.split(archive_name)
-		plot_name = os.path.splitext(plot_name)[0]
+		folder, ar_name = os.path.split(archive_name)
+		plot_name = ar_name.split('.')[0]
 		#subprocess.call(['pav','-GTpd','-g',"%s_DS.ps /CPS"%plot_name, archive_name], cwd=folder)
-		subprocess.call(['psrplot','-p','freq+','-c','psd=0','-c','above:l=','-c','above:c=%s'%plot_name,'-D', "%s.ps /CPS"%plot_name, '%s.ar'%plot_name], cwd=folder)
+		subprocess.call(['psrplot','-p','freq+','-c','psd=0','-c','above:l=','-c','above:c=%s'%plot_name,'-D', "%s.ps /CPS"%plot_name, ar_name], cwd=folder)
 		subprocess.call(['convert', '%s.ps'%plot_name,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s.png'%plot_name], cwd=folder)
 		subprocess.call(['pav','-SFT','-g',"%s_stokes.ps /CPS"%plot_name, '%s.ar'%plot_name], cwd=folder)
 		subprocess.call(['convert', '%s_stokes.ps'%plot_name,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s_stokes.png'%plot_name], cwd=folder)
