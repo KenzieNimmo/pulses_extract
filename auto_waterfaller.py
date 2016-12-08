@@ -67,7 +67,7 @@ def plotter(data, start, plot_duration, t, DM, IMJD, SMJD, duration, top_freq, s
 	fig.clf()
 	plt.close('all')
 
-def histogram(data, ax, title='', xlabel='', color='', bins=None, stacked=False, logy=False, logx=False):
+def histogram(data, ax, title='', xlabel='', color='', bins=None, stacked=False, logy=False, logx=False, ranked=False):
 	"""
 	Creates a histogram of a given burst property. 
 
@@ -77,8 +77,17 @@ def histogram(data, ax, title='', xlabel='', color='', bins=None, stacked=False,
 
 	"""
 	if not bins:
-                lenght = sum(len(x) for x in data)
-		bins = int(2 * np.sqrt(lenght))
+		if ranked:
+			length = sum(len(x) for x in data)
+			bins = int(2 * np.sqrt(length))
+			ax.hist(data, bins=bins, color=color, histtype='step', lw=2, stacked=stacked, log=logy)
+
+		else:
+			length = len(data)
+			bins = int(2 * np.sqrt(length))
+			ax.hist(data, bins=bins, color='g', histtype='step', lw=2, stacked=stacked, log=logy)
+
+
 
 	#logarithmic xaxis scale:
 	#MIN = ceil(np.amin(data[0])/1) #round up to nearest integer value
@@ -91,9 +100,12 @@ def histogram(data, ax, title='', xlabel='', color='', bins=None, stacked=False,
 		#n, bin_edges, patches = ax.hist(data, bins=bins, color=color, histtype='step', lw=2, stacked=stacked, log=logy)
 		#ax.set_xscale('linear')
 		#ax.set_xlim([np.amin(bin_edges), np.amax(bin_edges)])
-	try: ax.hist(data, bins=bins, color=color, histtype='step', lw=2, stacked=stacked, log=logy)
-	except ValueError: pass
-        ax.set_xlabel(xlabel, fontsize=8)
+	#try: 
+	#ax.hist(data, bins=bins, color=color, histtype='step', lw=2, stacked=stacked, log=logy)
+	#except ValueError: 
+	#	pass
+	#	print 'did not plot histogram'
+	ax.set_xlabel(xlabel, fontsize=8)
 	ax.set_ylabel('Counts', fontsize=8)
 	t = ax.set_title(title, fontsize=8)
 	t.set_y(1.09)
@@ -153,17 +165,27 @@ def plot_statistics(dm, time, SNR, duration, Rank, folder='.', observation='', r
 	colors = ['green', '#D4AC0D', 'red']
 	toa_plotter(time, SNR, duration, Rank, observation, ax=ax4)
 
-	DMs = [dm[Rank==0], dm[Rank==1], dm[Rank>=2]]
-	histogram(DMs, ax = ax1, title='Distribution of Dispersion Measures',\
-	                                            xlabel=(r'DM (pc cm$^{-3}$)'), color=colors)
+	if ranked:
+		DMs = [dm[Rank==0], dm[Rank==1], dm[Rank>=2]]
+		histogram(DMs, ax = ax1, title='Distribution of Dispersion Measures',\
+		                                            xlabel=(r'DM (pc cm$^{-3}$)'), color=colors, ranked=True)
 
-	SNRs = [SNR[Rank==0], SNR[Rank==1], SNR[Rank>=2]]
-	histogram(SNRs, ax= ax2, title='Distribution of Signal to Noise Ratios',\
-	                                            xlabel='S/N', color=colors, logy=True)
+		SNRs = [SNR[Rank==0], SNR[Rank==1], SNR[Rank>=2]]
+		histogram(SNRs, ax= ax2, title='Distribution of Signal to Noise Ratios',\
+		                                            xlabel='S/N', color=colors, logy=True, ranked=True)
 
-	durations = [duration[Rank==0]*1000., duration[Rank==1]*1000., duration[Rank>=2]*1000.]
-	histogram(durations, ax=ax3, title='Distribution of Burst Durations',\
-	                                            xlabel='Duration (ms)', color=colors)
+		durations = [duration[Rank==0]*1000., duration[Rank==1]*1000., duration[Rank>=2]*1000.]
+		histogram(durations, ax=ax3, title='Distribution of Burst Durations',\
+		                                            xlabel='Duration (ms)', color=colors, ranked=True)
+	else:
+		histogram(dm, ax = ax1, title='Distribution of Dispersion Measures',\
+		                                            xlabel=(r'DM (pc cm$^{-3}$)'))
+
+		histogram(SNR, ax= ax2, title='Distribution of Signal to Noise Ratios',\
+		                                            xlabel='S/N', logy=True)
+
+		histogram(duration*1000., ax=ax3, title='Distribution of Burst Durations',\
+		                                            xlabel='Duration (ms)')
 
 	scatter(dm, SNR, ax5, title='Dispersion Measure v. Signal to Noise Ratio',\
 									 xlabel=(r'DM (pc cm$^{-3}$)'), ylabel='SNR', Rank=Rank)
@@ -293,19 +315,19 @@ if __name__ == '__main__':
 	#DM, sigma, time, downfact = np.loadtxt(sys.argv[2], usecols=(0,1,2,4), unpack=True)
 	#downsamp = np.zeros(len(downfact)) + 1. #just a place holder so my code runs upon testing.
 	#main(sys.argv[1],time, DM, sigma, downsamp = downsamp)
-	#database = '/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/output/puppi_57614_C0531+33_0803/pulses/puppi_57614_C0531+33_0803.hdf5'#'/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/TEST/SinglePulses.hdf5'#'/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/output/puppi_57614_C0531+33_0803/OLD/SinglePulses.hdf5'
-	#pulses = pd.read_hdf(database,'pulses')
-	#dm = np.array(pulses.DM)
-	#SNR = np.array(pulses.Sigma)
-	#time = np.array(pulses.Time)
-	#duration = np.array(pulses.Duration)
-	#observation = "test_observation"
+	database = '/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/output/puppi_57614_C0531+33_0803/pulses/puppi_57614_C0531+33_0803.hdf5'#'/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/TEST/SinglePulses.hdf5'#'/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/output/puppi_57614_C0531+33_0803/OLD/SinglePulses.hdf5'
+	pulses = pd.read_hdf(database,'pulses')
+	dm = np.array(pulses.DM)
+	SNR = np.array(pulses.Sigma)
+	time = np.array(pulses.Time)
+	duration = np.array(pulses.Duration)
+	observation = "test_observation"
 	#Rank = np.random.randint(0,3,len(time))
-	#Rank = np.loadtxt('/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/TEST/puppi_57614_C0531+33_0803_pulses.txt', usecols=(1,), dtype='int')
-	#plot_statistics(dm, time, SNR, duration, Rank, folder='', observation=observation, ranked=True)
+	Rank = np.loadtxt('/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/TEST/puppi_57614_C0531+33_0803_pulses.txt', usecols=(1,), dtype='int')
+	plot_statistics(dm, time, SNR, duration, Rank, folder='', observation=observation, ranked=True)
 	#plt.savefig('test_stat_plot.png', bbox_inches='tight', dpi=300)
 	
-	psrchive_plots('psrchives/12.ar')
+	#psrchive_plots('psrchives/12.ar')
 	
 
 
