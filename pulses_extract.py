@@ -65,16 +65,20 @@ def main():
     store.remove('pulses')
     store.append('pulses',pulses)
     store.close()
+
+    obs_id = os.path.splitext(args.db_name)[0]
+    pulses[(pulses.Pulse == 0) | (pulses.Pulse == 1)].sort_index().to_csv(os.path.join(args.store_dir,'{}_realPulses_info.txt'.format(obs_id)), sep='\t', \
+      columns=['Sigma','DM','Time','Sample','IMJD','SMJD','Downfact','Duration','top_Freq','N_events','dDM','Pulse'], \
+      header= ['SNR',  'DM','Time','Sample','IMJD','SMJD','Downfact','Duration','top_Freq','N_events','dDM','Rank'], index_label='#PulseID')
     
   if args.plot_pulses: 
-    real_pulses = pulses[pulses.Pulse < 2]
-    if real_pulses.shape[0] > 0:
-      auto_waterfaller.main(args.fits, np.array(real_pulses.Time), np.array(real_pulses.DM), np.array(real_pulses.Sigma), \
-                                             np.array(real_pulses.Duration), top_freq=real_pulses.top_Freq.iloc[0], \
-                                             downsamp=np.clip(np.array(real_pulses.Downfact) / 5, 1, 1000), directory=args.store_dir, pulse_id=np.array(real_pulses.index))
+    if pulses.shape[0] > 0:
+      auto_waterfaller.main(args.fits, np.array(pulses.Time), np.array(pulses.DM), np.array(pulses.Sigma), \
+                                             np.array(pulses.Duration), top_freq=pulses.top_Freq.iloc[0], \
+                                             downsamp=np.clip(np.array(pulses.Downfact) / 5, 1, 1000), directory=args.store_dir, pulse_id=np.array(pulses.index))
   
   if args.extract_raw: 
-    real_pulses = pulses[pulses.Pulse < 2]
+    real_pulses = pulses[(pulses.Pulse == 0) | (pulses.Pulse == 1)]
     extract_subints_from_observation(args.extract_raw, args.store_dir, np.array(real_pulses.Time), -2, 8, pulseID=np.array(real_pulses.index).astype(str))
   
   if args.plot_statistics: 
@@ -149,7 +153,7 @@ def pulses_database(args, header, events=None):
   RFIexcision(events, pulses)
   
   pulses.sort_values('Sigma', ascending=False, inplace=True)
-  return pulses[pulses.Pulse == 0]
+  return pulses[pulses.Pulse == -1]
   
 
 def RFIexcision(events, pulses):
@@ -172,7 +176,7 @@ def RFIexcision(events, pulses):
   def crosses(sig):
     diff = sig - (sig.max() + sig.min()) / 2.
     count = np.count_nonzero(np.diff(np.sign(diff)))
-    return (count != 2) & (count != 4) & (count != 6)
+    return (count != 2) & (count != 4) & (count != 6) & (count != 8)
   pulses.Pulse += gb.apply(lambda x: crosses(x.Sigma)).astype(np.int8)
   
   #Remove weaker pulses within a temporal window

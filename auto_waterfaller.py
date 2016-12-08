@@ -23,7 +23,7 @@ import matplotlib.patches as mpatches
 from matplotlib import ticker
 from math import ceil
 import subprocess
-import Image
+from PIL import Image
 
 def plotter(data, start, plot_duration, t, DM, IMJD, SMJD, duration, top_freq, sigma, 
 			directory, FRB_name, observation, pulse_id, zoom=True, idx='', downsamp=True):
@@ -224,10 +224,10 @@ def plot_statistics(dm, time, SNR, duration, Rank, folder='.', observation='', r
 			#subprocess.call(['convert', '%s_profile.ps'%full_path_no_ext,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s_profile.png'%full_path_no_ext])
 
 def psrchive_plots(archive_name): #assuming: (full name of the archive with path)
-		folder, plot_name = os.path.split(archive_name)
-		plot_name = os.path.splitext(plot_name)[0]
+		folder, ar_name = os.path.split(archive_name)
+		plot_name = ar_name.split('.')[0]
 		#subprocess.call(['pav','-GTpd','-g',"%s_DS.ps /CPS"%plot_name, archive_name], cwd=folder)
-		subprocess.call(['psrplot','-p','freq+','-c','psd=0','-c','above:l=','-c','above:c=%s'%plot_name,'-D', "%s.ps /CPS"%plot_name, '%s.ar'%plot_name], cwd=folder)
+		subprocess.call(['psrplot','-p','freq+','-c','psd=0','-c','above:l=','-c','above:c=%s'%plot_name,'-D', "%s.ps /CPS"%plot_name, ar_name], cwd=folder)
 		subprocess.call(['convert', '%s.ps'%plot_name,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s.png'%plot_name], cwd=folder)
 		subprocess.call(['pav','-SFT','-g',"%s_stokes.ps /CPS"%plot_name, '%s.ar'%plot_name], cwd=folder)
 		subprocess.call(['convert', '%s_stokes.ps'%plot_name,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s_stokes.png'%plot_name], cwd=folder)
@@ -324,7 +324,7 @@ if __name__ == '__main__':
 	observation = "test_observation"
 	#Rank = np.random.randint(0,3,len(time))
 	Rank = np.loadtxt('/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/TEST/puppi_57614_C0531+33_0803_pulses.txt', usecols=(1,), dtype='int')
-	plot_statistics(dm, time, SNR, duration, Rank, folder='', observation=observation, ranked=True)
+	plot_statistics(dm, time, SNR, duration, Rank, folder='', observation=observation)
 	#plt.savefig('test_stat_plot.png', bbox_inches='tight', dpi=300)
 	
 	#psrchive_plots('psrchives/12.ar')

@@ -54,10 +54,10 @@ fi
 #Copy subbanded file and calibrator
 echo "Copying subbanded and calibrator fits files..."
 SECONDS=0
-if [ ! -e $RAW_DIR/$CAL_FILE ]; then
+if [ ! -e $OUT_DIR/obs_data/$CAL_FILE ]; then
   cp $RAW_DIR/$CAL_FILE $OUT_DIR/obs_data
 fi
-if [ ! -e $SUB_DIR/$FITS_NAME ]; then
+if [ ! -e $OUT_DIR/obs_data/$FITS_NAME ]; then
   cp $SUB_DIR/$FITS_NAME $OUT_DIR/obs_data
 fi
 duration=$SECONDS
@@ -71,13 +71,13 @@ if [ ! -e $OUT_DIR/pulses/RFI_pulses ]; then
 else
   mv $OUT_DIR/pulses/RFI_pulses/* $OUT_DIR/pulses/
 fi
-cp ${OUT_DIR}/pulses/${OBS_ID}_pulses.txt $RANKING_BU
-python ${SCRIPT_DIR}/pulses_extract.py -db_name $DB_FILE -pulses_database -pulses_checked ${OUT_DIR}/pulses/${OBS_ID}_pulses.txt \
-  -store_dir $OUT_DIR/pulses -extract_raw $RAW_DIR/$OBS_ID -plot_statistics >/dev/null
 #Move RFI pulses in RFI folder
 for PULS in `awk -F"\t" '$2 == "2" { print $1"\t"$3 }' $OUT_DIR/pulses/${OBS_ID}_pulses.txt`; do
   mv $OUT_DIR/pulses/$PULS $OUT_DIR/pulses/RFI_pulses/
 done
+cp ${OUT_DIR}/pulses/${OBS_ID}_pulses.txt $RANKING_BU
+python ${SCRIPT_DIR}/pulses_extract.py -db_name $DB_FILE -pulses_database -pulses_checked ${OUT_DIR}/pulses/${OBS_ID}_pulses.txt \
+  -store_dir $OUT_DIR/pulses -extract_raw $RAW_DIR/$OBS_ID -plot_statistics >/dev/null
 duration=$SECONDS
 echo "Raw fits files and diagnostic plots created. Time taken: $(($duration / 60)) m"
 
@@ -98,7 +98,7 @@ echo "Raw fits files and diagnostic plots created. Time taken: $(($duration / 60
 #Create psrarchive files
 echo "PSRARCHIVE files creating..."
 SECONDS=0
-python ${SCRIPT_DIR}/create_psrchives.py $OUT_DIR/pulses/$DB_FILE -fits_file "${OBS_ID}_*.fits" -obsPATH $OUT_DIR/pulses -par_file $PAR_FILE >/dev/null
+python ${SCRIPT_DIR}/create_psrchives.py $OUT_DIR/pulses/$DB_FILE -fits_file "${OBS_ID}_*.fits" -obsPATH $OUT_DIR/pulses >/dev/null
 duration=$SECONDS
 echo "PSRARCHIVE files created. Time taken: $(($duration / 60)) m"
 

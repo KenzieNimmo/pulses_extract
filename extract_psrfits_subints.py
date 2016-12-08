@@ -162,9 +162,9 @@ def extract_subints_from_observation(froot,path,tbursts,isub0,isub1,pulseID=''):
                     # Extract subints
                     extract_subints_from_single_file(files[i],fname,isubmin,isubmax)
                 else:
-                    print "Pulse %d extends over a file break and it was not processed."%(pulseID[idx])
+                    print "Pulse %s extends over a file break and it was not processed."%(pulseID[idx])
                     with open(os.path.join(path, 'ERRORS.txt'), 'w') as error_file:
-                      error_file.write("Pulse %d extends over a file break and it was not processed."%(pulseID[idx]))
+                      error_file.write("Pulse %s extends over a file break and it was not processed."%(pulseID[idx]))
                       
     return
     
