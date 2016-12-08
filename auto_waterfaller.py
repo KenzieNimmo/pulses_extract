@@ -153,15 +153,19 @@ def plot_statistics(dm, time, SNR, duration, Rank, folder='.', observation='', r
 	colors = ['green', '#D4AC0D', 'red']
 	toa_plotter(time, SNR, duration, Rank, observation, ax=ax4)
 
-	DMs = [dm[Rank==0], dm[Rank==1], dm[Rank>=2]]
+	if ranked: DMs = [dm[Rank==0], dm[Rank==1], dm[Rank>=2]]
+	else: DMs = dm
 	histogram(DMs, ax = ax1, title='Distribution of Dispersion Measures',\
 	                                            xlabel=(r'DM (pc cm$^{-3}$)'), color=colors)
 
-	SNRs = [SNR[Rank==0], SNR[Rank==1], SNR[Rank>=2]]
+	if ranked: SNRs = [SNR[Rank==0], SNR[Rank==1], SNR[Rank>=2]]
+	else: SNRs = SNR
 	histogram(SNRs, ax= ax2, title='Distribution of Signal to Noise Ratios',\
 	                                            xlabel='S/N', color=colors, logy=True)
-
-	durations = [duration[Rank==0]*1000., duration[Rank==1]*1000., duration[Rank>=2]*1000.]
+        
+        
+	if ranked: durations = [duration[Rank==0]*1000., duration[Rank==1]*1000., duration[Rank>=2]*1000.]
+	else: durations = duration
 	histogram(durations, ax=ax3, title='Distribution of Burst Durations',\
 	                                            xlabel='Duration (ms)', color=colors)
 
