@@ -154,7 +154,7 @@ def pulses_database(args, header, events=None):
   RFIexcision(events, pulses)
   
   pulses.sort_values('Sigma', ascending=False, inplace=True)
-  return pulses[pulses.Pulse == 0]
+  return pulses[pulses.Pulse == -1]
   
 
 def RFIexcision(events, pulses):

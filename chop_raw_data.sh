@@ -54,10 +54,10 @@ fi
 #Copy subbanded file and calibrator
 echo "Copying subbanded and calibrator fits files..."
 SECONDS=0
-if [ ! -e $RAW_DIR/$CAL_FILE ]; then
+if [ ! -e $OUT_DIR/obs_data/$CAL_FILE ]; then
   cp $RAW_DIR/$CAL_FILE $OUT_DIR/obs_data
 fi
-if [ ! -e $SUB_DIR/$FITS_NAME ]; then
+if [ ! -e $OUT_DIR/obs_data/$FITS_NAME ]; then
   cp $SUB_DIR/$FITS_NAME $OUT_DIR/obs_data
 fi
 duration=$SECONDS
