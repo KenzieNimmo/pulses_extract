@@ -23,7 +23,7 @@ import matplotlib.patches as mpatches
 from matplotlib import ticker
 from math import ceil
 import subprocess
-import Image
+from PIL import Image
 
 def plotter(data, start, plot_duration, t, DM, IMJD, SMJD, duration, top_freq, sigma, 
 			directory, FRB_name, observation, pulse_id, zoom=True, idx='', downsamp=True):
