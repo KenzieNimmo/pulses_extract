@@ -134,7 +134,7 @@ if __name__ == '__main__':
     fits_file = fits_path.format(idx_p) 
     if '*' in fits_file: fits_file = glob(fits_file)[0]
     
-    obs_id = os.path.splitext(args.db_name)[0]
+    obs_id = os.path.splitext(os.path.basename(args.db_name))[0]
     par_file = '/dev/shm/{}_ephemeris'.format(obs_id)
     with open(par_file, 'w') as f:
       f.write(ephemeris.format(puls.DM))
