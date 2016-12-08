@@ -4,6 +4,7 @@ import os
 import argparse
 import multiprocessing as mp
 import shutil
+import StringIO
 
 import psrchive
 import pyfits
@@ -14,6 +15,15 @@ from presto import psr_utils
 from auto_waterfaller import psrchive_plots
 
 
+ephemeris = '''PSRJ J0531+33
+RAJ 05:31:58.561
+DECJ 33:08:52.56
+PEPOCH 57388.0
+P0 0.04194304
+EPHVER 2
+DM {}'''
+
+
 def parser():
     # Command-line options
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -21,7 +31,7 @@ def parser():
     parser.add_argument('db_name', help="Name of the HDF5 database containing single pulses.", default='.')
     parser.add_argument('-fits_file', help="Name of fits file.", default='*')
     parser.add_argument('-obsPATH', help="Path of the observation output folder.", default='.')
-    parser.add_argument('-par_file', help="Name of the parameter file for the puls.", default='*.par')
+    #parser.add_argument('-par_file', help="Name of the parameter file for the puls.", default='')
     parser.add_argument('-profile_bins', help="Number of bins within the profile.", default=4096, type=int)
     return parser.parse_args()
 
@@ -60,7 +70,7 @@ def dspsr(puls, par_file, fits_file, profile_bins=4096, parallel=False):
       else: start = 0
       
       with open(os.devnull, 'w') as FNULL:
-        _ = subprocess.call(['dspsr', '-S', str(start), '-D', str(puls.DM), '-K', '-b', str(profile_bins), '-s', '-E', par_file, fits_file], cwd=temp_folder, stdout=FNULL)
+        _ = subprocess.call(['dspsr', '-S', str(start), '-K', '-b', str(profile_bins), '-s', '-E', par_file, fits_file], cwd=temp_folder, stdout=FNULL)
     
       #Lists of archive names and starting times (s)
       archive_list = np.array(glob(os.path.join(temp_folder,'pulse_*.ar')))
@@ -115,14 +125,21 @@ if __name__ == '__main__':
   pulses = pd.read_hdf(args.db_name,'pulses')
   pulses = pulses[(pulses.Pulse == 0) | (pulses.Pulse == 1)]
   
-  if '*' in args.par_file: par_file = glob(args.par_file)[0]
-  else: par_file = args.par_file
+  #if args.par_file: par_file = args.par_file
+  #else: par_file = ephemeris
 
   fits_path = os.path.join(args.obsPATH, '{}', args.fits_file)
     
   for idx_p, puls in pulses.iterrows():
     fits_file = fits_path.format(idx_p) 
     if '*' in fits_file: fits_file = glob(fits_file)[0]
+    
+    obs_id = os.path.splitext(args.db_name)[0]
+    par_file = '/dev/shm/{}_ephemeris'.format(obs_id)
+    with open(par_file, 'w') as f:
+      f.write(ephemeris.format(puls.DM))
+    
     dspsr(puls, par_file, fits_file, profile_bins=args.profile_bins)
-
+    
+    os.remove(par_file)
 
