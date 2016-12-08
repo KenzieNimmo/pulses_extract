@@ -177,7 +177,7 @@ def RFIexcision(events, pulses):
   def crosses(sig):
     diff = sig - (sig.max() + sig.min()) / 2.
     count = np.count_nonzero(np.diff(np.sign(diff)))
-    return (count != 2) & (count != 4) & (count != 6)
+    return (count != 2) & (count != 4) & (count != 6) & (count != 8)
   pulses.Pulse += gb.apply(lambda x: crosses(x.Sigma)).astype(np.int8)
   
   #Remove weaker pulses within a temporal window
