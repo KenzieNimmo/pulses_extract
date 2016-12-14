@@ -54,7 +54,7 @@ def plot_DS(DS, archive_name, extent=None, not_show=False, save=False):
   fig.tight_layout()
   fig.subplots_adjust(hspace=0)
   title = os.path.split(os.path.basename(archive_name)
-  plt.title(title)[0])
+  plt.title(title)
   
   if not not_show: plt.show()
   if save: fig.savefig(title)
