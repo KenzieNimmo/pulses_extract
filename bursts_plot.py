@@ -25,7 +25,6 @@ def main():
   
 def plot_DS(DS, archive_name, extent=None, show=True, save=False):
   fig = plt.figure()
-  fig.suptitle('aaa')
   
   #Dynamic spectrum
   ax1 = plt.subplot2grid((5,5), (1,0), rowspan=4, colspan=4)
@@ -66,6 +65,7 @@ def plot_DS(DS, archive_name, extent=None, show=True, save=False):
   
   #General plot settings
   title = os.path.split(os.path.basename(archive_name))[0]
+  fig.suptitle('aaa')
   #fig.tight_layout()
   fig.subplots_adjust(hspace=0, wspace=0)
   
