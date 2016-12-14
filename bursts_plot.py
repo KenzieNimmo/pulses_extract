@@ -64,10 +64,10 @@ def plot_DS(DS, archive_name, extent=None, show=True, save=False):
   ax3.set_ylim(extent[2:4])
   
   #General plot settings
+  title = os.path.split(os.path.basename(archive_name))[0]
+  fig.title(title)
   fig.tight_layout()
   fig.subplots_adjust(hspace=0, wspace=0)
-  title = os.path.split(os.path.basename(archive_name))[0]
-  plt.title(title)
   
   if show: plt.show()
   if save: fig.savefig(title)
