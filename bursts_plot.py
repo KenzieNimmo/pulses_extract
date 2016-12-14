@@ -38,7 +38,7 @@ def plot_DS(DS, archive_name, extent=None, show=True, save=False):
   else:
     ax1.set_xlabel("Time (bins)")
     ax1.set_ylabel("Frequency (bins)")
-    extent = [0, smooth_DS.shape[1], smooth_DS.shape[0], 0]
+    extent = [0, smooth_DS.shape[1]-1, smooth_DS.shape[0]-1, 0]
   
   #Pulse profile
   ax2 = plt.subplot2grid((5,5), (0,0), colspan=4, sharex=ax1)
