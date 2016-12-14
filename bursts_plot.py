@@ -98,35 +98,15 @@ def load_zap_list(archive_name):
   None value in time mean all values.
   '''
   
-  if os.path.basename(archive_name) == 'puppi_57638_C0531+33_1218_2797.Tp':
+  if os.path.basename(archive_name) == 'puppi_57649_C0531+33_0106_413.Tp':
     zap_list = [\
-[0,   None, None],
-[27,  2800, 3000],
-[99,  2200, 3200],
-[100, 2000, 3000],
-[159, 200 , 500 ],
-[168, 2200, 3200],
-[169, 2200, 3200],
-[190, 0   , 100 ],
-[191, 0   , 100 ],
-[201, None, None],
-[202, None, None],
+[99,  2700, 3700],
+[103, 1700, 2700],
 [275, None, None],
 [276, None, None],
-[286, None, None],
-[308, None, None],
-[309, None, None],
-[310, None, None],
-[311, None, None],
-[320, None, None],
-[321, None, None],
 [323, None, None],
 [324, None, None],
-[334, None, None],
-[335, None, None],
-[343, None, None],
-[344, None, None],
-[353, None, None]]
+[334, None, None]]
     
   elif os.path.basename(archive_name) == 'puppi_.Tp':
     zap_list = [\
