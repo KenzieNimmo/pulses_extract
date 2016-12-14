@@ -11,7 +11,7 @@ def parser():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
                                     description="Plot dynamic spectrum from single archives with 1 polarisation and 1 subintegration.")
     parser.add_argument('archive_name', help="Name of the psrchive file to plot.")
-    parser.add_argument('-not_show', help="Do no show the plot.", action='store_true')
+    parser.add_argument('-show', help="Show the plot.", action='store_false')
     parser.add_argument('-save_fig', help="Save the plot.", action='store_true')
     return parser.parse_args()
 
@@ -19,9 +19,9 @@ def main():
   args = parser()
   DS, extent = load_DS(args.archive_name)
   zap(archive_name, DS)
-  plot_DS(DS, archive_name, extent=extent, not_show=args.not_show, save=args.save_fig)
+  plot_DS(DS, archive_name, extent=extent, show=args.show, save=args.save_fig)
   
-def plot_DS(DS, archive_name, extent=None, not_show=False, save=False):
+def plot_DS(DS, archive_name, extent=None, show=True, save=False):
   fig = plt.figure()
   
   #Dynamic spectrum
@@ -57,7 +57,7 @@ def plot_DS(DS, archive_name, extent=None, not_show=False, save=False):
   title = os.path.split(os.path.basename(archive_name))[0]
   plt.title(title)
   
-  if not not_show: plt.show()
+  if show: plt.show()
   if save: fig.savefig(title)
   return 
 
