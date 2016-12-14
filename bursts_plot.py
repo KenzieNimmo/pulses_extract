@@ -63,12 +63,12 @@ def plot_DS(DS, archive_name, extent=None, show=True, save=False):
   ax3.tick_params(axis='y', labelleft='off')
   ax3.set_ylim(extent[2:4])
   
-  print archive_name
+  print 'archive_name: ', archive_name
   
   #General plot settings
   title = os.path.split(os.path.basename(archive_name))[0]
   
-  print title
+  print 'title: ',title
   
   fig.suptitle(title)
   fig.tight_layout()
