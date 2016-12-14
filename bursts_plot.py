@@ -32,10 +32,13 @@ def plot_DS(DS, archive_name, extent=None, show=True, save=False):
   smooth_DS -= np.median(smooth_DS)
   smooth_DS /= smooth_DS.max()
   ax1.imshow(smooth_DS, cmap='RdGy_r', origin='upper', aspect='auto', interpolation='nearest', extent=extent)
-  ax1.set_xlabel("Time (ms)")
-  ax1.set_ylabel("Frequency (MHz)")
-  
-  if not extent: extent = [0, smooth_DS.shape[1], smooth_DS.shape[0], 0]
+  if extent:
+    ax1.set_xlabel("Time (ms)")
+    ax1.set_ylabel("Frequency (MHz)")
+  else:
+    ax1.set_xlabel("Time (bins)")
+    ax1.set_ylabel("Frequency (bins)")
+    extent = [0, smooth_DS.shape[1], smooth_DS.shape[0], 0]
   
   #Pulse profile
   ax2 = plt.subplot2grid((5,5), (0,0), colspan=4, sharex=ax1)
