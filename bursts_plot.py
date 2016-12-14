@@ -13,13 +13,15 @@ def parser():
     parser.add_argument('archive_name', help="Name of the psrchive file to plot.")
     parser.add_argument('-show', help="Show the plot.", action='store_false')
     parser.add_argument('-save_fig', help="Save the plot.", action='store_true')
+    parser.add_argument('-zap', help="Plot to manually zap bins out.", action='store_true')
     return parser.parse_args()
 
 def main():
   args = parser()
   DS, extent = load_DS(args.archive_name)
+  if args.zap: extent = None
   zap(args.archive_name, DS)
-  plot_DS(DS, args.archive_name, extent=extent, show=args.show, save=args.save_fig)
+  plot_DS(DS, args.archive_name, extent=extent, show=args.show, save=args.save_fig zap=args.zap)
   
 def plot_DS(DS, archive_name, extent=None, show=True, save=False):
   fig = plt.figure()
