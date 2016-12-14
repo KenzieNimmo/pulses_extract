@@ -292,18 +292,68 @@ def load_zap_list(archive_name):
 
 
  
-  elif os.path.basename(archive_name) == 'puppi_.Tp':
+  elif os.path.basename(archive_name) == 'puppi_57648_C0531+33_0048_378.Tp':
     zap_list = [\
-[],
-[]
+[0, None, None],
+[28 , None, None],
+[83 , None, None],
+[123, None, None],
+[124, None, None],
+[125, None, None],
+[152, None, None],
+[170, None, None],
+[171, None, None],
+[180, None, None],
+[207, None, None],
+[208, None, None],
+[235, None, None],
+[236, None, None],
+[237, None, None],
+[275, None, None],
+[276, None, None],
+[277, None, None],
+[286, None, None],
+[332, None, None],
+[333, None, None],
+[334, None, None],
+[335, None, None],
+[341, None, None],
+[342, None, None],
 ]
 
 
  
-  elif os.path.basename(archive_name) == 'puppi_.Tp':
+  elif os.path.basename(archive_name) == 'puppi_57642_C0531+33_1322_7699.Tp':
     zap_list = [\
-[],
-[]
+[0, None, None],
+[170, None, None],
+[171, None, None],
+[180, None, None],
+[275, None, None],
+[276, None, None],
+[286, None, None],
+[287, None, None],
+[320, None, None],
+[323, None, None],
+[324, None, None],
+[334, None, None],
+[335, None, None],
+[342, 3500, None],
+[343, 3200, None],
+[406, 3600, None],
+[406, 3000, None],
+[407, 2600, None],
+[408, 2100, None],
+[409, 1700, None],
+[410, 1200, None],
+[411, 800, None],
+[412, None, None],
+[417, 3200, None],
+[418, 2800, None],
+[419, 2500, None],
+[420, 1800, None],
+[421, 1200, None],
+[422, 800, None]
 ]
 
 
