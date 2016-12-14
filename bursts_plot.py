@@ -21,7 +21,7 @@ def main():
   DS, extent = load_DS(args.archive_name)
   if args.zap: extent = None
   zap(args.archive_name, DS)
-  plot_DS(DS, args.archive_name, extent=extent, show=args.show, save=args.save_fig zap=args.zap)
+  plot_DS(DS, args.archive_name, extent=extent, show=args.show, save=args.save_fig)
   
 def plot_DS(DS, archive_name, extent=None, show=True, save=False):
   fig = plt.figure()
