@@ -66,7 +66,7 @@ def plot_DS(DS, archive_name, extent=None, show=True, save=False):
   #General plot settings
   title = os.path.splitext(os.path.basename(archive_name))[0]
   fig.suptitle(title)
-  fig.tight_layout()
+  #fig.tight_layout()
   fig.subplots_adjust(hspace=0, wspace=0)
   
   if show: plt.show()
