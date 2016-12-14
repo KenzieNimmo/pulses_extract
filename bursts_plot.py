@@ -66,7 +66,6 @@ def plot_DS(DS, archive_name, extent=None, show=True, save=False):
   #General plot settings
   title = os.path.splitext(os.path.basename(archive_name))[0]
   fig.suptitle(title)
-  #fig.tight_layout()
   fig.subplots_adjust(hspace=0, wspace=0)
   
   if show: plt.show()
@@ -399,10 +398,29 @@ def load_zap_list(archive_name):
 
 
  
-  elif os.path.basename(archive_name) == 'puppi_.Tp':
+  elif os.path.basename(archive_name) == 'puppi_57638_C0531+33_1218_2797.Tp':
     zap_list = [\
-[],
-[]
+[0, None, None],
+[27, 2400, 3000],
+[99, 2000, 3100],
+[100, 1850, 2900] ,
+[159, 100, 300],
+[168, 2000, 3200],
+[169, 2000, 3200],
+[201, 1200, 3000],
+[202, 1200, 3000],
+[275, None, None],
+[276, None, None],
+[286, None, None],
+[310, None, 3000],
+[311, None, 3500],
+[320, 3500, None],
+[321, 3500, None],
+[323, None, None],
+[334, None, None],
+[343, None, None],
+[344, 1500, 3000],
+[353, None, None]
 ]
 
 
