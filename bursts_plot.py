@@ -114,6 +114,7 @@ def load_zap_list(archive_name):
     
   elif os.path.basename(archive_name) == 'puppi_57644_C0531+33_0021_2461.Tp':
     zap_list = [\
+[0, None, None],
 [286, None, None],
 [310, None, None],
 [311, None, None],
@@ -127,8 +128,11 @@ def load_zap_list(archive_name):
 [324, None, None],
 [343, None, None],
 [344, None, None],
-[287, None, None]
+[287, None, None],
+[510, None, None]
 ]
+
+
   
   elif os.path.basename(archive_name) == 'puppi_.Tp':
     zap_list = [\
