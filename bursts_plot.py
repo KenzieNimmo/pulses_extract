@@ -45,7 +45,7 @@ def plot_DS(DS, archive_name, extent=None, show=True, save=False):
   #Baseline
   ax3 = plt.subplot2grid((5,5), (1,4), rowspan=4, sharey=ax1)
   bl = np.mean(smooth_DS, axis=1)
-  y = np.linspace(extent[2], extent[3], bl.size)
+  y = np.linspace(extent[3], extent[2], bl.size)
   ax3.plot(bl, y, 'k-')
   ax3.tick_params(axis='x', which='both', top='off', bottom='off', labelbottom='off')
   ax3.tick_params(axis='y', labelleft='off')
