@@ -111,10 +111,24 @@ def load_zap_list(archive_name):
 [324, None, None],
 [334, None, None]]
     
+  elif os.path.basename(archive_name) == 'puppi_57644_C0531+33_0021_2461.Tp':
+    zap_list = [\
+[286, None, None],
+[310, None, None],
+[311, None, None],
+[320,765, 1500],
+[321, 0, 1500],
+[332, None, None],
+[341, None, None],
+[342, None, None],
+[353, None, None]
+]
+  
   elif os.path.basename(archive_name) == 'puppi_.Tp':
     zap_list = [\
 [],
-[]]
+[]
+]
     
   else:
     print "Archive not known. It will not be zapped. Select bins to zap out if you wish."
