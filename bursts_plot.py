@@ -35,7 +35,7 @@ def plot_DS(DS, archive_name, extent=None, show=True, save=False):
     cmap = 'RdGy_r'
   else: 
     smooth_DS = DS
-    cmap = 'Greys_r'
+    cmap = 'Greys'
   ax1.imshow(smooth_DS, cmap=cmap, origin='upper', aspect='auto', interpolation='nearest', extent=extent)
   if extent:
     ax1.set_xlabel("Time (ms)")
