@@ -69,7 +69,7 @@ def plot_DS(DS, archive_name, extent=None, show=True, save=False):
   fig.subplots_adjust(hspace=0, wspace=0)
   
   if show: plt.show()
-  if save: fig.savefig(title)
+  if save: fig.savefig(title, dpi=300)
   return 
 
 def load_DS(archive_name):
