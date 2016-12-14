@@ -28,9 +28,11 @@ def plot_DS(DS, archive_name, extent=None, show=True, save=False):
   
   #Dynamic spectrum
   ax1 = plt.subplot2grid((5,5), (1,0), rowspan=4, colspan=4)
-  smooth_DS = scipy.misc.imresize(DS, 0.5, interp='cubic').astype(np.float)
-  smooth_DS -= np.median(smooth_DS)
-  smooth_DS /= smooth_DS.max()
+  if extent:
+    smooth_DS = scipy.misc.imresize(DS, 0.5, interp='cubic').astype(np.float)
+    smooth_DS -= np.median(smooth_DS)
+    smooth_DS /= smooth_DS.max()
+  else: smooth_DS = DS
   ax1.imshow(smooth_DS, cmap='RdGy_r', origin='upper', aspect='auto', interpolation='nearest', extent=extent)
   if extent:
     ax1.set_xlabel("Time (ms)")
