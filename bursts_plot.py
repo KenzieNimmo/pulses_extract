@@ -374,7 +374,11 @@ def load_zap_list(archive_name):
 [0, None, None],
 [320, None, None],
 [343, None, None],
-[344, None, None]
+[344, None, None],
+[320, None, None],
+[343, None, None],
+[344, None, None],
+[428, None, None]
 ]
 
 
@@ -388,7 +392,9 @@ def load_zap_list(archive_name):
 [311, None, 600],
 [343, 3200, 3600],
 [344, 3000, 3400],
-[353, None, None]
+[353, None, None],
+[320, None, None],
+[321, None, 500]
 ]
 
 
