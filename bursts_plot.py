@@ -14,9 +14,9 @@ def parser():
     parser.add_argument('-save_fig', help="Save the plot.", action='store_true')
     return parser.parse_args()
 
-def main(archive_name):
+def main():
   args = parser()
-  DS, extent = load_DS(archive_name)
+  DS, extent = load_DS(args.archive_name)
   zap(archive_name, DS)
   plot_DS(DS, archive_name, extent=extent, not_show=args.not_show, save=args.save_fig)
   
