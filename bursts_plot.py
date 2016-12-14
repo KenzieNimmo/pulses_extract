@@ -36,7 +36,7 @@ def plot_DS(DS, archive_name, extent=None, show=True, save=False):
   else: 
     smooth_DS = DS
     cmap = 'Greys_r'
-  ax1.imshow(smooth_DS, cmap='RdGy_r', origin='upper', aspect='auto', interpolation='nearest', extent=extent)
+  ax1.imshow(smooth_DS, cmap=cmap, origin='upper', aspect='auto', interpolation='nearest', extent=extent)
   if extent:
     ax1.set_xlabel("Time (ms)")
     ax1.set_ylabel("Frequency (MHz)")
