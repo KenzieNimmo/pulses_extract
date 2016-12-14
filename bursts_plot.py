@@ -132,14 +132,95 @@ def load_zap_list(archive_name):
 [510, None, None]
 ]
 
+  elif os.path.basename(archive_name) == 'puppi_57638_C0531+33_1218_280.Tp':
+    zap_list = [\
+[102, 3750, None],
+[170, None, None],
+[180, None, None],
+[275, None, None],
+[276, None, None],
+[286, None, None],
+[310, 3750, None],
+[311, 3750, None],
+[320, 700, 1000],
+[332, None, None],
+[334, None, None],
+[335, None, None],
+[341, None, None],
+[342, None, None],
+[353, None, None],
+[410, 2500, None]
+]
 
+  
+  elif os.path.basename(archive_name) == 'puppi_57648_C0531+33_0048_821.Tp':
+    zap_list = [\
+[0  , None, None],
+[1  , None, None],
+[2  , None, None],
+[3  , None, None],
+[4  , None, None],
+[5  , None, None],
+[6  , None, None],
+[7  , None, None],
+[8  , None, None],
+[9  , None, None],
+[10 , None, None],
+[11 , None, None],
+[12 , None, None],
+[13 , None, None],
+[14 , None, None],
+[15 , None, None],
+[16 , None, None],
+[17 , None, None],
+[18 , None, None],
+[19 , None, None],
+[20 , None, None],
+[27 , None, None],
+[28 , None, None],
+[29 , None, None],
+[102, None, 2000],
+[168, None, None],
+[169, None, None],
+[170, None, None],
+[171, None, None],
+[172, None, None],
+[180, None, None],
+[168, None, None],
+[168, None, None],
+[275, None, None],
+[276, None, None],
+[286, None, None],
+[287, None, None],
+[323, None, None],
+[324, None, None],
+[332, None, None],
+[334, None, None],
+[341, None, None],
+[342, None, None]
+]
+  
+  elif os.path.basename(archive_name) == 'puppi_.Tp':
+    zap_list = [\
+[100, None, 1000],
+[275, None, None],
+[276, None, None],
+[310, None, None],
+[311, None, None],
+[320, None, None],
+[321, None, None],
+[334, None, None],
+[335, None, None],
+[343, None, 3000],
+[344, None, 3000],
+[353, None, None]
+]
   
   elif os.path.basename(archive_name) == 'puppi_.Tp':
     zap_list = [\
 [],
 []
-]
-    
+]    
   else:
     print "Archive not known. It will not be zapped. Select bins to zap out if you wish."
     zap_list = []
