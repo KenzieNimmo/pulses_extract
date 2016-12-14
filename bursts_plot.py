@@ -32,7 +32,10 @@ def plot_DS(DS, archive_name, extent=None, show=True, save=False):
     smooth_DS = scipy.misc.imresize(DS, 0.25, interp='cubic').astype(np.float)
     smooth_DS -= np.median(smooth_DS)
     smooth_DS /= smooth_DS.max()
-  else: smooth_DS = DS
+    cmap = 'RdGy_r'
+  else: 
+    smooth_DS = DS
+    cmap = 'Greys_r'
   ax1.imshow(smooth_DS, cmap='RdGy_r', origin='upper', aspect='auto', interpolation='nearest', extent=extent)
   if extent:
     ax1.set_xlabel("Time (ms)")
