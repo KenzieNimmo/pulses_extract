@@ -89,14 +89,12 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
     
   if extent and width:
     prof = np.mean(smooth_DS, axis=0)
-    peak_ms = float(prof.argmax()) / prof.size * extent[3]
-    extent[2] -= peak_ms
-    extent[3] -= peak_ms
+    peak_ms = float(prof.argmax()) / prof.size * extent[1]
+    extent[0] -= peak_ms
+    extent[1] -= peak_ms
 
   if not extent: extent = [0, smooth_DS.shape[1]-1, smooth_DS.shape[0]-1, 0]
   
-  print width, extent
-
   ax1.imshow(smooth_DS, cmap=cmap, origin='upper', aspect='auto', interpolation='nearest', extent=extent)
   
   if width: ax1.set_xlim(-width, width)
