@@ -29,7 +29,7 @@ def parser():
     parser.add_argument('-f_min', help="Minimum frequency to plot in GHz.", default=None, type=float)
     parser.add_argument('-f_max', help="Maximum frequency to plot in GHz.", default=None, type=float)
     parser.add_argument('-cmap', help="Colormap to use in the plots. Other useful: RdGy_r", default='Greys')
-    parser.add_argument('-log_scale', help="Logaritmic color scale.", default='store_true')
+    parser.add_argument('-log_scale', help="Logaritmic color scale.", action='store_true')
     return parser.parse_args()
 
 
