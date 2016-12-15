@@ -23,6 +23,7 @@ def parser():
     parser.add_argument('-nrows', help="Number of rows in the general plot.", default=1, type=int)
     parser.add_argument('-t_scrunch', help="Time scrunch archives by this factor.", default=1., type=float)
     parser.add_argument('-f_scrunch', help="Frequency scrunch archives by this factor.", default=1., type=float)
+    parser.add_argument('-time_window', help="Time window around the burst.", default=False, type=float)
     return parser.parse_args()
 
 
@@ -56,10 +57,10 @@ def main():
     
     #Plot the archive
     idx += skip
-    plot(DS, plot_grid[idx], fig, extent=extent, ncols=args.ncols, nrows=args.nrows, t_scrunch=args.t_scrunch, f_scrunch=args.f_scrunch, index=idx)
+    plot(DS, plot_grid[idx], fig, extent=extent, ncols=args.ncols, nrows=args.nrows, t_scrunch=args.t_scrunch, f_scrunch=args.f_scrunch, index=idx, width=False)
   
   #General plot settings
-  fig.subplots_adjust(hspace=0.05, wspace=0.05)
+  fig.subplots_adjust(hspace=0.3, wspace=0.05)
   if args.show: plt.show()
   if args.save_fig: fig.savefig(os.path.splitext(os.path.basename())[0], papertype = 'a4', orientation = 'portrait', format = 'png')
   return
@@ -86,19 +87,22 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
     cmap = 'Greys'
     units = ("chan", "bin")
     
-  if extent:
+  if extent and width:
     prof = np.mean(smooth_DS, axis=0)
     peak_ms = float(prof.argmax()) / prof.size * extent[3]
     extent[2] -= peak_ms
     extent[3] -= peak_ms
-  else: extent = [0, smooth_DS.shape[1]-1, smooth_DS.shape[0]-1, 0]
+
+  if not extent: extent = [0, smooth_DS.shape[1]-1, smooth_DS.shape[0]-1, 0]
 
   ax1.imshow(smooth_DS, cmap=cmap, origin='upper', aspect='auto', interpolation='nearest', extent=extent)
+  
+  if width: ax1.set_xlim(-width, width)
   
   #Give labels only to edge plots
   if index % ncols == 0: ax1.set_ylabel("Frequency ({})".format(units[0]))
   else: ax1.tick_params(axis='y', labelleft='off')
-  if index < ncols * (nrows - 1): ax1.tick_params(axis='x', labelbottom='off')
+  if (index < ncols * (nrows - 1)) and not width: ax1.tick_params(axis='x', labelbottom='off')
   else: ax1.set_xlabel("Time ({})".format(units[1]))
   
   #Pulse profile
