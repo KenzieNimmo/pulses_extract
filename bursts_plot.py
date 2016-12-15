@@ -85,9 +85,14 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
     smooth_DS = DS
     cmap = 'Greys'
     units = ("chan", "bin")
-    extent = [0, smooth_DS.shape[1]-1, smooth_DS.shape[0]-1, 0]
+    
+  if extent:
+    prof = np.mean(smooth_DS, axis=0)
+    peak_ms = float(prof.argmax()) / prof.size() * extent[3]
+    extent[2] -= peak_ms
+    extent[3] -= peak_ms
+  else: extent = [0, smooth_DS.shape[1]-1, smooth_DS.shape[0]-1, 0]
 
-  #TODO: shift time axis to center on burst
   ax1.imshow(smooth_DS, cmap=cmap, origin='upper', aspect='auto', interpolation='nearest', extent=extent)
   
   #Give labels only to edge plots
@@ -97,7 +102,6 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
   else: ax1.set_xlabel("Time ({})".format(units[1]))
   
   #Pulse profile
-  prof = np.mean(smooth_DS, axis=0)
   x = np.linspace(extent[0], extent[1], prof.size)
   ax2.plot(x, prof, 'k-')
   ax2.tick_params(axis='y', which='both', left='off', right='off', labelleft='off')
