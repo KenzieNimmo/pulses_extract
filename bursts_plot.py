@@ -59,7 +59,7 @@ def main():
     
     #Plot the archive
     idx += skip
-    plot(DS, plot_grid[idx], fig, extent=extent, ncols=args.ncols, nrows=args.nrows, t_scrunch=args.t_scrunch, f_scrunch=args.f_scrunch,/
+    plot(DS, plot_grid[idx], fig, extent=extent, ncols=args.ncols, nrows=args.nrows, t_scrunch=args.t_scrunch, f_scrunch=args.f_scrunch,\
          index=idx, width=args.time_window, fmin=args.f_min, fmax=args.f_max)
   
   #General plot settings
