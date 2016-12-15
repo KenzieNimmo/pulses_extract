@@ -37,7 +37,7 @@ def main():
   else: ar_list = args.archives_list
   for idx, archive_name in enumerate(ar_list):
     #Skip plots in the first row
-    if args.ncols / idx = 0:
+    if args.ncols / idx == 0:
       plots_to_skip = args.nrows * args.ncols - len(ar_list)
       if args.ncols - idx <= plots_to_skip: continue
       
