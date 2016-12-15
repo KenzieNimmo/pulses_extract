@@ -33,11 +33,13 @@ def main():
   fig = plt.figure(figsize=(8.27, 11.69))  #A4
   
   #Loop on each archive
-  if len(args.archives_list) == 1: ar_list = glob(args.archives_list)
+  if len(args.archives_list) == 1: 
+    print args.archives_list
+    ar_list = glob(args.archives_list)
   else: ar_list = args.archives_list
   for idx, archive_name in enumerate(ar_list):
     #Skip plots in the first row
-    if args.ncols / idx == 0:
+    if idx / args.ncols == 0:
       plots_to_skip = args.nrows * args.ncols - len(ar_list)
       if args.ncols - idx <= plots_to_skip: continue
       
