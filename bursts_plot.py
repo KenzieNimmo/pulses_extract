@@ -28,20 +28,23 @@ def parser():
 
 
 def main():
+  #Define general variables
   args = parser()
   plot_grid = gridspec.GridSpec(args.nrows, args.ncols)  #Grid of burst plots
   fig = plt.figure(figsize=(8.27, 11.69))  #A4
   
-  #Loop on each archive
+  #Load archive list
   if len(args.archives_list) == 1: 
     print args.archives_list
     ar_list = glob(args.archives_list)
   else: ar_list = args.archives_list
+  
+  #Loop on each archive
   for idx, archive_name in enumerate(ar_list):
     #Skip plots in the first row
     if idx / args.ncols == 0:
       plots_to_skip = args.nrows * args.ncols - len(ar_list)
-      if args.ncols - idx <= plots_to_skip: continue
+      if args.ncols - idx == plots_to_skip: idx += plots_to_skip
       
     #Load archive
     DS, extent = load_DS(archive_name)
@@ -89,8 +92,8 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
   #Give labels only to edge plots
   if index % ncols == 0: ax1.set_ylabel("Frequency ({})".format(units[0]))
   else: ax1.tick_params(axis='y', labelleft='off')
-  if index < ncols * (nrows - 1): ax1.set_xlabel("Time ({})".format(units[1]))
-  else: ax1.tick_params(axis='x', labelbottom='off')
+  if index < ncols * (nrows - 1): ax1.tick_params(axis='x', labelbottom='off')
+  else: ax1.set_xlabel("Time ({})".format(units[1]))
   
   #Pulse profile
   prof = np.mean(smooth_DS, axis=0)
