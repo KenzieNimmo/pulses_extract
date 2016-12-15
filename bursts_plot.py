@@ -13,6 +13,7 @@ def parser():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
                                     description="Plot dynamic spectrum from multiple archives with 1 polarisation and 1 subintegration.")
     parser.add_argument('archives_list', help="Name of the psrchive files to plot.", default='*.Tp')
+    parser.add_argument('-o', help="Plot name.", default='bursts_list.png')
     parser.add_argument('-show', help="Show the plot.", action='store_false')
     parser.add_argument('-save_fig', help="Save the plot.", action='store_true')
     parser.add_argument('-zap', help="Plot to manually zap bins out.", action='store_true')
@@ -44,7 +45,7 @@ def main():
   fig.subplots_adjust(hspace=0, wspace=0)
   
   if args.show: plt.show()
-  if args.save: fig.savefig(os.path.splitext(os.path.basename(archive_name))[0], papertype = 'a4', orientation = 'portrait', format = 'png')
+  if args.save: fig.savefig(os.path.splitext(os.path.basename())[0], papertype = 'a4', orientation = 'portrait', format = 'png')
   return
   
   
