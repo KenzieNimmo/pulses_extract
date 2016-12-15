@@ -26,6 +26,7 @@ def parser():
     parser.add_argument('-time_window', help="Time window around the burst in ms.", default=False, type=float)
     parser.add_argument('-f_min', help="Minimum frequency to plot in GHz.", default=None, type=float)
     parser.add_argument('-f_max', help="Maximum frequency to plot in GHz.", default=None, type=float)
+    parser.add_argument('-cmap', help="Colormap to use in the plots. Other useful: RdGy_r", default='Greys')
     return parser.parse_args()
 
 
@@ -60,7 +61,7 @@ def main():
     #Plot the archive
     idx += skip
     plot(DS, plot_grid[idx], fig, extent=extent, ncols=args.ncols, nrows=args.nrows, t_scrunch=args.t_scrunch, f_scrunch=args.f_scrunch,\
-         index=idx, width=args.time_window, fmin=args.f_min, fmax=args.f_max)
+         index=idx, width=args.time_window, fmin=args.f_min, fmax=args.f_max, cmap=args.cmap)
   
   #General plot settings
   fig.subplots_adjust(hspace=0.3, wspace=0.05)
@@ -70,7 +71,7 @@ def main():
   
   
   
-def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_scrunch=1., index=None, width=False, fmin=None, fmax=None):
+def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_scrunch=1., index=None, width=False, fmin=None, fmax=None, cmap='Greys'):
   #Define subplots
   plot_grid = gridspec.GridSpecFromSubplotSpec(2, 2, subplot_spec, wspace=0., hspace=0., height_ratios=[1,5], width_ratios=[5,1])
   ax1 = plt.Subplot(fig, plot_grid[2])
@@ -79,14 +80,12 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
   
   #Dynamic spectrum
   if extent:
-    smooth_DS = scipy.ndimage.zoom(DS, (1./f_scrunch,1./t_scrunch))
+    smooth_DS = scipy.ndimage.zoom(DS, (1./f_scrunch,1./t_scrunch), order=1)
     smooth_DS -= np.median(smooth_DS)
     smooth_DS /= smooth_DS.max()
-    cmap = 'RdGy_r'
     units = ("GHz", "ms")
   else: 
     smooth_DS = DS
-    cmap = 'Greys'
     units = ("chan", "bin")
     
   if extent and width:
