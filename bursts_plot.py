@@ -25,12 +25,11 @@ def parser():
 
 def main():
   args = parser()
-  print args.archives_list
   plot_grid = gridspec.GridSpec(args.nrows, args.ncols)  #Grid of burst plots
   fig = plt.figure(figsize=(8.27, 11.69))  #A4
   
   #Loop on each archive
-  if len(args.archives_list == 1): ar_list = glob(args.archives_list)
+  if len(args.archives_list) == 1: ar_list = glob(args.archives_list)
   else: ar_list = args.archives_list
   for idx, archive_name in enumerate(ar_list):
     #Load archive
