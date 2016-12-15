@@ -8,6 +8,8 @@ import numpy as np
 import psrchive
 import scipy.ndimage
 
+
+
 def parser():
     # Command-line options
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -23,6 +25,8 @@ def parser():
     parser.add_argument('-f_scrunch', help="Frequency scrunch archives by this factor.", default=1., type=float)
     return parser.parse_args()
 
+
+
 def main():
   args = parser()
   plot_grid = gridspec.GridSpec(args.nrows, args.ncols)  #Grid of burst plots
@@ -32,6 +36,11 @@ def main():
   if len(args.archives_list) == 1: ar_list = glob(args.archives_list)
   else: ar_list = args.archives_list
   for idx, archive_name in enumerate(ar_list):
+    #Skip plots in the first row
+    if args.ncols / idx = 0:
+      plots_to_skip = args.nrows * args.ncols - len(ar_list)
+      if args.ncols - idx <= plots_to_skip: continue
+      
     #Load archive
     DS, extent = load_DS(archive_name)
     
@@ -40,17 +49,18 @@ def main():
     zap(archive_name, DS)
     
     #Plot the archive
-    plot(DS, plot_grid[idx], fig, extent=extent, ncols=args.ncols, nrows=args.nrows, t_scrunch=args.t_scrunch, f_scrunch=args.f_scrunch)
+    plot(DS, plot_grid[idx], fig, extent=extent, ncols=args.ncols, nrows=args.nrows, t_scrunch=args.t_scrunch, f_scrunch=args.f_scrunch, index=idx)
   
     #General plot settings
-  fig.subplots_adjust(hspace=0, wspace=0)
+  fig.subplots_adjust(hspace=0.3, wspace=0.3)
   
   if args.show: plt.show()
-  if args.save: fig.savefig(os.path.splitext(os.path.basename())[0], papertype = 'a4', orientation = 'portrait', format = 'png')
+  if args.save_fig: fig.savefig(os.path.splitext(os.path.basename())[0], papertype = 'a4', orientation = 'portrait', format = 'png')
   return
   
   
-def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_scrunch=1.):
+  
+def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_scrunch=1., index=None):
   #Define subplots
   plot_grid = gridspec.GridSpecFromSubplotSpec(2, 2, subplot_spec, wspace=0., hspace=0., height_ratios=[1,5], width_ratios=[5,1])
   ax1 = plt.Subplot(fig, plot_grid[2])
@@ -58,26 +68,44 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
   ax3 = plt.Subplot(fig, plot_grid[3], sharey=ax1)
   
   #Dynamic spectrum
-  #ax1 = plt.subplot2grid((5,5), (1,0), rowspan=4, colspan=4)
   if extent:
     smooth_DS = scipy.ndimage.zoom(DS, (1./f_scrunch,1./t_scrunch))
     smooth_DS -= np.median(smooth_DS)
     smooth_DS /= smooth_DS.max()
     cmap = 'RdGy_r'
+    units = ("MHz", "ms")
+    
   else: 
     smooth_DS = DS
     cmap = 'Greys'
-  ax1.imshow(smooth_DS, cmap=cmap, origin='upper', aspect='auto', interpolation='nearest', extent=extent)
-  if extent:
-    ax1.set_xlabel("Time (ms)")
-    ax1.set_ylabel("Frequency (MHz)")
-  else:
-    ax1.set_xlabel("Time (bins)")
-    ax1.set_ylabel("Frequency (bins)")
+    units = ("chan", "bin")
     extent = [0, smooth_DS.shape[1]-1, smooth_DS.shape[0]-1, 0]
+
+  #TODO: shift time axis to center on burst
+  ax1.imshow(smooth_DS, cmap=cmap, origin='upper', aspect='auto', interpolation='nearest', extent=extent)
+  
+  #Give labels only to edge plots
+  if index % ncols == 0: ax1.set_ylabel("Frequency ({})".format(units[0]))
+  else: ax1.tick_params(axis='y', labelleft='off')
+  if 
+  
+  
+  
+  
+
+
+  else:
+    if extent:
+      ax1.set_xlabel("Time (ms)")
+      ax1.set_ylabel("Frequency (MHz)")
+    else:
+      ax1.set_xlabel("Time (bins)")
+      ax1.set_ylabel("Frequency (bins)")
+      
+
+    
   
   #Pulse profile
-  #ax2 = plt.subplot2grid((5,5), (0,0), colspan=4, sharex=ax1)
   prof = np.mean(smooth_DS, axis=0)
   x = np.linspace(extent[0], extent[1], prof.size)
   ax2.plot(x, prof, 'k-')
@@ -86,7 +114,6 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
   ax2.set_xlim(extent[0:2])
   
   #Baseline
-  #ax3 = plt.subplot2grid((5,5), (1,4), rowspan=4, sharey=ax1)
   bl = np.mean(smooth_DS, axis=1)
   y = np.linspace(extent[3], extent[2], bl.size)
   ax3.plot(bl, y, 'k-')
@@ -99,6 +126,8 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
   fig.add_subplot(ax3)
   return 
 
+
+
 def load_DS(archive_name):
   load_archive = psrchive.Archive_load(archive_name)
   load_archive.remove_baseline()
@@ -109,7 +138,9 @@ def load_DS(archive_name):
   duration = load_archive.integration_length() * 1000
   
   return DS, [0., duration, freq-bw/2, freq+bw/2]
-    
+   
+   
+   
 def zap(archive_name, DS):
   zap_list = load_zap_list(archive_name)
   
@@ -119,6 +150,8 @@ def zap(archive_name, DS):
   DS -= med
   DS /= DS.max()
   return
+  
+  
   
 def load_zap_list(archive_name):
   '''
@@ -181,7 +214,6 @@ def load_zap_list(archive_name):
 [0, None, None]
 ]
 
-  
   elif os.path.basename(archive_name) == 'puppi_57648_C0531+33_0048_821.Tp':
     zap_list = [\
 [0  , None, None],
@@ -265,8 +297,6 @@ def load_zap_list(archive_name):
 [0, None, None]
 ]
 
-
- 
   elif os.path.basename(archive_name) == 'puppi_57641_C0531+33_1312_521.Tp':
     zap_list = [\
 [102, None, 1500],
@@ -285,8 +315,6 @@ def load_zap_list(archive_name):
 [0, None, None]
 ]
 
-
- 
   elif os.path.basename(archive_name) == 'puppi_57642_C0531+33_1322_1965.Tp':
     zap_list = [\
 [0, None, None],
@@ -316,8 +344,6 @@ def load_zap_list(archive_name):
 [353, None, None]
 ]
 
-
- 
   elif os.path.basename(archive_name) == 'puppi_57648_C0531+33_0048_378.Tp':
     zap_list = [\
 [0, None, None],
@@ -351,8 +377,6 @@ def load_zap_list(archive_name):
 [324, None, None]
 ]
 
-
- 
   elif os.path.basename(archive_name) == 'puppi_57642_C0531+33_1322_7699.Tp':
     zap_list = [\
 [0, None, None],
@@ -393,8 +417,6 @@ def load_zap_list(archive_name):
 [422, 800, None]
 ]
 
-
- 
   elif os.path.basename(archive_name) == 'puppi_57646_C0531+33_0085_2476.Tp':
     zap_list = [\
 [0, None, None],
@@ -407,8 +429,6 @@ def load_zap_list(archive_name):
 [428, None, None]
 ]
 
-
- 
   elif os.path.basename(archive_name) == 'puppi_57646_C0531+33_0085_4275.Tp':
     zap_list = [\
 [0, None, None],
@@ -423,8 +443,6 @@ def load_zap_list(archive_name):
 [321, None, 500]
 ]
 
-
- 
   elif os.path.basename(archive_name) == 'puppi_57638_C0531+33_1218_2797.Tp':
     zap_list = [\
 [0, None, None],
@@ -450,12 +468,6 @@ def load_zap_list(archive_name):
 [344, 1500, 3000],
 [353, None, None]
 ]
-
-
-
-
-
-
 
   else:
     print "Archive not known. It will not be zapped. Select bins to zap out if you wish."
