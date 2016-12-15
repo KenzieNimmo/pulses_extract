@@ -12,7 +12,7 @@ def parser():
     # Command-line options
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
                                     description="Plot dynamic spectrum from multiple archives with 1 polarisation and 1 subintegration.")
-    parser.add_argument('archives_list', help="Name of the psrchive files to plot.", nargs='+', default=['*.Tp',])
+    parser.add_argument('archives_list', help="Name of the psrchive files to plot.", nargs='+', default=['*.Tp',], required=False)
     parser.add_argument('-o', help="Plot name.", default='bursts_list.png')
     parser.add_argument('-show', help="Show the plot.", action='store_false')
     parser.add_argument('-save_fig', help="Save the plot.", action='store_true')
@@ -53,9 +53,9 @@ def main():
 def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_scrunch=1.):
   #Define subplots
   plot_grid = gridspec.GridSpecFromSubplotSpec(2, 2, subplot_spec, wspace=0., hspace=0., height_ratios=[1,5], width_ratios=[5,1])
-  ax1 = plt.Subplot(fig, plot_grid[3])
+  ax1 = plt.Subplot(fig, plot_grid[2])
   ax2 = plt.Subplot(fig, plot_grid[0], sharex=ax1)
-  ax3 = plt.Subplot(fig, plot_grid[4], sharey=ax1)
+  ax3 = plt.Subplot(fig, plot_grid[3], sharey=ax1)
   
   #Dynamic spectrum
   #ax1 = plt.subplot2grid((5,5), (1,0), rowspan=4, colspan=4)
