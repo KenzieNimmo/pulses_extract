@@ -87,23 +87,8 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
   #Give labels only to edge plots
   if index % ncols == 0: ax1.set_ylabel("Frequency ({})".format(units[0]))
   else: ax1.tick_params(axis='y', labelleft='off')
-  if 
-  
-  
-  
-  
-
-
-  else:
-    if extent:
-      ax1.set_xlabel("Time (ms)")
-      ax1.set_ylabel("Frequency (MHz)")
-    else:
-      ax1.set_xlabel("Time (bins)")
-      ax1.set_ylabel("Frequency (bins)")
-      
-
-    
+  if index < ncols * (nrows - 1): ax1.set_xlabel("Time ({})".format(units[1]))
+  else: ax1.tick_params(axis='x', labelbottom='off')
   
   #Pulse profile
   prof = np.mean(smooth_DS, axis=0)
