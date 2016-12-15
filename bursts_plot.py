@@ -35,7 +35,7 @@ def main():
   #Define general variables
   args = parser()
   plot_grid = gridspec.GridSpec(args.nrows, args.ncols)  #Grid of burst plots
-  fig = plt.figure(figsize=(8.27, 11.69))  #A4
+  fig = plt.figure(figsize=(2*8.27, 2*11.69))  #A4
   
   #Load archive list
   if len(args.archives_list) == 1: ar_list = glob(args.archives_list[0])
