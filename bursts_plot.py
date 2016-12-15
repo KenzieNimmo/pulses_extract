@@ -40,11 +40,12 @@ def main():
   else: ar_list = args.archives_list
   
   #Loop on each archive
+  skip = 0
   for idx, archive_name in enumerate(ar_list):
     #Skip plots in the first row
     if idx / args.ncols == 0:
       plots_to_skip = args.nrows * args.ncols - len(ar_list)
-      if args.ncols - idx == plots_to_skip: idx += plots_to_skip
+      if args.ncols - idx == plots_to_skip: skip += plots_to_skip
       
     #Load archive
     DS, extent = load_DS(archive_name)
@@ -54,7 +55,7 @@ def main():
     zap(archive_name, DS)
     
     #Plot the archive
-    plot(DS, plot_grid[idx], fig, extent=extent, ncols=args.ncols, nrows=args.nrows, t_scrunch=args.t_scrunch, f_scrunch=args.f_scrunch, index=idx)
+    plot(DS, plot_grid[idx + skip], fig, extent=extent, ncols=args.ncols, nrows=args.nrows, t_scrunch=args.t_scrunch, f_scrunch=args.f_scrunch, index=idx)
   
     #General plot settings
   fig.subplots_adjust(hspace=0.3, wspace=0.3)
