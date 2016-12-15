@@ -111,7 +111,8 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
   ax2.plot(x, prof, 'k-')
   ax2.tick_params(axis='y', which='both', left='off', right='off', labelleft='off')
   ax2.tick_params(axis='x', labelbottom='off')
-  ax2.set_xlim(extent[0:2])
+  if width: ax2.set_xlim(-width, width)
+  else: ax2.set_xlim(extent[0:2])
   
   #Baseline
   bl = np.mean(smooth_DS, axis=1)
