@@ -12,7 +12,7 @@ def parser():
     # Command-line options
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
                                     description="Plot dynamic spectrum from multiple archives with 1 polarisation and 1 subintegration.")
-    parser.add_argument('archives_list', help="Name of the psrchive files to plot.", nargs='+', default=['*.Tp',])
+    parser.add_argument('archives_list', help="Name of the psrchive files to plot.", nargs='+')
     parser.add_argument('-o', help="Plot name.", default='bursts_list.png')
     parser.add_argument('-show', help="Show the plot.", action='store_false')
     parser.add_argument('-save_fig', help="Save the plot.", action='store_true')
