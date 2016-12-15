@@ -10,7 +10,7 @@ import psrchive
 import scipy.ndimage
 
 mpl.rc('font',size=20)
-mpl.rc('lines', linewidth=4)
+mpl.rc('lines', linewidth=2)
 
 def parser():
     # Command-line options
