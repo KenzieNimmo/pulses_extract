@@ -24,6 +24,8 @@ def parser():
     parser.add_argument('-t_scrunch', help="Time scrunch archives by this factor.", default=1., type=float)
     parser.add_argument('-f_scrunch', help="Frequency scrunch archives by this factor.", default=1., type=float)
     parser.add_argument('-time_window', help="Time window around the burst in ms.", default=False, type=float)
+    parser.add_argument('-f_min', help="Minimum frequency to plot in GHz.", default=None, type=float)
+    parser.add_argument('-f_max', help="Maximum frequency to plot in GHz.", default=None, type=float)
     return parser.parse_args()
 
 
@@ -57,7 +59,8 @@ def main():
     
     #Plot the archive
     idx += skip
-    plot(DS, plot_grid[idx], fig, extent=extent, ncols=args.ncols, nrows=args.nrows, t_scrunch=args.t_scrunch, f_scrunch=args.f_scrunch, index=idx, width=args.time_window)
+    plot(DS, plot_grid[idx], fig, extent=extent, ncols=args.ncols, nrows=args.nrows, t_scrunch=args.t_scrunch, f_scrunch=args.f_scrunch,/
+         index=idx, width=args.time_window, fmin=args.f_min, fmax=args.f_max)
   
   #General plot settings
   fig.subplots_adjust(hspace=0.3, wspace=0.05)
@@ -67,7 +70,7 @@ def main():
   
   
   
-def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_scrunch=1., index=None, width=False):
+def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_scrunch=1., index=None, width=False, fmin=None, fmax=None):
   #Define subplots
   plot_grid = gridspec.GridSpecFromSubplotSpec(2, 2, subplot_spec, wspace=0., hspace=0., height_ratios=[1,5], width_ratios=[5,1])
   ax1 = plt.Subplot(fig, plot_grid[2])
@@ -81,7 +84,6 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
     smooth_DS /= smooth_DS.max()
     cmap = 'RdGy_r'
     units = ("GHz", "ms")
-    
   else: 
     smooth_DS = DS
     cmap = 'Greys'
@@ -92,12 +94,14 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
     peak_ms = float(prof.argmax()) / prof.size * extent[1]
     extent[0] -= peak_ms
     extent[1] -= peak_ms
-
+  if not fmin: fmin = extent[2]
+  if not fmax: fmax = extent[3]
   if not extent: extent = [0, smooth_DS.shape[1]-1, smooth_DS.shape[0]-1, 0]
   
   ax1.imshow(smooth_DS, cmap=cmap, origin='upper', aspect='auto', interpolation='nearest', extent=extent)
   
-  if width: ax1.set_xlim(-width, width)
+  if width: ax1.set_xlim(-width/2., width/2.)
+  ax1.set_ylim(fmin, fmax)
   
   #Give labels only to edge plots
   if index % ncols == 0: ax1.set_ylabel("Frequency ({})".format(units[0]))
@@ -111,7 +115,7 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
   ax2.plot(x, prof, 'k-')
   ax2.tick_params(axis='y', which='both', left='off', right='off', labelleft='off')
   ax2.tick_params(axis='x', labelbottom='off')
-  if width: ax2.set_xlim(-width, width)
+  if width: ax2.set_xlim(-width/2., width/2.)
   else: ax2.set_xlim(extent[0:2])
   
   #Baseline
@@ -120,7 +124,7 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
   ax3.plot(bl, y, 'k-')
   ax3.tick_params(axis='x', which='both', top='off', bottom='off', labelbottom='off')
   ax3.tick_params(axis='y', labelleft='off')
-  ax3.set_ylim(extent[2:4])
+  ax3.set_ylim(fmin, fmax)
   
   fig.add_subplot(ax1)
   fig.add_subplot(ax2)
