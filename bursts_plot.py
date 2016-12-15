@@ -106,6 +106,7 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
   else: ax1.set_xlabel("Time ({})".format(units[1]))
   
   #Pulse profile
+  prof = np.mean(smooth_DS, axis=0)
   x = np.linspace(extent[0], extent[1], prof.size)
   ax2.plot(x, prof, 'k-')
   ax2.tick_params(axis='y', which='both', left='off', right='off', labelleft='off')
