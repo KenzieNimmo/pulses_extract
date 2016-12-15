@@ -12,7 +12,7 @@ def parser():
     # Command-line options
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
                                     description="Plot dynamic spectrum from multiple archives with 1 polarisation and 1 subintegration.")
-    parser.add_argument('archives_list', help="Name of the psrchive files to plot.", default='*.Tp')
+    parser.add_argument('archives_list', help="Name of the psrchive files to plot.", nargs='+', default=['*.Tp',])
     parser.add_argument('-o', help="Plot name.", default='bursts_list.png')
     parser.add_argument('-show', help="Show the plot.", action='store_false')
     parser.add_argument('-save_fig', help="Save the plot.", action='store_true')
@@ -29,7 +29,8 @@ def main():
   fig = plt.figure(figsize=(8.27, 11.69))  #A4
   
   #Loop on each archive
-  ar_list = glob(args.archives_list)
+  if len(args.archives_list == 1): ar_list = glob(args.archives_list)
+  else: ar_list = args.archives_list
   for idx, archive_name in enumerate(ar_list):
     #Load archive
     DS, extent = load_DS(archive_name)
