@@ -23,7 +23,7 @@ def parser():
     parser.add_argument('-nrows', help="Number of rows in the general plot.", default=1, type=int)
     parser.add_argument('-t_scrunch', help="Time scrunch archives by this factor.", default=1., type=float)
     parser.add_argument('-f_scrunch', help="Frequency scrunch archives by this factor.", default=1., type=float)
-    parser.add_argument('-time_window', help="Time window around the burst.", default=False, type=float)
+    parser.add_argument('-time_window', help="Time window around the burst in ms.", default=False, type=float)
     return parser.parse_args()
 
 
@@ -94,6 +94,8 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
     extent[3] -= peak_ms
 
   if not extent: extent = [0, smooth_DS.shape[1]-1, smooth_DS.shape[0]-1, 0]
+  
+  print width, extent
 
   ax1.imshow(smooth_DS, cmap=cmap, origin='upper', aspect='auto', interpolation='nearest', extent=extent)
   
