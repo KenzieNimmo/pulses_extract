@@ -79,7 +79,7 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
     smooth_DS -= np.median(smooth_DS)
     smooth_DS /= smooth_DS.max()
     cmap = 'RdGy_r'
-    units = ("MHz", "ms")
+    units = ("GHz", "ms")
     
   else: 
     smooth_DS = DS
@@ -126,9 +126,11 @@ def load_DS(archive_name):
   
   freq = load_archive.get_centre_frequency()
   bw = abs(load_archive.get_bandwidth())
+  f0 = (freq - bw / 2) / 1000
+  f1 = (freq + bw / 2) / 1000
   duration = load_archive.integration_length() * 1000
   
-  return DS, [0., duration, freq-bw/2, freq+bw/2]
+  return DS, [0., duration, f0, f1]
    
    
    
