@@ -38,9 +38,7 @@ def main():
   fig = plt.figure(figsize=(8.27, 11.69))  #A4
   
   #Load archive list
-  if len(args.archives_list) == 1: 
-    print args.archives_list
-    ar_list = glob(args.archives_list)
+  if len(args.archives_list) == 1: ar_list = glob(args.archives_list[0])
   else: ar_list = args.archives_list
   
   #Loop on each archive
@@ -64,6 +62,7 @@ def main():
          index=idx, width=args.time_window, fmin=args.f_min, fmax=args.f_max, cmap=args.cmap)
   
   #General plot settings
+  fig.tight_layout()
   fig.subplots_adjust(hspace=0.3, wspace=0.05)
   if args.show: plt.show()
   if args.save_fig: fig.savefig(os.path.splitext(os.path.basename())[0], papertype = 'a4', orientation = 'portrait', format = 'png')
