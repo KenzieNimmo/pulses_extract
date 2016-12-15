@@ -2,13 +2,15 @@ import os
 import argparse
 from glob import glob
 
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import numpy as np
 import psrchive
 import scipy.ndimage
 
-
+mpl.rc('font',size=20)
+mpl.rc('lines', linewidth=4)
 
 def parser():
     # Command-line options
