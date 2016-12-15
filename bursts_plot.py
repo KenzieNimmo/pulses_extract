@@ -35,7 +35,7 @@ def main():
   #Define general variables
   args = parser()
   plot_grid = gridspec.GridSpec(args.nrows, args.ncols)  #Grid of burst plots
-  fig = plt.figure(figsize=(2*8.27, 2*11.69))  #A4
+  fig = plt.figure(figsize=(4*8.27, 4*11.69))  #A4
   
   #Load archive list
   if len(args.archives_list) == 1: ar_list = glob(args.archives_list[0])
@@ -63,7 +63,7 @@ def main():
   
   #General plot settings
   fig.tight_layout()
-  fig.subplots_adjust(hspace=0.3, wspace=0.05)
+  fig.subplots_adjust(hspace=0.1, wspace=0.05)
   if args.show: plt.show()
   if args.save_fig: fig.savefig(args.o, papertype = 'a4', orientation = 'portrait', format = 'png')
   return
