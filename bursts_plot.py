@@ -1,35 +1,64 @@
 import os
 import argparse
+from glob import glob
 
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 import numpy as np
 import psrchive
-import scipy.misc
+import scipy.ndimage
 
 def parser():
     # Command-line options
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-                                    description="Plot dynamic spectrum from single archives with 1 polarisation and 1 subintegration.")
-    parser.add_argument('archive_name', help="Name of the psrchive file to plot.")
+                                    description="Plot dynamic spectrum from multiple archives with 1 polarisation and 1 subintegration.")
+    parser.add_argument('archives_list', help="Name of the psrchive files to plot.", default='*.Tp')
     parser.add_argument('-show', help="Show the plot.", action='store_false')
     parser.add_argument('-save_fig', help="Save the plot.", action='store_true')
     parser.add_argument('-zap', help="Plot to manually zap bins out.", action='store_true')
+    parser.add_argument('-ncols', help="Number of columns in the general plot.", default=1, type=int)
+    parser.add_argument('-nrows', help="Number of rows in the general plot.", default=1, type=int)
+    parser.add_argument('-t_scrunch', help="Time scrunch archives by this factor.", default=1., type=float)
+    parser.add_argument('-f_scrunch', help="Frequency scrunch archives by this factor.", default=1., type=float)
     return parser.parse_args()
 
 def main():
   args = parser()
-  DS, extent = load_DS(args.archive_name)
-  if args.zap: extent = None
-  zap(args.archive_name, DS)
-  plot_DS(DS, args.archive_name, extent=extent, show=args.show, save=args.save_fig)
+  plot_grid = gridspec.GridSpec(args.nrows, args.ncols)  #Grid of burst plots
+  fig = plt.figure(figsize=(8.27, 11.69))  #A4
   
-def plot_DS(DS, archive_name, extent=None, show=True, save=False):
-  fig = plt.figure()
+  #Loop on each archive
+  ar_list = glob(args.archives_list)
+  for idx, archive_name in enumerate(ar_list):
+    #Load archive
+    DS, extent = load_DS(archive_name)
+    
+    #Zap the archive
+    if args.zap: extent = None
+    zap(archive_name, DS)
+    
+    #Plot the archive
+    plot(DS, plot_grid[idx], fig, extent=extent, ncols=args.ncols, nrows=args.nrows, t_scrunch=args.t_scrunch, f_scrunch=args.f_scrunch)
+  
+    #General plot settings
+  fig.subplots_adjust(hspace=0, wspace=0)
+  
+  if args.show: plt.show()
+  if args.save: fig.savefig(os.path.splitext(os.path.basename(archive_name))[0], papertype = 'a4', orientation = 'portrait', format = 'png')
+  return
+  
+  
+def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_scrunch=1.):
+  #Define subplots
+  plot_grid = gridspec.GridSpecFromSubplotSpec(2, 2, subplot_spec, wspace=0., hspace=0., height_ratios=[1,5], width_ratios=[5,1])
+  ax1 = plt.Subplot(fig, plot_grid[3])
+  ax2 = plt.Subplot(fig, plot_grid[0], sharex=ax1)
+  ax3 = plt.Subplot(fig, plot_grid[4], sharey=ax1)
   
   #Dynamic spectrum
-  ax1 = plt.subplot2grid((5,5), (1,0), rowspan=4, colspan=4)
+  #ax1 = plt.subplot2grid((5,5), (1,0), rowspan=4, colspan=4)
   if extent:
-    smooth_DS = scipy.misc.imresize(DS, 0.25, interp='cubic').astype(np.float)
+    smooth_DS = scipy.ndimage.zoom(DS, (1./f_scrunch,1./t_scrunch))
     smooth_DS -= np.median(smooth_DS)
     smooth_DS /= smooth_DS.max()
     cmap = 'RdGy_r'
@@ -46,7 +75,7 @@ def plot_DS(DS, archive_name, extent=None, show=True, save=False):
     extent = [0, smooth_DS.shape[1]-1, smooth_DS.shape[0]-1, 0]
   
   #Pulse profile
-  ax2 = plt.subplot2grid((5,5), (0,0), colspan=4, sharex=ax1)
+  #ax2 = plt.subplot2grid((5,5), (0,0), colspan=4, sharex=ax1)
   prof = np.mean(smooth_DS, axis=0)
   x = np.linspace(extent[0], extent[1], prof.size)
   ax2.plot(x, prof, 'k-')
@@ -55,7 +84,7 @@ def plot_DS(DS, archive_name, extent=None, show=True, save=False):
   ax2.set_xlim(extent[0:2])
   
   #Baseline
-  ax3 = plt.subplot2grid((5,5), (1,4), rowspan=4, sharey=ax1)
+  #ax3 = plt.subplot2grid((5,5), (1,4), rowspan=4, sharey=ax1)
   bl = np.mean(smooth_DS, axis=1)
   y = np.linspace(extent[3], extent[2], bl.size)
   ax3.plot(bl, y, 'k-')
@@ -63,13 +92,9 @@ def plot_DS(DS, archive_name, extent=None, show=True, save=False):
   ax3.tick_params(axis='y', labelleft='off')
   ax3.set_ylim(extent[2:4])
   
-  #General plot settings
-  title = os.path.splitext(os.path.basename(archive_name))[0]
-  fig.suptitle(title)
-  fig.subplots_adjust(hspace=0, wspace=0)
-  
-  if show: plt.show()
-  if save: fig.savefig(title, dpi=300)
+  fig.add_subplot(ax1)
+  fig.add_subplot(ax2)
+  fig.add_subplot(ax3)
   return 
 
 def load_DS(archive_name):
