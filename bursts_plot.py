@@ -69,7 +69,7 @@ def main():
     #Plot the archive
     idx += skip
 
-    if idx == args.nrows * args.ncols / 2:
+    if (idx > 0) and (idx == args.nrows * args.ncols / 2):
       plot_DM_curves(extent, plot_grid[idx], fig, fmin=args.f_min, fmax=args.f_max, width=args.time_window)
       skip += 1
       idx += 1
@@ -120,6 +120,8 @@ def plot_DM_curves(extent, subplot_spec, fig, fmin=None, fmax=None, width=False)
   
   if width: ax.set_xlim(-width/2., width/2.)
   ax.set_ylim(fmin, fmax)
+  ax.tick_params(axis='x', labelbottom='off')
+  ax.tick_params(axis='y', labelleft='off')
   fig.add_subplot(ax)
   return
   
