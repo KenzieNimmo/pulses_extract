@@ -82,7 +82,7 @@ def main():
   fig.tight_layout()
   fig.subplots_adjust(hspace=0.1, wspace=0.05)
   if args.show: plt.show()
-  if args.save_fig: fig.savefig(args.o, papertype = 'a4', orientation = 'portrait', format = 'png')
+  if args.save_fig: fig.savefig(args.o) #, papertype = 'a4', orientation = 'portrait', format = 'png')
   return
   
   
@@ -237,37 +237,37 @@ def burst_components(archive_name):
   elif os.path.basename(archive_name) == 'puppi_57644_C0531+33_0021_2461.Tp':
     return []
   
-  elif os.path.basename(archive_name) == 'puppi_57644_C0531+33_1218_280.Tp':
+  elif os.path.basename(archive_name) == 'puppi_57638_C0531+33_1218_280.Tp':
     return []
   
-  elif os.path.basename(archive_name) == 'puppi_57644_C0531+33_0048_821.Tp':
+  elif os.path.basename(archive_name) == 'puppi_57648_C0531+33_0048_821.Tp':
     return []
   
-  elif os.path.basename(archive_name) == 'puppi_57644_C0531+33_1274_1421.Tp':
+  elif os.path.basename(archive_name) == 'puppi_57640_C0531+33_1274_1421.Tp':
     return []
   
-  elif os.path.basename(archive_name) == 'puppi_57644_C0531+33_1312_185.Tp':
+  elif os.path.basename(archive_name) == 'puppi_57641_C0531+33_1312_185.Tp':
     return []
   
-  elif os.path.basename(archive_name) == 'puppi_57644_C0531+33_1312_521.Tp':
+  elif os.path.basename(archive_name) == 'puppi_57641_C0531+33_1312_521.Tp':
     return []
   
-  elif os.path.basename(archive_name) == 'puppi_57644_C0531+33_1322_1965.Tp':
+  elif os.path.basename(archive_name) == 'puppi_57642_C0531+33_1322_1965.Tp':
     return []
   
-  elif os.path.basename(archive_name) == 'puppi_57644_C0531+33_0048_378.Tp':
+  elif os.path.basename(archive_name) == 'puppi_57648_C0531+33_0048_378.Tp':
     return []
   
-  elif os.path.basename(archive_name) == 'puppi_57644_C0531+33_1322_7699.Tp':
+  elif os.path.basename(archive_name) == 'puppi_57642_C0531+33_1322_7699.Tp':
     return []
   
-  elif os.path.basename(archive_name) == 'puppi_57644_C0531+33_0085_2476.Tp':
+  elif os.path.basename(archive_name) == 'puppi_57646_C0531+33_0085_2476.Tp':
     return []
   
-  elif os.path.basename(archive_name) == 'puppi_57644_C0531+33_0085_4275.Tp':
+  elif os.path.basename(archive_name) == 'puppi_57646_C0531+33_0085_4275.Tp':
     return []
   
-  elif os.path.basename(archive_name) == 'puppi_57644_C0531+33_1218_2797.Tp':
+  elif os.path.basename(archive_name) == 'puppi_57638_C0531+33_1218_2797.Tp':
     return []
   
   else:
