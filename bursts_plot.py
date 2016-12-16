@@ -89,17 +89,30 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
   else: 
     smooth_DS = DS
     units = ("chan", "bin")
+
+  if extent and not fmin: fmin = extent[2]
+  if extent and not fmax: fmax = extent[3]
     
-  if extent and width:
+  #Applies temporal and frequency windows
+  if extent:
     prof = np.mean(smooth_DS, axis=0)
-    peak_ms = float(prof.argmax()) / prof.size * extent[1]
+    res_t = extent[1] / prof.size 
+    peak_ms = float(prof.argmax()) * res_t
     extent[0] -= peak_ms
     extent[1] -= peak_ms
-  if not fmin: fmin = extent[2]
-  if not fmax: fmax = extent[3]
-  if not extent: extent = [0, smooth_DS.shape[1]-1, smooth_DS.shape[0]-1, 0]
+    if width: smooth_DS = smooth_DS[:, prof.argmax() - np.ceil(width / 2. / res_t) : prof.argmax() + np.ceil(width / 2. / res_t)]
+    
+    fmin_bin = np.floor((fmin - extent[2]) / (extent[3] - extent[2]) * smooth_DS.shape[0])
+    fmax_bin = pn.ceil((fmax - extent[2]) / (extent[3] - extent[2]) * smooth_DS.shape[0])
+    smooth_DS = smooth_DS[fmin_bin:fmax_bin]
+    
+   else: extent = [0, smooth_DS.shape[1]-1, smooth_DS.shape[0]-1, 0]
   
-  if log_scale: smooth_DS = np.log(smooth_DS)
+  if log_scale:
+    smooth_DS -= smooth_DS.min()
+    smooth_DS /= smooth_DS.max()
+    smooth_DS = np.log(smooth_DS)
+    
   ax1.imshow(smooth_DS, cmap=cmap, origin='upper', aspect='auto', interpolation='nearest', extent=extent)
   
   if width: ax1.set_xlim(-width/2., width/2.)
