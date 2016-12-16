@@ -117,9 +117,7 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
     smooth_DS /= smooth_DS.max()
     smooth_DS = np.log(smooth_DS)
     
-  print smooth_DS.shape  
-  
-  ax1.imshow(smooth_DS, cmap=cmap, origin='upper', aspect='auto', interpolation='nearest', extent=extent)
+  ax1.imshow(smooth_DS, cmap=cmap, origin='upper', aspect='auto', interpolation='nearest')#, extent=extent)
   
   #if width: ax1.set_xlim(-width/2., width/2.)
   #ax1.set_ylim(fmin, fmax)
