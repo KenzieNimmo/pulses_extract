@@ -54,15 +54,17 @@ def main():
       
     #Load archive
     DS, extent = load_DS(archive_name)
+
+    #Zap the archive
+    if args.zap: extent = None
+    zap(archive_name, DS)
+    
+    #Invert teh band if flipped
     if extent[3] < extent[2]:
       temp = extent[3]
       extent[3] = extent[2]
       extent[2] = temp
       DS = np.flipud(DS)
-    
-    #Zap the archive
-    if args.zap: extent = None
-    zap(archive_name, DS)
     
     #Plot the archive
     idx += skip
