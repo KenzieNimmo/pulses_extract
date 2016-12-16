@@ -193,6 +193,7 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
   
   #Baseline
   bl = np.mean(smooth_DS, axis=1)
+  bl /= bl.max()
   y = np.linspace(extent[3], extent[2], bl.size)
   ax3.plot(bl, y, 'k-')
   ax3.tick_params(axis='x', which='both', top='off', bottom='off', labelbottom='off')
@@ -204,6 +205,7 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
   for i in range(len(components)-1):
     ax2.axvspan(components[i], components[i+1], color=colors[i], ls='-', linewidth=.2, alpha=.5)
     bl_c = np.mean(smooth_DS[:, components[i] : components[i+1]], axis=1)
+    bl_c /= bl.max()
     ax3.plot(bl_c, y, ls='--', c=colors[i])
     
     
