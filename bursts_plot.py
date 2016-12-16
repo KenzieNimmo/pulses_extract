@@ -49,8 +49,8 @@ def main():
   for idx, archive_name in enumerate(ar_list):
     #Skip plots in the first row
     if idx / args.ncols == 0:
-      plots_to_skip = args.nrows * args.ncols - len(ar_list)
-      if args.ncols - idx == plots_to_skip: skip += plots_to_skip - 1
+      plots_to_skip = args.nrows * args.ncols - len(ar_list) - 1
+      if args.ncols - idx == plots_to_skip: skip += plots_to_skip
       
     #Load archive
     DS, extent = load_DS(archive_name)
@@ -86,10 +86,11 @@ def main():
   
   
 def plot_DM_curves(extent, subplot_spec, fig, fmin=None, fmax=None, width=False):
+  plot_grid = gridspec.GridSpecFromSubplotSpec(2, 2, subplot_spec, wspace=0., hspace=0., height_ratios=[1,5], width_ratios=[5,1])
+  ax = plt.Subplot(fig, plot_grid[2])
+
   if not fmin: fmin = extent[2]
   if not fmax: fmax = extent[3]
-  ax = plt.Subplot(fig, subplot_spec)
-  
   f = np.linspace(fmin, fmax, 1000)
   
   def dt(f, dDM, fmin):
@@ -97,23 +98,23 @@ def plot_DM_curves(extent, subplot_spec, fig, fmin=None, fmax=None, width=False)
   
   t = dt(f, 0., fmin)
   ax.plot(t, f, 'k-')
-  ax.annotate("0", xy=(t[0] + 0.1, f[0] + 1e-3), horizontalalignment='left', verticalalignment='baseline')
+  ax.annotate("0" , xy=(t[0] + 0.1, f[0] + 5e-3), horizontalalignment='left', verticalalignment='baseline')
   
   t = dt(f, +1., fmin)
   ax.plot(t, f, 'k--')
-  ax.annotate("+1", xy=(t[0] + 0.1, f[0] + 1e-3), horizontalalignment='left', verticalalignment='baseline')
+  ax.annotate("+1", xy=(t[0] + 0.1, f[0] + 5e-3), horizontalalignment='left', verticalalignment='baseline')
   
   t = dt(f, -1., fmin)
   ax.plot(t, f, 'k--')
-  ax.annotate("-1", xy=(t[0] + 0.1, f[0] + 1e-3), horizontalalignment='left', verticalalignment='baseline')
+  ax.annotate("-1", xy=(t[0] + 0.1, f[0] + 5e-3), horizontalalignment='left', verticalalignment='baseline')
   
   t = dt(f, +2., fmin)
   ax.plot(t, f, 'k-.')
-  ax.annotate("+2", xy=(t[0] + 0.1, f[0] + 1e-3), horizontalalignment='left', verticalalignment='baseline')
+  ax.annotate("+2", xy=(t[0] + 0.1, f[0] + 5e-3), horizontalalignment='left', verticalalignment='baseline')
   
   t = dt(f, -2., fmin)
   ax.plot(t, f, 'k-.')
-  ax.annotate("-2", xy=(t[0] + 0.1, f[0] + 1e-3), horizontalalignment='left', verticalalignment='baseline')
+  ax.annotate("-2", xy=(t[0] + 0.1, f[0] + 5e-3), horizontalalignment='left', verticalalignment='baseline')
   
   if width: ax.set_xlim(-width/2., width/2.)
   ax.set_ylim(fmin, fmax)
