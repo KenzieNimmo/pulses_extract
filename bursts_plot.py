@@ -107,6 +107,8 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
     smooth_DS = smooth_DS[fmin_bin:fmax_bin]
     extent[2] = fmin
     extent[3] = fmax
+    
+    print fmin,fmax
         
   else: extent = [0, smooth_DS.shape[1]-1, smooth_DS.shape[0]-1, 0]
   
