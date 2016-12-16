@@ -72,6 +72,7 @@ def main():
     if idx == args.nrows * args.ncols / 2:
       plot_DM_curves(extent, plot_grid[idx], fig, fmin=args.f_min, fmax=args.f_max)
       skip += 1
+      idx += 1
 
     plot(DS, plot_grid[idx], fig, extent=extent, ncols=args.ncols, nrows=args.nrows, t_scrunch=args.t_scrunch, f_scrunch=args.f_scrunch,\
          index=idx, width=args.time_window, fmin=args.f_min, fmax=args.f_max, cmap=args.cmap, log_scale=args.log_scale)
@@ -228,7 +229,47 @@ def zap(archive_name, DS):
   
 
 def burst_components(archive_name):
+  if os.path.basename(archive_name) == 'puppi_57649_C0531+33_0106_413.Tp':
+    return []
   
+  elif os.path.basename(archive_name) == 'puppi_57644_C0531+33_0021_2461.Tp':
+    return []
+  
+  elif os.path.basename(archive_name) == 'puppi_57644_C0531+33_1218_280.Tp':
+    return []
+  
+  elif os.path.basename(archive_name) == 'puppi_57644_C0531+33_0048_821.Tp':
+    return []
+  
+  elif os.path.basename(archive_name) == 'puppi_57644_C0531+33_1274_1421.Tp':
+    return []
+  
+  elif os.path.basename(archive_name) == 'puppi_57644_C0531+33_1312_185.Tp':
+    return []
+  
+  elif os.path.basename(archive_name) == 'puppi_57644_C0531+33_1312_521.Tp':
+    return []
+  
+  elif os.path.basename(archive_name) == 'puppi_57644_C0531+33_1322_1965.Tp':
+    return []
+  
+  elif os.path.basename(archive_name) == 'puppi_57644_C0531+33_0048_378.Tp':
+    return []
+  
+  elif os.path.basename(archive_name) == 'puppi_57644_C0531+33_1322_7699.Tp':
+    return []
+  
+  elif os.path.basename(archive_name) == 'puppi_57644_C0531+33_0085_2476.Tp':
+    return []
+  
+  elif os.path.basename(archive_name) == 'puppi_57644_C0531+33_0085_4275.Tp':
+    return []
+  
+  elif os.path.basename(archive_name) == 'puppi_57644_C0531+33_1218_2797.Tp':
+    return []
+  
+  else:
+    print "Archive not known, components will not be identified."
   
   return  
 
