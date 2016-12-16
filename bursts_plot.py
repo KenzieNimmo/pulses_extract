@@ -68,8 +68,8 @@ def main():
     
     #Plot the archive
     if idx == args.nrows * args.ncols / 2:
-      skip += 1
       plot_DM_curves(extent, plot_grid[idx], fig, fmin=args.f_min, fmax=args.f_max)
+      skip += 1
 
     idx += skip
     plot(DS, plot_grid[idx], fig, extent=extent, ncols=args.ncols, nrows=args.nrows, t_scrunch=args.t_scrunch, f_scrunch=args.f_scrunch,\
