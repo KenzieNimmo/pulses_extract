@@ -102,13 +102,11 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
     extent[1] = width / 2.
     if width: smooth_DS = smooth_DS[:, int(prof.argmax() - np.ceil(width / 2. / res_t)) : int(prof.argmax() + np.ceil(width / 2. / res_t))]
     
-    fmin_bin = int(np.floor((fmin - extent[2]) / (extent[3] - extent[2]) * smooth_DS.shape[0]))
-    fmax_bin = int(np.ceil((fmax - extent[2]) / (extent[3] - extent[2]) * smooth_DS.shape[0]))
+    fmin_bin = int(np.ceil((fmax - extent[2]) / (extent[3] - extent[2]) * smooth_DS.shape[0]))
+    fmax_bin = int(np.floor((fmin - extent[2]) / (extent[3] - extent[2]) * smooth_DS.shape[0]))
     smooth_DS = smooth_DS[fmin_bin:fmax_bin]
-    
     extent[2] = fmin
     extent[3] = fmax
-    
         
   else: extent = [0, smooth_DS.shape[1]-1, smooth_DS.shape[0]-1, 0]
   
@@ -117,7 +115,7 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
     smooth_DS /= smooth_DS.max()
     smooth_DS = np.log(smooth_DS)
     
-  ax1.imshow(smooth_DS, cmap=cmap, origin='upper', aspect='auto', interpolation='nearest')#, extent=extent)
+  ax1.imshow(smooth_DS, cmap=cmap, origin='upper', aspect='auto', interpolation='nearest', extent=extent)
   
   #if width: ax1.set_xlim(-width/2., width/2.)
   #ax1.set_ylim(fmin, fmax)
