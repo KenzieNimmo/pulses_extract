@@ -54,6 +54,8 @@ def main():
       
     #Load archive
     DS, extent = load_DS(archive_name)
+    
+    components = burst_components(archive_name)
 
     #Zap the archive
     if args.zap: extent = None
@@ -75,7 +77,7 @@ def main():
       idx += 1
 
     plot(DS, plot_grid[idx], fig, extent=extent, ncols=args.ncols, nrows=args.nrows, t_scrunch=args.t_scrunch, f_scrunch=args.f_scrunch,\
-         index=idx, width=args.time_window, fmin=args.f_min, fmax=args.f_max, cmap=args.cmap, log_scale=args.log_scale)
+         index=idx, width=args.time_window, fmin=args.f_min, fmax=args.f_max, cmap=args.cmap, log_scale=args.log_scale, components=components)
 
   
   #General plot settings
@@ -126,7 +128,7 @@ def plot_DM_curves(extent, subplot_spec, fig, fmin=None, fmax=None, width=False)
   return
   
   
-def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_scrunch=1., index=None, width=False, fmin=None, fmax=None, cmap='Greys', log_scale=False):
+def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_scrunch=1., index=None, width=False, fmin=None, fmax=None, cmap='Greys', log_scale=False, components=None):
   #Define subplots
   plot_grid = gridspec.GridSpecFromSubplotSpec(2, 2, subplot_spec, wspace=0., hspace=0., height_ratios=[1,5], width_ratios=[5,1])
   ax1 = plt.Subplot(fig, plot_grid[2])
@@ -154,6 +156,7 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
     extent[0] = - width / 2.
     extent[1] = width / 2.
     if width: smooth_DS = smooth_DS[:, int(prof.argmax() - np.ceil(width / 2. / res_t)) : int(prof.argmax() + np.ceil(width / 2. / res_t))]
+    components = components / t_scrunch * res_t
     
     fmin_bin = int(np.floor((fmin - extent[2]) / (extent[3] - extent[2]) * smooth_DS.shape[0]))
     fmax_bin = int(np.ceil((fmax - extent[2]) / (extent[3] - extent[2]) * smooth_DS.shape[0]))
@@ -180,6 +183,8 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
   else: ax1.set_xlabel("Time ({})".format(units[1]))
   
   #Pulse profile
+  for c in components:
+    ax2.axvline(c, c='dodgerblue', ls='-', linewidth=.2)
   prof = np.mean(smooth_DS, axis=0)
   x = np.linspace(extent[0], extent[1], prof.size)
   ax2.plot(x, prof, 'k-')
@@ -232,48 +237,49 @@ def zap(archive_name, DS):
 
 def burst_components(archive_name):
   if os.path.basename(archive_name) == 'puppi_57649_C0531+33_0106_413.Tp':
-    return []
+    components = []
   
   elif os.path.basename(archive_name) == 'puppi_57644_C0531+33_0021_2461.Tp':
-    return []
+    components = []
   
   elif os.path.basename(archive_name) == 'puppi_57638_C0531+33_1218_280.Tp':
-    return []
+    components = []
   
   elif os.path.basename(archive_name) == 'puppi_57648_C0531+33_0048_821.Tp':
-    return []
+    components = []
   
   elif os.path.basename(archive_name) == 'puppi_57640_C0531+33_1274_1421.Tp':
-    return []
+    components = []
   
   elif os.path.basename(archive_name) == 'puppi_57641_C0531+33_1312_185.Tp':
-    return []
+    components = []
   
   elif os.path.basename(archive_name) == 'puppi_57641_C0531+33_1312_521.Tp':
-    return []
+    components = []
   
   elif os.path.basename(archive_name) == 'puppi_57642_C0531+33_1322_1965.Tp':
-    return []
+    components = []
   
   elif os.path.basename(archive_name) == 'puppi_57648_C0531+33_0048_378.Tp':
-    return []
+    components = []
   
   elif os.path.basename(archive_name) == 'puppi_57642_C0531+33_1322_7699.Tp':
-    return []
+    components = []
   
   elif os.path.basename(archive_name) == 'puppi_57646_C0531+33_0085_2476.Tp':
-    return []
+    components = []
   
   elif os.path.basename(archive_name) == 'puppi_57646_C0531+33_0085_4275.Tp':
-    return []
+    components = []
   
   elif os.path.basename(archive_name) == 'puppi_57638_C0531+33_1218_2797.Tp':
-    return []
+    components = [1601, 1659, 1735, 1860, 2075]
   
   else:
     print "Archive not known, components will not be identified."
+    components = []
   
-  return  
+  return np.array(components)
 
   
   
