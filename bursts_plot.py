@@ -60,7 +60,7 @@ def main():
     zap(archive_name, DS)
     
     #Invert the band if flipped
-    if extent[3] < extent[2]:
+    if extent and (extent[3] < extent[2]):
       temp = extent[3]
       extent[3] = extent[2]
       extent[2] = temp
