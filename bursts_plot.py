@@ -82,7 +82,7 @@ def main():
   fig.tight_layout()
   fig.subplots_adjust(hspace=0.1, wspace=0.05)
   if args.show: plt.show()
-  if args.save_fig: fig.savefig(args.o) #, papertype = 'a4', orientation = 'portrait', format = 'png')
+  if args.save_fig: fig.savefig(args.o, papertype = 'a4', orientation = 'portrait', format = 'png')
   return
   
   
