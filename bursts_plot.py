@@ -156,11 +156,11 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
     extent[0] = - width / 2.
     extent[1] = width / 2.
     components_ms = components / t_scrunch * res_t
-    components = int(components / t_scrunch)
+    components = np.int(components / t_scrunch)
     if width: 
       smooth_DS = smooth_DS[:, int(prof.argmax() - np.ceil(width / 2. / res_t)) : int(prof.argmax() + np.ceil(width / 2. / res_t))]
       components_ms -= peak_ms
-      components -= np.int(prof.argmax() - np.ceil(width / 2. / res_t))
+      components -= int(prof.argmax() - np.ceil(width / 2. / res_t))
     
     fmin_bin = int(np.floor((fmin - extent[2]) / (extent[3] - extent[2]) * smooth_DS.shape[0]))
     fmax_bin = int(np.ceil((fmax - extent[2]) / (extent[3] - extent[2]) * smooth_DS.shape[0]))
