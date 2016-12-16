@@ -98,16 +98,16 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
     prof = np.mean(smooth_DS, axis=0)
     res_t = extent[1] / prof.size 
     peak_ms = float(prof.argmax()) * res_t
-    extent[0] -= peak_ms
-    extent[1] -= peak_ms
-    if width: smooth_DS = smooth_DS[:, prof.argmax() - np.ceil(width / 2. / res_t) : prof.argmax() + np.ceil(width / 2. / res_t)]
+    extent[0] = - width / 2.
+    extent[1] = width / 2.
+    if width: smooth_DS = smooth_DS[:, int(prof.argmax() - np.ceil(width / 2. / res_t)) : int(prof.argmax() + np.ceil(width / 2. / res_t))]
     
-    fmin_bin = np.floor((fmin - extent[2]) / (extent[3] - extent[2]) * smooth_DS.shape[0])
-    fmax_bin = np.ceil((fmax - extent[2]) / (extent[3] - extent[2]) * smooth_DS.shape[0])
+    fmin_bin = int(np.floor((fmin - extent[2]) / (extent[3] - extent[2]) * smooth_DS.shape[0]))
+    fmax_bin = int(np.ceil((fmax - extent[2]) / (extent[3] - extent[2]) * smooth_DS.shape[0]))
     smooth_DS = smooth_DS[fmin_bin:fmax_bin]
-    
-    print fmin_bin, fmax_bin, prof.argmax() - np.ceil(width / 2. / res_t), prof.argmax() + np.ceil(width / 2. / res_t)
-    
+    extent[2] = fmin
+    extent[3] = fmax
+        
   else: extent = [0, smooth_DS.shape[1]-1, smooth_DS.shape[0]-1, 0]
   
   if log_scale:
