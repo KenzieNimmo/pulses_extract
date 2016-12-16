@@ -70,7 +70,7 @@ def main():
     idx += skip
 
     if idx == args.nrows * args.ncols / 2:
-      plot_DM_curves(extent, plot_grid[idx], fig, fmin=args.f_min, fmax=args.f_max)
+      plot_DM_curves(extent, plot_grid[idx], fig, fmin=args.f_min, fmax=args.f_max, width=args.time_window)
       skip += 1
       idx += 1
 
