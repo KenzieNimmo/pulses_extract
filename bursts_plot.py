@@ -103,7 +103,7 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
     if width: smooth_DS = smooth_DS[:, prof.argmax() - np.ceil(width / 2. / res_t) : prof.argmax() + np.ceil(width / 2. / res_t)]
     
     fmin_bin = np.floor((fmin - extent[2]) / (extent[3] - extent[2]) * smooth_DS.shape[0])
-    fmax_bin = pn.ceil((fmax - extent[2]) / (extent[3] - extent[2]) * smooth_DS.shape[0])
+    fmax_bin = np.ceil((fmax - extent[2]) / (extent[3] - extent[2]) * smooth_DS.shape[0])
     smooth_DS = smooth_DS[fmin_bin:fmax_bin]
     
   else: extent = [0, smooth_DS.shape[1]-1, smooth_DS.shape[0]-1, 0]
