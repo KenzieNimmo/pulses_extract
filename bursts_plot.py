@@ -183,8 +183,6 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
   else: ax1.set_xlabel("Time ({})".format(units[1]))
   
   #Pulse profile
-  for c in components:
-    ax2.axvline(c, c='dodgerblue', ls='-', linewidth=.2)
   prof = np.mean(smooth_DS, axis=0)
   x = np.linspace(extent[0], extent[1], prof.size)
   ax2.plot(x, prof, 'k-')
@@ -196,14 +194,20 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
   #Baseline
   bl = np.mean(smooth_DS, axis=1)
   y = np.linspace(extent[3], extent[2], bl.size)
-  for i in range(len(components)-1):
-    bl_c = np.mean(smooth_DS[:, components[i] : components[i+1]], axis=1)
-    ax3.plot(bl_c, y, 'g--')
   ax3.plot(bl, y, 'k-')
   ax3.tick_params(axis='x', which='both', top='off', bottom='off', labelbottom='off')
   ax3.tick_params(axis='y', labelleft='off')
   ax3.set_ylim(fmin, fmax)
   
+  #Plot components
+  colors = ['dodgerblue', 'mistyrose', 'sage', 'lavender', 'y', 'lightsalmon', 'silver']
+  for i in range(len(components)-1):
+    ax2.axvspan(components[i], components[i+1], c=colors[i], ls='-', linewidth=.2, alpha=.5)
+    bl_c = np.mean(smooth_DS[:, components[i] : components[i+1]], axis=1)
+    ax3.plot(bl_c, y, ls='--', c=colors[i])
+    
+    
+    
   fig.add_subplot(ax1)
   fig.add_subplot(ax2)
   fig.add_subplot(ax3)
