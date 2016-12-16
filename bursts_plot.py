@@ -183,7 +183,7 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
   #Give labels only to edge plots
   if index % ncols == 0: ax1.set_ylabel("Frequency ({})".format(units[0]))
   else: ax1.tick_params(axis='y', labelleft='off')
-  if (index < ncols * (nrows - 1)) and not width: ax1.tick_params(axis='x', labelbottom='off')
+  if (index < ncols * (nrows - 1)) and width: ax1.tick_params(axis='x', labelbottom='off')
   else: ax1.set_xlabel("Time ({})".format(units[1]))
   
   #Pulse profile
@@ -206,9 +206,9 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
   #Plot components
   colors = ['b', 'g', 'r', 'c', 'm', 'y']
   for i in range(len(components)-1):
-    ax2.axvspan(components_ms[i], components_ms[i+1], color=colors[i], ls='-', linewidth=.2, alpha=.5, ymax=.2)
+    ax2.axvspan(components_ms[i], components_ms[i+1], color=colors[i], ls='-', alpha=.5, ymax=.1)
     bl_c = np.sum(smooth_DS[:, components[i] : components[i+1]], axis=1)
-    ax3.plot(bl_c, y, c=colors[i])
+    ax3.plot(bl_c, y, c=colors[i], lw=1.)
     
     
     
