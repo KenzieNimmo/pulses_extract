@@ -80,9 +80,6 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
   ax2 = plt.Subplot(fig, plot_grid[0], sharex=ax1)
   ax3 = plt.Subplot(fig, plot_grid[3], sharey=ax1)
 
-  print extent
-
-
   #Dynamic spectrum
   if extent:
     smooth_DS = scipy.ndimage.zoom(DS, (1./f_scrunch,1./t_scrunch), order=1)
@@ -120,6 +117,8 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
     smooth_DS /= smooth_DS.max()
     smooth_DS = np.log(smooth_DS)
     
+  print smooth_DS.shape  
+  
   ax1.imshow(smooth_DS, cmap=cmap, origin='upper', aspect='auto', interpolation='nearest', extent=extent)
   
   #if width: ax1.set_xlim(-width/2., width/2.)
