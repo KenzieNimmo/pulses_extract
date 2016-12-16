@@ -67,11 +67,12 @@ def main():
       DS = np.flipud(DS)
     
     #Plot the archive
+    idx += skip
+
     if idx == args.nrows * args.ncols / 2:
       plot_DM_curves(extent, plot_grid[idx], fig, fmin=args.f_min, fmax=args.f_max)
       skip += 1
 
-    idx += skip
     plot(DS, plot_grid[idx], fig, extent=extent, ncols=args.ncols, nrows=args.nrows, t_scrunch=args.t_scrunch, f_scrunch=args.f_scrunch,\
          index=idx, width=args.time_window, fmin=args.f_min, fmax=args.f_max, cmap=args.cmap, log_scale=args.log_scale)
 
@@ -224,6 +225,13 @@ def zap(archive_name, DS):
   DS /= DS.max()
   return
   
+  
+
+def burst_components(archive_name):
+  
+  
+  return  
+
   
   
 def load_zap_list(archive_name):
