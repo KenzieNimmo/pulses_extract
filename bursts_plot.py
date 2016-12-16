@@ -50,7 +50,7 @@ def main():
     #Skip plots in the first row
     if idx / args.ncols == 0:
       plots_to_skip = args.nrows * args.ncols - len(ar_list)
-      if args.ncols - idx == plots_to_skip: skip += plots_to_skip
+      if args.ncols - idx == plots_to_skip: skip += plots_to_skip - 1
       
     #Load archive
     DS, extent = load_DS(archive_name)
@@ -59,7 +59,7 @@ def main():
     if args.zap: extent = None
     zap(archive_name, DS)
     
-    #Invert teh band if flipped
+    #Invert the band if flipped
     if extent[3] < extent[2]:
       temp = extent[3]
       extent[3] = extent[2]
@@ -67,9 +67,14 @@ def main():
       DS = np.flipud(DS)
     
     #Plot the archive
+    if idx == len(ar_list) / 2:
+      plot_DM_curves(extent, plot_grid[idx], fig, fmin=args.f_min, fmax=args.f_max)
+      idx += 1
+
     idx += skip
     plot(DS, plot_grid[idx], fig, extent=extent, ncols=args.ncols, nrows=args.nrows, t_scrunch=args.t_scrunch, f_scrunch=args.f_scrunch,\
          index=idx, width=args.time_window, fmin=args.f_min, fmax=args.f_max, cmap=args.cmap, log_scale=args.log_scale)
+
   
   #General plot settings
   fig.tight_layout()
@@ -78,6 +83,42 @@ def main():
   if args.save_fig: fig.savefig(args.o, papertype = 'a4', orientation = 'portrait', format = 'png')
   return
   
+  
+  
+def plot_DM_curves(extent, subplot_spec, fig, fmin=None, fmax=None, width=False):
+  if not fmin: fmin = extent[2]
+  if not fmax: fmax = extent[3]
+  ax = plt.Subplot(fig, subplot_spec)
+  
+  f = np.linspace(fmin, fmax, 1000)
+  
+  def dt(f, dDM, fmin):
+    return 4.14881e6 * ((f*1000)**-2 - (fmax*1000)**-2) * dDM
+  
+  t = dt(f, 0., fmin)
+  ax.plot(t, f, 'k-')
+  ax.annotate("0", xy=(t[0] + 0.1, f[0] + 1e-3), horizontalalignment='left', verticalalignment='baseline')
+  
+  t = dt(f, +1., fmin)
+  ax.plot(t, f, 'k--')
+  ax.annotate("+1", xy=(t[0] + 0.1, f[0] + 1e-3), horizontalalignment='left', verticalalignment='baseline')
+  
+  t = dt(f, -1., fmin)
+  ax.plot(t, f, 'k--')
+  ax.annotate("-1", xy=(t[0] + 0.1, f[0] + 1e-3), horizontalalignment='left', verticalalignment='baseline')
+  
+  t = dt(f, +2., fmin)
+  ax.plot(t, f, 'k-.')
+  ax.annotate("+2", xy=(t[0] + 0.1, f[0] + 1e-3), horizontalalignment='left', verticalalignment='baseline')
+  
+  t = dt(f, -2., fmin)
+  ax.plot(t, f, 'k-.')
+  ax.annotate("-2", xy=(t[0] + 0.1, f[0] + 1e-3), horizontalalignment='left', verticalalignment='baseline')
+  
+  if width: ax.set_xlim(-width/2., width/2.)
+  ax.set_ylim(fmin, fmax)
+  fig.add_subplot(ax)
+  return
   
   
 def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_scrunch=1., index=None, width=False, fmin=None, fmax=None, cmap='Greys', log_scale=False):
@@ -118,7 +159,7 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
   else: extent = [0, smooth_DS.shape[1]-1, 0, smooth_DS.shape[0]-1]
   
   if log_scale:
-    smooth_DS -= smooth_DS.min()
+    smooth_DS -= smooth_DS.min() + 1e-6
     smooth_DS /= smooth_DS.max()
     smooth_DS = np.log(smooth_DS)
     
