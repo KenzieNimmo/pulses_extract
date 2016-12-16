@@ -198,7 +198,7 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
   y = np.linspace(extent[3], extent[2], bl.size)
   for i in range(len(components)-1):
     bl_c = np.mean(smooth_DS[:, components[i] : components[i+1]], axis=1)
-    ax3.plot(bl, y, 'g--')
+    ax3.plot(bl_c, y, 'g--')
   ax3.plot(bl, y, 'k-')
   ax3.tick_params(axis='x', which='both', top='off', bottom='off', labelbottom='off')
   ax3.tick_params(axis='y', labelleft='off')
