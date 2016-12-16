@@ -115,8 +115,8 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
     
   ax1.imshow(smooth_DS, cmap=cmap, origin='upper', aspect='auto', interpolation='nearest', extent=extent)
   
-  if width: ax1.set_xlim(-width/2., width/2.)
-  ax1.set_ylim(fmin, fmax)
+  #if width: ax1.set_xlim(-width/2., width/2.)
+  #ax1.set_ylim(fmin, fmax)
   
   #Give labels only to edge plots
   if index % ncols == 0: ax1.set_ylabel("Frequency ({})".format(units[0]))
@@ -130,8 +130,8 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
   ax2.plot(x, prof, 'k-')
   ax2.tick_params(axis='y', which='both', left='off', right='off', labelleft='off')
   ax2.tick_params(axis='x', labelbottom='off')
-  if width: ax2.set_xlim(-width/2., width/2.)
-  else: ax2.set_xlim(extent[0:2])
+  #if width: ax2.set_xlim(-width/2., width/2.)
+  #else: ax2.set_xlim(extent[0:2])
   
   #Baseline
   bl = np.mean(smooth_DS, axis=1)
@@ -139,7 +139,7 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
   ax3.plot(bl, y, 'k-')
   ax3.tick_params(axis='x', which='both', top='off', bottom='off', labelbottom='off')
   ax3.tick_params(axis='y', labelleft='off')
-  ax3.set_ylim(fmin, fmax)
+  #ax3.set_ylim(fmin, fmax)
   
   fig.add_subplot(ax1)
   fig.add_subplot(ax2)
