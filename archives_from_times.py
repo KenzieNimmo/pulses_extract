@@ -45,7 +45,7 @@ def main():
     os.makedirs(out_dir)
   
   for i in range(len(args.time_list)):
-    t_folder = os.path.join(out_dir,'%.2f'%t)
+    t_folder = os.path.join(out_dir,'%.2f'%t_sec)
     os.makedirs(t_folder)
     extract_archive(t_sec[i], t_mjd[i], args.obsID, out_dir=t_folder, width=args.time_window)
   
