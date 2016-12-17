@@ -45,7 +45,8 @@ def main():
     os.makedirs(out_dir)
   
   for i in range(len(args.time_list)):
-    os.makedirs(os.path.join(out_dir,'%.2f'%t_sec[i]))
+    if not os.path.exists(os.path.join(out_dir,'%.2f'%t_sec[i]))
+      os.makedirs(os.path.join(out_dir,'%.2f'%t_sec[i]))
     extract_archive(t_sec[i], t_mjd[i], args.obsID, out_dir=out_dir, width=args.time_window)
   
   return
@@ -75,11 +76,12 @@ def start_of_obs(obsID):
   
 def extract_archive(t_sec, t_mjd, obsID, out_dir='.', width=0.04194304):
   #Create fits file
-  raw_files = os.path.join(RAW_DIR, obsID)
-  extract_subints_from_observation(raw_files, out_dir, [t_sec,], -2, 8, pulseID='%.2f'%t_sec)
+  fits_file = os.path.join(out_dir,'%.2f'%t_sec,'%d_%.2f.fits'%(obsID,t_sec))
+  if not os.path.isfile(fits_file):
+    raw_files = os.path.join(RAW_DIR, obsID)
+    extract_subints_from_observation(raw_files, out_dir, [t_sec,], -2, 8, pulseID='%.2f'%t_sec)
   
   #Create psrchive
-  fits_file = os.path.join(out_dir,'%.2f'%t_sec,'%.2f.fits'%t_sec)
   dspsr(fits_file, SMJD=t_mjd, width=width)
   
   return
