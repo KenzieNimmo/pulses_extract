@@ -36,7 +36,7 @@ def main():
   else:
     print "MJD values inserted."
     t_mjd = args.time_list
-    t_sec = mjd2sec(t_mjd)
+    t_sec = mjd2sec(t_mjd, obsID)
     print "Equivalent seconds from the start of observation: {}".format(t_sec)
     
   #Output directory
