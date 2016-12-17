@@ -28,6 +28,8 @@ def parser():
 def main():
   args = parser()
   
+  print args.time_list
+  
   if max(args.time_list) < 36000:
     print "Seconds from the start of observation inserted."
     t_sec = args.time_list
