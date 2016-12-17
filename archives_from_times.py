@@ -75,6 +75,7 @@ def start_of_obs(obsID):
   
   
 def extract_archive(t_sec, t_mjd, obsID, out_dir='.', width=0.04194304):
+  out_dir = os.path.abspath(out_dir)
   #Create fits file
   fits_file = os.path.join(out_dir,'%.2f'%t_sec,'%s_%.2f.fits'%(obsID,t_sec))
   if not os.path.isfile(fits_file):

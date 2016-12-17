@@ -86,8 +86,6 @@ def dspsr(fits_file, puls=None, par_file=False, profile_bins=4096, parallel=Fals
       if phase_start: start = period / 2.
       else: start = 0
       
-      print ['dspsr', '-S', str(start), '-K', '-b', str(profile_bins), '-s', '-E', par_file, fits_file]
-      
       with open(os.devnull, 'w') as FNULL:
         _ = subprocess.call(['dspsr', '-S', str(start), '-K', '-b', str(profile_bins), '-s', '-E', par_file, fits_file], cwd=temp_folder, stdout=FNULL)
     
