@@ -35,8 +35,8 @@ def main():
     print "Equivalent MJDs: {}".format(mjd + t_mjd / 24. / 3600.)
   else:
     print "MJD values inserted."
-    t_mjd = args.time_list
-    t_sec = mjd2sec(t_mjd, args.obsID)
+    t_sec, mjd = mjd2sec(t_mjd, args.obsID)
+    t_mjd = [t - mjd for t in args.time_list]
     print "Equivalent seconds from the start of observation: {}".format(t_sec)
     
   #Output directory
@@ -59,7 +59,7 @@ def sec2mjd(t_sec, obsID):
 
 def mjd2sec(t_mjd, obsID):
   obs_start, mjd = start_of_obs(obsID)
-  return [(t - mjd) * 24. * 3600. - obs_start for t in t_mjd] 
+  return [(t - mjd) * 24. * 3600. - obs_start for t in t_mjd], mjd
   
 def start_of_obs(obsID):
   raw_files = os.path.join(RAW_DIR, obsID)
