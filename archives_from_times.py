@@ -18,7 +18,7 @@ def parser():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
                                     description="The program extracts chunks of data from fits file into psarchives around a specified time list.")
     parser.add_argument('obsID', help="ID of the observation to process.")
-    parser.add_argument('time_list', help="List of times to extract, either in seconds from beginning of observation or MJD.", nargs='+')
+    parser.add_argument('time_list', help="List of times to extract, either in seconds from beginning of observation or MJD.", nargs='+', type=float)
     parser.add_argument('-output_folder', help="Path of the folder to store the bursts.", default='.')
     parser.add_argument('-time_window', help="Time window to extract around the pulse.", default=0.04194304, type=float)
     return parser.parse_args()
@@ -63,7 +63,6 @@ def mjd2sec(t_mjd, obsID):
   
 def start_of_obs(obsID):
   raw_files = os.path.join(RAW_DIR, obsID)
-  print raw_files
   raw_fits_files = glob(raw_files+'*')
   file_starts = []
   for obs in raw_fits_files:
