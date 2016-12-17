@@ -45,7 +45,7 @@ def main():
     os.makedirs(out_dir)
   
   for i in range(len(args.time_list)):
-    if not os.path.exists(os.path.join(out_dir,'%.2f'%t_sec[i]))
+    if not os.path.exists(os.path.join(out_dir,'%.2f'%t_sec[i])):
       os.makedirs(os.path.join(out_dir,'%.2f'%t_sec[i]))
     extract_archive(t_sec[i], t_mjd[i], args.obsID, out_dir=out_dir, width=args.time_window)
   
