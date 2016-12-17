@@ -137,9 +137,6 @@ def extract_subints_from_observation(froot,path,tbursts,isub0,isub1,pulseID=''):
     for idx, tburst in enumerate(tbursts):
         # Output filename
         fname="%s_%s.fits"%(os.path.join(path,pulseID[idx],os.path.basename(froot)),pulseID[idx])
-        
-        print path,pulseID[idx],os.path.basename(froot),pulseID[idx]
-        
         if os.path.isfile(fname): continue
 
         # Skip bursts outside of observation

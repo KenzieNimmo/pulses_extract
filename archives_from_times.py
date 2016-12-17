@@ -45,9 +45,8 @@ def main():
     os.makedirs(out_dir)
   
   for i in range(len(args.time_list)):
-    t_folder = os.path.join(out_dir,'%.2f'%t_sec[i])
-    os.makedirs(t_folder)
-    extract_archive(t_sec[i], t_mjd[i], args.obsID, out_dir=t_folder, width=args.time_window)
+    os.makedirs(os.path.join(out_dir,'%.2f'%t_sec[i]))
+    extract_archive(t_sec[i], t_mjd[i], args.obsID, out_dir=out_dir, width=args.time_window)
   
   return
 
@@ -80,7 +79,7 @@ def extract_archive(t_sec, t_mjd, obsID, out_dir='.', width=0.04194304):
   extract_subints_from_observation(raw_files, out_dir, [t_sec,], -2, 8, pulseID='%.2f'%t_sec)
   
   #Create psrchive
-  fits_file = os.path.join(out_dir,'%.2f.fits'%t_sec)
+  fits_file = os.path.join(out_dir,'%.2f'%t_sec,'%.2f.fits'%t_sec)
   dspsr(fits_file, SMJD=t_mjd, width=width)
   
   return
