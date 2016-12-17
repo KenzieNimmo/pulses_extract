@@ -20,7 +20,7 @@ def parser():
     parser.add_argument('obsID', help="ID of the observation to process.")
     parser.add_argument('time_list', help="List of times to extract, either in seconds from beginning of observation or MJD.", nargs='+', type=float)
     parser.add_argument('-output_folder', help="Path of the folder to store the bursts.", default='.')
-    parser.add_argument('-time_window', help="Time window to extract around the pulse.", default=0.04194304, type=float)
+    parser.add_argument('-time_window', help="Time window to extract around the pulse, in sec.", default=0.04194304, type=float)
     return parser.parse_args()
  
 
