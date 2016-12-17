@@ -65,6 +65,8 @@ def get_starttimes(froot):
         else:
             break
 
+   print froot, files
+
     return files,np.array(stt_imjd),np.array(stt_smjd),np.array(stt_offs),np.array(nsblk),np.array(tbin),np.asarray(nsuboffs),np.asarray(nsub)
 
 # Extract subints from a single file
@@ -138,8 +140,6 @@ def extract_subints_from_observation(froot,path,tbursts,isub0,isub1,pulseID=''):
         # Output filename
         fname="%s_%s.fits"%(os.path.join(path,pulseID[idx],os.path.basename(froot)),pulseID[idx])
         if os.path.isfile(fname): continue
-      
-        print tburst, tend
 
         # Skip bursts outside of observation
         if tburst<0.0 or tburst>np.max(tend):
