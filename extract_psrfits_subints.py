@@ -65,7 +65,7 @@ def get_starttimes(froot):
         else:
             break
 
-   print froot, files
+    print froot, files
 
     return files,np.array(stt_imjd),np.array(stt_smjd),np.array(stt_offs),np.array(nsblk),np.array(tbin),np.asarray(nsuboffs),np.asarray(nsub)
 
