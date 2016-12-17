@@ -59,7 +59,7 @@ def sec2mjd(t_sec, obsID):
 
 def mjd2sec(t_mjd, obsID):
   obs_start, mjd = start_of_obs(obsID)
-  return [t - obs_start for t in t_mjd] 
+  return [t - mjd - obs_start / 24. / 3600. for t in t_mjd] 
   
 def start_of_obs(obsID):
   raw_files = os.path.join(RAW_DIR, obsID)
