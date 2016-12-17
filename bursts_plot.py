@@ -1,4 +1,4 @@
-import os
+  import os
 import argparse
 from glob import glob
 
@@ -142,6 +142,8 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
     smooth_DS /= smooth_DS.max()
     units = ("GHz", "ms")
   else: 
+    width = False
+    fmin = fmax = None
     smooth_DS = DS
     units = ("chan", "bin")
 
@@ -204,12 +206,13 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
   ax3.set_ylim(fmin, fmax)
   
   #Plot components
-  colors = ['b', 'g', 'r', 'c', 'm', 'y']
-  for i in range(len(components)-1):
-    ax2.axvspan(components_ms[i], components_ms[i+1], color=colors[i], ls='-', alpha=.5, ymax=.1)
-    bl_c = np.sum(smooth_DS[:, components[i] : components[i+1]], axis=1)
-    ax3.plot(bl_c, y, c=colors[i], lw=1.)
-    
+  try:
+    colors = ['b', 'g', 'r', 'c', 'm', 'y']
+    for i in range(len(components)-1):
+      ax2.axvspan(components_ms[i], components_ms[i+1], color=colors[i], ls='-', ymax=.1)
+      bl_c = np.sum(smooth_DS[:, components[i] : components[i+1]], axis=1)
+      ax3.plot(bl_c, y, c=colors[i], lw=1.)
+  except UnboundLocalError: pass
     
     
   fig.add_subplot(ax1)
@@ -248,40 +251,40 @@ def zap(archive_name, DS):
 
 def burst_components(archive_name):
   if os.path.basename(archive_name) == 'puppi_57649_C0531+33_0106_413.Tp':
-    components = []
+    components = [1910, 2012, 2120, 2307]
   
   elif os.path.basename(archive_name) == 'puppi_57644_C0531+33_0021_2461.Tp':
-    components = []
+    components = [2100, 2700]
   
   elif os.path.basename(archive_name) == 'puppi_57638_C0531+33_1218_280.Tp':
-    components = []
+    components = [1100, 1600]
   
   elif os.path.basename(archive_name) == 'puppi_57648_C0531+33_0048_821.Tp':
-    components = []
+    components = [2295, 2434, 2522, 2800]
   
   elif os.path.basename(archive_name) == 'puppi_57640_C0531+33_1274_1421.Tp':
-    components = []
+    components = [2100, 2600]
   
   elif os.path.basename(archive_name) == 'puppi_57641_C0531+33_1312_185.Tp':
-    components = []
+    components = [1570, 1834, 1969, 2211, 2264, 2361, 2510, 2685]
   
   elif os.path.basename(archive_name) == 'puppi_57641_C0531+33_1312_521.Tp':
-    components = []
+    components = [2368, 2471, 2530, 2750]
   
   elif os.path.basename(archive_name) == 'puppi_57642_C0531+33_1322_1965.Tp':
-    components = []
+    components = [1847, 1944, 2032, 2124, 2240, 2360]
   
   elif os.path.basename(archive_name) == 'puppi_57648_C0531+33_0048_378.Tp':
-    components = []
+    components = [1187, 1347, 1482]
   
   elif os.path.basename(archive_name) == 'puppi_57642_C0531+33_1322_7699.Tp':
-    components = []
+    components = [2300, 2385, 2474, 2560, 2825]
   
   elif os.path.basename(archive_name) == 'puppi_57646_C0531+33_0085_2476.Tp':
-    components = []
+    components = [1714, 1797, 1910, 2070, 2222]
   
   elif os.path.basename(archive_name) == 'puppi_57646_C0531+33_0085_4275.Tp':
-    components = []
+    components = [626, 753, 890, 1194]
   
   elif os.path.basename(archive_name) == 'puppi_57638_C0531+33_1218_2797.Tp':
     components = [1601, 1659, 1735, 1860, 2075]
