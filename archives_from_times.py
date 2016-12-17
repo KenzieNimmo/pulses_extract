@@ -63,6 +63,7 @@ def mjd2sec(t_mjd, obsID):
   
 def start_of_obs(obsID):
   raw_files = os.path.join((RAW_DIR, obsID))
+  print raw_files
   raw_fits_files = glob(raw_files+'*')
   file_starts = []
   for obs in raw_fits_files:
