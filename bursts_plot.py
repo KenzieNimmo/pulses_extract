@@ -207,7 +207,7 @@ def plot(DS, subplot_spec, fig, extent=None, ncols=1, nrows=1, t_scrunch=1., f_s
   
   #Plot components
   try:
-    colors = ['b', 'g', 'r', 'c', 'm', 'y']
+    colors = ['b', 'r', 'g', 'c', 'm', 'y', 'lime', 'darkblue']
     for i in range(len(components)-1):
       ax2.axvspan(components_ms[i], components_ms[i+1], color=colors[i], ls='-', ymax=.1)
       bl_c = np.sum(smooth_DS[:, components[i] : components[i+1]], axis=1)
