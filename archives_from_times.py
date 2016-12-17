@@ -27,9 +27,7 @@ def parser():
 
 def main():
   args = parser()
-  
-  print args.time_list
-  
+    
   if max(args.time_list) < 36000:
     print "Seconds from the start of observation inserted."
     t_sec = args.time_list
@@ -46,7 +44,7 @@ def main():
   if not os.path.exists(out_dir):
     os.makedirs(out_dir)
   
-  for i in len(args.time_list):
+  for i in range(len(args.time_list)):
     t_folder = os.path.join(out_dir,'%.2f'%t)
     os.makedirs(t_folder)
     extract_archive(t_sec[i], t_mjd[i], args.obsID, out_dir=t_folder, width=args.time_window)
