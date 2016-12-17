@@ -76,8 +76,7 @@ def start_of_obs(obsID):
   
 def extract_archive(t_sec, t_mjd, obsID, out_dir='.', width=0.04194304):
   #Create fits file
-  raw_files = os.path.join(RAW_DIR, obsID)
-  extract_subints_from_observation(raw_files, out_dir, [t_sec,], -2, 8, pulseID='%.2f'%t_sec)
+  extract_subints_from_observation(RAW_DIR, out_dir, [t_sec,], -2, 8, pulseID='%.2f'%t_sec)
   
   #Create psrchive
   fits_file = os.path.join(out_dir,'%.2f.fits'%t_sec)
