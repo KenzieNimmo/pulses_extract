@@ -32,7 +32,7 @@ def main():
     print "Seconds from the start of observation inserted."
     t_sec = args.time_list
     t_mjd, mjd = sec2mjd(t_sec, args.obsID)
-    print "Equivalent MJDs: {}".format(mjd + t_mjd / 24. / 3600.)
+    print "Equivalent MJDs: {}".format([mjd + t / 24. / 3600. for t in t_mjd])
   else:
     print "MJD values inserted."
     t_sec, mjd = mjd2sec(args.time_list, args.obsID)
