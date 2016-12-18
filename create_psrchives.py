@@ -87,7 +87,7 @@ def dspsr(fits_file, puls=None, par_file=False, profile_bins=4096, parallel=Fals
       else: start = 0
       
       with open(os.devnull, 'w') as FNULL:
-        _ = subprocess.call(['dspsr', '-S', str(start), '-K', '-b', str(profile_bins), '-s', '-E', par_file, fits_file], cwd=temp_folder, stdout=FNULL)
+        #_ = subprocess.call(['dspsr', '-S', str(start), '-K', '-b', str(profile_bins), '-s', '-E', par_file, fits_file], cwd=temp_folder, stdout=FNULL)
     
       #Lists of archive names and starting times (s)
       archive_list = np.array(glob(os.path.join(temp_folder,'pulse_*.ar')))
@@ -98,6 +98,7 @@ def dspsr(fits_file, puls=None, par_file=False, profile_bins=4096, parallel=Fals
     
       #Find archive where dispersed pulse would start
       start_dispersed_puls = SMJD - archive_time_list
+      print SMJD, archive_time_list
       idx_puls = np.where( (start_dispersed_puls > 0) & (start_dispersed_puls < period))[0][0]
     
       #Check that puls is centered

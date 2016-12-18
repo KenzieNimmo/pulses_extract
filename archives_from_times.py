@@ -31,7 +31,7 @@ def main():
   if max(args.time_list) < 36000:
     print "Seconds from the start of observation inserted."
     t_sec = args.time_list
-    t_mjd, mjd = secs2mjd(t_sec, args.obsID)
+    t_mjd, mjd = sec2mjd(t_sec, args.obsID)
     print "Equivalent MJDs: {}".format(mjd + t_mjd / 24. / 3600.)
   else:
     print "MJD values inserted."
