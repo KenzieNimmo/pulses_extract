@@ -70,7 +70,7 @@ def dspsr(fits_file, puls=None, par_file=False, profile_bins=4096, parallel=Fals
   puls_folder = os.path.split(archive_name)[0]
   if not os.path.isfile(archive_name + '.ar'):
     readfile = read_fits(fits_file)
-    period = readfile['time_resolution'] * profile_bins
+    period = width #readfile['time_resolution'] * profile_bins
 
     #Delay between maximum and central frequencies
     DM_delay = psr_utils.delay_from_DM(DM, readfile['freq_c']) - psr_utils.delay_from_DM(DM, readfile['freq_c'] + readfile['bandwidth'] / 2. )
@@ -99,7 +99,7 @@ def dspsr(fits_file, puls=None, par_file=False, profile_bins=4096, parallel=Fals
     
       #Find archive where dispersed pulse would start
       start_dispersed_puls = SMJD - archive_time_list
-      print SMJD, archive_time_list
+      print start_dispersed_puls, period
       idx_puls = np.where( (start_dispersed_puls > 0) & (start_dispersed_puls < period))[0][0]
     
       #Check that puls is centered
