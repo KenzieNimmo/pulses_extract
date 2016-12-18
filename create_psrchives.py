@@ -87,10 +87,11 @@ def dspsr(fits_file, puls=None, par_file=False, profile_bins=4096, parallel=Fals
       else: start = 0
       
       with open(os.devnull, 'w') as FNULL:
-        #_ = subprocess.call(['dspsr', '-S', str(start), '-K', '-b', str(profile_bins), '-s', '-E', par_file, fits_file], cwd=temp_folder, stdout=FNULL)
-        pass
+        _ = subprocess.call(['dspsr', '-S', str(start), '-K', '-b', str(profile_bins), '-s', '-E', par_file, fits_file], cwd=temp_folder, stdout=FNULL)
+        
       #Lists of archive names and starting times (s)
       archive_list = np.array(glob(os.path.join(temp_folder,'pulse_*.ar')))
+      print archive_list
       archive_time_list = np.array([psrchive.Archive_load(ar).start_time().get_secs() + psrchive.Archive_load(ar).start_time().get_fracsec() for ar in archive_list])
       idx_sorted = np.argsort(archive_list)
       archive_list = archive_list[idx_sorted]
