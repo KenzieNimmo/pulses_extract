@@ -98,7 +98,6 @@ def dspsr(fits_file, puls=None, par_file=False, profile_bins=4096, parallel=Fals
     
       #Find archive where dispersed pulse would start
       start_dispersed_puls = SMJD - archive_time_list
-      print SMJD, archive_time_list, period
       idx_puls = np.where( (start_dispersed_puls > 0) & (start_dispersed_puls < period))[0][0]
     
       #Check that puls is centered

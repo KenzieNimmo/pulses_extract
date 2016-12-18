@@ -36,7 +36,7 @@ def main():
   else:
     print "MJD values inserted."
     t_sec, mjd = mjd2sec(args.time_list, args.obsID)
-    t_mjd = [t - mjd for t in args.time_list]
+    t_mjd = [(t - mjd)*24.*3600. for t in args.time_list]
     print "Equivalent seconds from the start of observation: {}".format(t_sec)
     
   #Output directory
