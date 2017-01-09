@@ -215,7 +215,7 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
     colors = ['b', 'r', 'g', 'c', 'm', 'y', 'lime', 'darkblue']
     for i in range(len(components)-1):
       ax2.axvspan(components_ms[i], components_ms[i+1], color=colors[i], ls='-', ymax=.1)
-      bl_c = spectrum[:, components[i] : components[i+1]]
+      bl_c = spectrum[components[i] : components[i+1]]
       ax3.plot(bl_c, y, c=colors[i], lw=1.)
   except UnboundLocalError: pass
 
