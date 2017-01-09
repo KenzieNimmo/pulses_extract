@@ -658,5 +658,5 @@ def load_zap_list(archive_name):
   return zap_list 
 
 
-if __name__ == '__main__'):
+if __name__ == '__main__':
   main()
