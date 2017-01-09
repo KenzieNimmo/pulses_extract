@@ -163,8 +163,8 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
       components -= int(ts.argmax() - np.ceil(width / 2. / res_t))
     else: t0 = t1 = None
     
-    fmin_bin = int(np.floor((fmin - extent[2]) / (extent[3] - extent[2]) * smooth_DS.shape[0]))
-    fmax_bin = int(np.ceil((fmax - extent[2]) / (extent[3] - extent[2]) * smooth_DS.shape[0]))
+    fmin_bin = int(np.floor((fmin - extent[2]) / (extent[3] - extent[2]) * spectrum.size))
+    fmax_bin = int(np.ceil((fmax - extent[2]) / (extent[3] - extent[2]) * spectrum.size))
     extent[2] = fmin
     extent[3] = fmax
   
