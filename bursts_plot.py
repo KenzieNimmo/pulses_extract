@@ -239,14 +239,11 @@ def load_DS(archive_name, pol=False, zap=False, t_scrunch=False, f_scrunch=False
   else: zap_ar(archive_name, archive)
   
   #Load dynamic spectrum
-  if pol: 
-    DS = archive[0]
-    if t_scrunch: DS = np.sum(np.reshape(DS, (DS.shape[0], DS.shape[1], DS.shape[2] / t_scrunch, t_scrunch)), axis=-1)
-    if f_scrunch: DS = np.sum(np.reshape(DS, (DS.shape[0], DS.shape[1]  / t_scrunch, t_scrunch, DS.shape[2])), axis=2)
-  else: 
-    DS = archive
-    if t_scrunch: DS = np.sum(np.reshape(DS, (DS.shape[0], DS.shape[1] / t_scrunch, t_scrunch)), axis=-1)
-    if f_scrunch: DS = np.sum(np.reshape(DS, (DS.shape[0]  / t_scrunch, t_scrunch, DS.shape[1])), axis=1)
+  if pol: DS = archive[0]
+  else: DS = archive
+
+  if t_scrunch: DS = np.sum(np.reshape(DS, (DS.shape[0], DS.shape[1] / t_scrunch, t_scrunch)), axis=2)
+  if f_scrunch: DS = np.sum(np.reshape(DS, (DS.shape[0]  / t_scrunch, t_scrunch, DS.shape[1])), axis=1)
   
   #Load frequency spectrum
   spectrum = np.sum(DS, axis=1)
