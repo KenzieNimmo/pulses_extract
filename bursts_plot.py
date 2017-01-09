@@ -234,7 +234,8 @@ def load_DS(archive_name, pol=False, zap=False, t_scrunch=False, f_scrunch=False
   archive = load_archive.get_data().squeeze()
   
   #Zap archive
-  if pol: for i in range(4): zap_ar(archive_name, archive[i])
+  if pol: 
+    for i in range(4): zap_ar(archive_name, archive[i])
   else: zap_ar(archive_name, archive)
   
   #Load dynamic spectrum
