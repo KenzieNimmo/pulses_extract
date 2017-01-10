@@ -81,7 +81,7 @@ def main():
     
     plot(DS, spectrum, ts, extent, plot_grid[idx], fig, ncols=args.ncols, nrows=args.nrows,\
          index=idx, width=args.time_window, fmin=args.f_min, fmax=args.f_max, cmap=args.cmap, log_scale=args.log_scale, components=components,\
-         zap=args.zap)
+         zap=args.zap, pol=args.pol)
 
   
   #General plot settings
@@ -132,8 +132,8 @@ def plot_DM_curves(extent, subplot_spec, fig, fmin=None, fmax=None, width=False)
   return
   
   
-def plot(DS, spectrum, ts_pol, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunch=1., f_scrunch=1., index=None,\
-    width=False, fmin=None, fmax=None, cmap='Greys', log_scale=False, components=None, zap=False):
+def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunch=1., f_scrunch=1., index=None,\
+    width=False, fmin=None, fmax=None, cmap='Greys', log_scale=False, components=None, zap=False, pol=False):
   #Define subplots
   plot_grid = gridspec.GridSpecFromSubplotSpec(2, 2, subplot_spec, wspace=0., hspace=0., height_ratios=[1,5], width_ratios=[5,1])
   ax1 = plt.Subplot(fig, plot_grid[2])
@@ -149,23 +149,20 @@ def plot(DS, spectrum, ts_pol, extent, subplot_spec, fig, ncols=1, nrows=1, t_sc
   if not zap and not fmin: fmin = extent[2]
   if not zap and not fmax: fmax = extent[3]
   
-  print ts_pol.shape
-  
   if zap: extent = [0, DS.shape[1]-1, 0, DS.shape[0]-1]
   else:
-    if ts_pol.shape[0] == 4: ts = ts_pol[0]
-    else: ts = ts_pol
-    res_t = extent[1] / ts.size 
-    peak_ms = float(ts.argmax()) * res_t
+    res_t = extent[1] / ts.shape[0]
+    peak = ts[0].argmax()
+    peak_ms = float(peak) * res_t
     extent[0] = - width / 2.
     extent[1] = width / 2.
     components_ms = components / t_scrunch * res_t
     components = (components / t_scrunch).astype(int)
     if width:
-      t0 = int(ts.argmax() - np.ceil(width / 2. / res_t))
-      t1 = int(ts.argmax() + np.ceil(width / 2. / res_t))
+      t0 = int(peak - np.ceil(width / 2. / res_t))
+      t1 = int(peak + np.ceil(width / 2. / res_t))
       components_ms -= peak_ms
-      components -= int(ts.argmax() - np.ceil(width / 2. / res_t))
+      components -= int(peak - np.ceil(width / 2. / res_t))
     else: t0 = t1 = None
     
     print t0, t1, peak_ms, res_t, components, components_ms, extent
@@ -177,12 +174,7 @@ def plot(DS, spectrum, ts_pol, extent, subplot_spec, fig, ncols=1, nrows=1, t_sc
   
     DS = DS[fmin_bin : fmax_bin, t0 : t1]
     spectrum = spectrum[fmin_bin : fmax_bin]
-    if len(ts_pol.shape) == 4:
-      ts_pol = ts_pol[:, t0 : t1]
-      ts = ts_pol[0]
-    else: 
-      ts_pol = ts_pol[t0 : t1]
-      ts = ts_pol
+    ts = ts[:, t0 : t1]
   
   if log_scale:
     DS -= DS.min() + 1e-6
@@ -201,11 +193,11 @@ def plot(DS, spectrum, ts_pol, extent, subplot_spec, fig, ncols=1, nrows=1, t_sc
   else: ax1.set_xlabel("Time ({})".format(units[1]))
   
   #Pulse profile
-  x = np.linspace(extent[0], extent[1], ts.size)
-  ax2.plot(x, ts, 'k-')
-  if ts_pol.shape[0] == 4:
-    ax2.plot(x, ts_pol[1], 'r-')
-    ax2.plot(x, ts_pol[2], 'b-')
+  x = np.linspace(extent[0], extent[1], ts.shape[0])
+  ax2.plot(x, ts[0], 'k-')
+  if pol:
+    ax2.plot(x, ts[1], 'r-')
+    ax2.plot(x, ts[2], 'b-')
   ax2.tick_params(axis='y', which='both', left='off', right='off', labelleft='off')
   ax2.tick_params(axis='x', labelbottom='off')
   if width: ax2.set_xlim(-width/2., width/2.)
@@ -238,34 +230,28 @@ def load_DS(archive_name, pol=False, zap=False, t_scrunch=False, f_scrunch=False
   load_archive = psrchive.Archive_load(archive_name)
   load_archive.remove_baseline()
   load_archive.convert_state('Stokes')
-  if not pol: load_archive.pscrunch()
   archive = load_archive.get_data().squeeze()
+  if len(archive.shape) != 3: raise AttributeError('Archive not valid')  #MIGLIORARE!
+
+  if t_scrunch: archive = np.sum(np.reshape(archive, (archive.shape[0], archive.shape[1], archive.shape[2] / t_scrunch, t_scrunch)), axis=3)
+  if f_scrunch: DS = np.sum(np.reshape(archive, (archive.shape[0], archive.shape[0]  / t_scrunch, t_scrunch, archive.shape[1])), axis=2)
   
   #Zap archive
-  if pol: 
-    for i in range(4): zap_ar(archive_name, archive[i])
-  else: zap_ar(archive_name, archive)
+  for i in range(4): zap_ar(archive_name, archive[i])
   
   #Load dynamic spectrum
-  if pol: DS = archive[0]
-  else: DS = archive
-  
-  if t_scrunch: DS = np.sum(np.reshape(DS, (DS.shape[0], DS.shape[1] / t_scrunch, t_scrunch)), axis=2)
-  if f_scrunch: DS = np.sum(np.reshape(DS, (DS.shape[0]  / t_scrunch, t_scrunch, DS.shape[1])), axis=1)
+  DS = archive[0]
   
   #Load frequency spectrum
   spectrum = np.sum(DS, axis=1)
   
   #Load timeseries
-  if pol:   #ORDINE DELLE OPERAZIONI CORRETTO??
-    I = np.sum(archive[0], axis=0)
-    L = np.sum(np.sqrt(archive[1]**2 + archive[2]**2), axis=0)
-    V = np.sum(archive[3], axis=0)
-    PA = np.sum(np.rad2deg(np.arctan2(archive[2] , archive[1])) / 2., axis=0)
-    ts = np.vstack((I, L, V, PA))
-  else:
-    ts = np.sum(DS, axis=0)
-    
+  I = np.sum(archive[0], axis=0)
+  L = np.sum(np.sqrt(archive[1]**2 + archive[2]**2), axis=0)
+  V = np.sum(archive[3], axis=0)
+  PA = np.sum(np.rad2deg(np.arctan2(archive[2] , archive[1])) / 2., axis=0)
+  ts = np.vstack((I, L, V, PA))
+  
   #Load extensions
   if zap: extent = None
   else:
