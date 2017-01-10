@@ -140,6 +140,8 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
   ax2 = plt.Subplot(fig, plot_grid[0], sharex=ax1)
   ax3 = plt.Subplot(fig, plot_grid[3], sharey=ax1)
   
+  print DS
+  
   #Applies temporal and frequency windows
   if zap:
     fmin = fmax = None
@@ -249,7 +251,7 @@ def load_DS(archive_name, pol=False, zap=False, t_scrunch=False, f_scrunch=False
   I = np.sum(archive[0], axis=0)
   L = np.sum(np.sqrt(archive[1]**2 + archive[2]**2), axis=0)
   V = np.sum(archive[3], axis=0)
-  PA = np.sum(np.rad2deg(np.arctan2(archive[2] , archive[1])) / 2., axis=0)
+  PA = np.sum(np.rad2deg(np.arctan2(archive[2] , archive[1])) / 2., axis=0)  #CONTROLLARE
   ts = np.vstack((I, L, V, PA))
   
   #Load extensions
