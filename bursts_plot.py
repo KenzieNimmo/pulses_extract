@@ -140,8 +140,6 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
   ax2 = plt.Subplot(fig, plot_grid[0], sharex=ax1)
   ax3 = plt.Subplot(fig, plot_grid[3], sharey=ax1)
   
-  print DS
-  
   #Applies temporal and frequency windows
   if zap:
     fmin = fmax = None
@@ -236,7 +234,7 @@ def load_DS(archive_name, pol=False, zap=False, t_scrunch=False, f_scrunch=False
   if len(archive.shape) != 3: raise AttributeError('Archive not valid')  #MIGLIORARE!
 
   if t_scrunch: archive = np.sum(np.reshape(archive, (archive.shape[0], archive.shape[1], archive.shape[2] / t_scrunch, t_scrunch)), axis=3)
-  if f_scrunch: DS = np.sum(np.reshape(archive, (archive.shape[0], archive.shape[0]  / t_scrunch, t_scrunch, archive.shape[1])), axis=2)
+  if f_scrunch: DS = np.sum(np.reshape(archive, (archive.shape[0], archive.shape[1]  / t_scrunch, t_scrunch, archive.shape[2])), axis=2)
   
   #Zap archive
   for i in range(4): zap_ar(archive_name, archive[i])
