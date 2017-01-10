@@ -69,6 +69,7 @@ def main():
       extent[3] = extent[2]
       extent[2] = temp
       DS = np.flipud(DS)
+      spectrum = np.flipud(spectrum)
     
     #Plot the archive
     idx += skip
@@ -241,6 +242,8 @@ def load_DS(archive_name, pol=False, zap=False, t_scrunch=False, f_scrunch=False
   #Load dynamic spectrum
   if pol: DS = archive[0]
   else: DS = archive
+  
+  print DS.shape, archive.shape
 
   if t_scrunch: DS = np.sum(np.reshape(DS, (DS.shape[0], DS.shape[1] / t_scrunch, t_scrunch)), axis=2)
   if f_scrunch: DS = np.sum(np.reshape(DS, (DS.shape[0]  / t_scrunch, t_scrunch, DS.shape[1])), axis=1)
