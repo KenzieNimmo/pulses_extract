@@ -149,7 +149,7 @@ def plot(DS, spectrum, ts_pol, extent, subplot_spec, fig, ncols=1, nrows=1, t_sc
   if not zap and not fmin: fmin = extent[2]
   if not zap and not fmax: fmax = extent[3]
   
-  print ts.shape
+  print ts_pol.shape
   
   if zap: extent = [0, DS.shape[1]-1, 0, DS.shape[0]-1]
   else:
