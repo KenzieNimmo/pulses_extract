@@ -149,6 +149,8 @@ def plot(DS, spectrum, ts_pol, extent, subplot_spec, fig, ncols=1, nrows=1, t_sc
   if not zap and not fmin: fmin = extent[2]
   if not zap and not fmax: fmax = extent[3]
   
+  print ts.shape
+  
   if zap: extent = [0, DS.shape[1]-1, 0, DS.shape[0]-1]
   else:
     if ts_pol.shape[0] == 4: ts = ts_pol[0]
@@ -165,6 +167,8 @@ def plot(DS, spectrum, ts_pol, extent, subplot_spec, fig, ncols=1, nrows=1, t_sc
       components_ms -= peak_ms
       components -= int(ts.argmax() - np.ceil(width / 2. / res_t))
     else: t0 = t1 = None
+    
+    print t0, t1, peak_ms, res_t, components, components_ms, extent
     
     fmin_bin = int(np.floor((fmin - extent[2]) / (extent[3] - extent[2]) * spectrum.size))
     fmax_bin = int(np.ceil((fmax - extent[2]) / (extent[3] - extent[2]) * spectrum.size))
