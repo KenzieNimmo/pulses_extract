@@ -152,6 +152,7 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
   if zap: extent = [0, DS.shape[1]-1, 0, DS.shape[0]-1]
   else:
     res_t = extent[1] / ts.shape[1]
+    print ts.shape[1]
     peak = ts[0].argmax()
     peak_ms = float(peak) * res_t
     extent[0] = - width / 2.
