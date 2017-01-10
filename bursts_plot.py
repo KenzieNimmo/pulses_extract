@@ -139,7 +139,13 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
   ax1 = plt.Subplot(fig, plot_grid[2])
   ax2 = plt.Subplot(fig, plot_grid[0], sharex=ax1)
   ax3 = plt.Subplot(fig, plot_grid[3], sharey=ax1)
-
+  
+  if ts.shape[0] == 4:
+    ts_pol = ts
+    ts = ts[0]
+  else:
+    ts_pol = False
+  
   #Applies temporal and frequency windows
   if zap:
     fmin = fmax = None
@@ -191,14 +197,11 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
   else: ax1.set_xlabel("Time ({})".format(units[1]))
   
   #Pulse profile
-  if len(ts.shape) == 1: 
-    x = np.linspace(extent[0], extent[1], ts.size)
-    ax2.plot(x, ts, 'k-')
-  else:
-    x = np.linspace(extent[0], extent[1], ts.shape[1])
-    ax2.plot(x, ts[0], 'k-')
-    ax2.plot(x, ts[1], 'r-')
-    ax2.plot(x, ts[2], 'b-')
+  x = np.linspace(extent[0], extent[1], ts.size)
+  ax2.plot(x, ts, 'k-')
+  if ts_pol:
+    ax2.plot(x, ts_pol[1], 'r-')
+    ax2.plot(x, ts_pol[2], 'b-')
   ax2.tick_params(axis='y', which='both', left='off', right='off', labelleft='off')
   ax2.tick_params(axis='x', labelbottom='off')
   if width: ax2.set_xlim(-width/2., width/2.)
@@ -268,9 +271,7 @@ def load_DS(archive_name, pol=False, zap=False, t_scrunch=False, f_scrunch=False
     f1 = (freq + bw / 2) / 1000
     duration = load_archive.integration_length() * 1000
     extent = [0., duration, f0, f1]
-  
-  print DS.shape, spectrum.shape, ts.shape
-  
+    
   return DS, spectrum, ts, extent
    
    
