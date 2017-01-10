@@ -248,7 +248,7 @@ def load_DS(archive_name, pol=False, zap=False, t_scrunch=False, f_scrunch=False
   L = np.sqrt(np.sum(archive[1], axis=0)**2 + np.sum(archive[2], axis=0)**2)
   L -= np.median(L)
   V = np.sum(archive[3], axis=0)
-  PA = np.sum(np.rad2deg(np.arctan2(np.sum(archive[2], axis=0) , np.sum(archive[1], axis=0))) / 2., axis=0)  #CONTROLLARE
+  PA = np.rad2deg(np.arctan2(np.sum(archive[2], axis=0) , np.sum(archive[1], axis=0))) / 2.
   ts = np.vstack((I, L, V, PA))
   
   #Load extensions
