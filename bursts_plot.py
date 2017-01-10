@@ -140,9 +140,6 @@ def plot(DS, spectrum, ts_pol, extent, subplot_spec, fig, ncols=1, nrows=1, t_sc
   ax2 = plt.Subplot(fig, plot_grid[0], sharex=ax1)
   ax3 = plt.Subplot(fig, plot_grid[3], sharey=ax1)
   
-  if ts_pol.shape[0] == 4: ts = ts_pol[0]
-  else: ts = ts_pol
-  
   #Applies temporal and frequency windows
   if zap:
     fmin = fmax = None
@@ -154,6 +151,8 @@ def plot(DS, spectrum, ts_pol, extent, subplot_spec, fig, ncols=1, nrows=1, t_sc
   
   if zap: extent = [0, DS.shape[1]-1, 0, DS.shape[0]-1]
   else:
+    if ts_pol.shape[0] == 4: ts = ts_pol[0]
+    else: ts = ts_pol
     res_t = extent[1] / ts.size 
     peak_ms = float(ts.argmax()) * res_t
     extent[0] = - width / 2.
@@ -174,8 +173,12 @@ def plot(DS, spectrum, ts_pol, extent, subplot_spec, fig, ncols=1, nrows=1, t_sc
   
     DS = DS[fmin_bin : fmax_bin, t0 : t1]
     spectrum = spectrum[fmin_bin : fmax_bin]
-    if len(ts.shape) == 1: ts = ts[t0 : t1]
-    else: ts = ts[:, t0 : t1]
+    if len(ts_pol.shape) == 4:
+      ts_pol = ts_pol[:, t0 : t1]
+      ts = ts_pol[0]
+    else: 
+      ts_pol = ts_pol[t0 : t1]
+      ts = ts_pol
   
   if log_scale:
     DS -= DS.min() + 1e-6
