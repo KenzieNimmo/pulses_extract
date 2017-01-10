@@ -59,7 +59,7 @@ def main():
       if args.ncols - idx == plots_to_skip: skip += plots_to_skip
       
     #Load archive
-    DS, spectrum, ts, extent = load_DS(archive_name, args.pol, t_scrunch=args.t_scrunch, f_scrunch=args.f_scrunch)
+    DS, spectrum, ts, extent = load_DS(archive_name, t_scrunch=args.t_scrunch, f_scrunch=args.f_scrunch)
     components = burst_components(archive_name)
     if args.zap: extent = None
     
@@ -81,7 +81,7 @@ def main():
     
     plot(DS, spectrum, ts, extent, plot_grid[idx], fig, ncols=args.ncols, nrows=args.nrows,\
          index=idx, width=args.time_window, fmin=args.f_min, fmax=args.f_max, cmap=args.cmap, log_scale=args.log_scale, components=components,\
-         zap=args.zap, pol=args.pol)
+         zap=args.zap, pol=args.pol, t_scrunch=args.t_scrunch, f_scrunch=args.f_scrunch)
 
   
   #General plot settings
@@ -165,9 +165,6 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
       components_ms -= peak_ms
       components -= int(peak - center)
     else: t0 = t1 = None
-    
-    print components
-        
     fmin_bin = int(np.floor((fmin - extent[2]) / (extent[3] - extent[2]) * spectrum.size))
     fmax_bin = int(np.ceil((fmax - extent[2]) / (extent[3] - extent[2]) * spectrum.size))
     extent[2] = fmin
@@ -226,7 +223,7 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
   return 
 
 
-def load_DS(archive_name, pol=False, zap=False, t_scrunch=False, f_scrunch=False):
+def load_DS(archive_name, zap=False, t_scrunch=False, f_scrunch=False):
   #Load archive
   load_archive = psrchive.Archive_load(archive_name)
   load_archive.remove_baseline()
