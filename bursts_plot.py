@@ -243,8 +243,6 @@ def load_DS(archive_name, pol=False, zap=False, t_scrunch=False, f_scrunch=False
   if pol: DS = archive[0]
   else: DS = archive
   
-  print DS.shape, archive.shape
-
   if t_scrunch: DS = np.sum(np.reshape(DS, (DS.shape[0], DS.shape[1] / t_scrunch, t_scrunch)), axis=2)
   if f_scrunch: DS = np.sum(np.reshape(DS, (DS.shape[0]  / t_scrunch, t_scrunch, DS.shape[1])), axis=1)
   
@@ -270,6 +268,8 @@ def load_DS(archive_name, pol=False, zap=False, t_scrunch=False, f_scrunch=False
     f1 = (freq + bw / 2) / 1000
     duration = load_archive.integration_length() * 1000
     extent = [0., duration, f0, f1]
+  
+  print DS.shape, spectrum.shape, ts.shape
   
   return DS, spectrum, ts, extent
    
