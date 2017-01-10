@@ -245,9 +245,10 @@ def load_DS(archive_name, pol=False, zap=False, t_scrunch=False, f_scrunch=False
   
   #Load timeseries
   I = np.sum(DS, axis=0)
-  L = np.sum(np.sqrt(archive[1]**2 + archive[2]**2), axis=0)
+  L = np.sqrt(np.sum(archive[1], axis=0)**2 + np.sum(archive[2], axis=0)**2)
+  L -= np.median(L)
   V = np.sum(archive[3], axis=0)
-  PA = np.sum(np.rad2deg(np.arctan2(archive[2] , archive[1])) / 2., axis=0)  #CONTROLLARE
+  PA = np.sum(np.rad2deg(np.arctan2(np.sum(archive[2], axis=0) , np.sum(archive[1], axis=0))) / 2., axis=0)  #CONTROLLARE
   ts = np.vstack((I, L, V, PA))
   
   #Load extensions
