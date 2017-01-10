@@ -197,11 +197,12 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
     ax2.plot(x, ts[1], 'r-')
     ax2.plot(x, ts[2], 'b-')
   #ax2.tick_params(axis='y', which='both', left='off', right='off', labelleft='off')
-  ax2.tick_params(axis='y', which='right', right='off')
+  ax2.tick_params(axis='y', which='both', right='off', labelleft='off')
   ax2.tick_params(axis='x', labelbottom='off')
   if width: ax2.set_xlim(-width/2., width/2.)
   else: ax2.set_xlim(extent[0:2])
-  ax2.set_ylim(-ts[0].max()/5., ts[0].max()*5./6.)
+  ax2.set_ylim(-ts[0].max()/4., ts[0].max()*6./5.)
+  ax.set_yticks([ts[0].max(),])
   
   #Spectrum
   y = np.linspace(extent[2], extent[3], spectrum.size)
