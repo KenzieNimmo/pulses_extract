@@ -164,9 +164,7 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
       components_ms -= peak_ms
       components -= int(peak - np.ceil(width / 2. / res_t))
     else: t0 = t1 = None
-    
-    print t0, t1, peak_ms, res_t, components, components_ms, extent
-    
+        
     fmin_bin = int(np.floor((fmin - extent[2]) / (extent[3] - extent[2]) * spectrum.size))
     fmax_bin = int(np.ceil((fmax - extent[2]) / (extent[3] - extent[2]) * spectrum.size))
     extent[2] = fmin
@@ -233,11 +231,11 @@ def load_DS(archive_name, pol=False, zap=False, t_scrunch=False, f_scrunch=False
   archive = load_archive.get_data().squeeze()
   if len(archive.shape) != 3: raise AttributeError('Archive not valid')  #MIGLIORARE!
 
-  if t_scrunch: archive = np.sum(np.reshape(archive, (archive.shape[0], archive.shape[1], archive.shape[2] / t_scrunch, t_scrunch)), axis=3)
-  if f_scrunch: DS = np.sum(np.reshape(archive, (archive.shape[0], archive.shape[1]  / t_scrunch, t_scrunch, archive.shape[2])), axis=2)
-  
   #Zap archive
   for i in range(4): zap_ar(archive_name, archive[i])
+
+  if t_scrunch: archive = np.sum(np.reshape(archive, (archive.shape[0], archive.shape[1], archive.shape[2] / t_scrunch, t_scrunch)), axis=3)
+  if f_scrunch: DS = np.sum(np.reshape(archive, (archive.shape[0], archive.shape[1]  / t_scrunch, t_scrunch, archive.shape[2])), axis=2)
   
   #Load dynamic spectrum
   DS = archive[0]
@@ -246,7 +244,7 @@ def load_DS(archive_name, pol=False, zap=False, t_scrunch=False, f_scrunch=False
   spectrum = np.sum(DS, axis=1)
   
   #Load timeseries
-  I = np.sum(archive[0], axis=0)
+  I = np.sum(DS, axis=0)
   L = np.sum(np.sqrt(archive[1]**2 + archive[2]**2), axis=0)
   V = np.sum(archive[3], axis=0)
   PA = np.sum(np.rad2deg(np.arctan2(archive[2] , archive[1])) / 2., axis=0)  #CONTROLLARE
