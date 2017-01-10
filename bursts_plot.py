@@ -152,7 +152,6 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
   if zap: extent = [0, DS.shape[1]-1, 0, DS.shape[0]-1]
   else:
     res_t = extent[1] / ts.shape[1]
-    print ts.shape[1]
     peak = ts[0].argmax()
     peak_ms = float(peak) * res_t
     extent[0] = - width / 2.
@@ -160,10 +159,11 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
     components_ms = components / t_scrunch * res_t
     components = (components / t_scrunch).astype(int)
     if width:
-      t0 = int(peak - np.ceil(width / 2. / res_t))
-      t1 = int(peak + np.ceil(width / 2. / res_t))
+      center = np.ceil(width / 2. / res_t)
+      t0 = int(peak - center)
+      t1 = int(peak + center)
       components_ms -= peak_ms
-      components -= int(peak - np.ceil(width / 2. / res_t))
+      components -= int(peak - center)
     else: t0 = t1 = None
         
     fmin_bin = int(np.floor((fmin - extent[2]) / (extent[3] - extent[2]) * spectrum.size))
