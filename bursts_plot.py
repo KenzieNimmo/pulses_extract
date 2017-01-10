@@ -132,7 +132,7 @@ def plot_DM_curves(extent, subplot_spec, fig, fmin=None, fmax=None, width=False)
   return
   
   
-def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunch=1., f_scrunch=1., index=None,\
+def plot(DS, spectrum, ts_pol, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunch=1., f_scrunch=1., index=None,\
     width=False, fmin=None, fmax=None, cmap='Greys', log_scale=False, components=None, zap=False):
   #Define subplots
   plot_grid = gridspec.GridSpecFromSubplotSpec(2, 2, subplot_spec, wspace=0., hspace=0., height_ratios=[1,5], width_ratios=[5,1])
@@ -140,11 +140,8 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
   ax2 = plt.Subplot(fig, plot_grid[0], sharex=ax1)
   ax3 = plt.Subplot(fig, plot_grid[3], sharey=ax1)
   
-  if ts.shape[0] == 4:
-    ts_pol = ts
-    ts = ts[0]
-  else:
-    ts_pol = False
+  if ts_pol.shape[0] == 4: ts = ts_pol[0]
+  else: ts = ts_pol
   
   #Applies temporal and frequency windows
   if zap:
@@ -199,7 +196,7 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
   #Pulse profile
   x = np.linspace(extent[0], extent[1], ts.size)
   ax2.plot(x, ts, 'k-')
-  if ts_pol:
+  if ts_pol.shape[0] == 4:
     ax2.plot(x, ts_pol[1], 'r-')
     ax2.plot(x, ts_pol[2], 'b-')
   ax2.tick_params(axis='y', which='both', left='off', right='off', labelleft='off')
