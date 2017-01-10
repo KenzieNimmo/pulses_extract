@@ -53,6 +53,7 @@ def main():
   #Loop on each archive
   skip = 0
   for idx, archive_name in enumerate(ar_list):
+    i = idx
     #Skip plots in the first row
     if idx / args.ncols == 0:
       plots_to_skip = args.nrows * args.ncols - len(ar_list) - 1
@@ -81,7 +82,7 @@ def main():
     
     plot(DS, spectrum, ts, extent, plot_grid[idx], fig, ncols=args.ncols, nrows=args.nrows,\
          index=idx, width=args.time_window, fmin=args.f_min, fmax=args.f_max, cmap=args.cmap, log_scale=args.log_scale, components=components,\
-         zap=args.zap, pol=args.pol, t_scrunch=args.t_scrunch, f_scrunch=args.f_scrunch)
+         zap=args.zap, pol=args.pol, t_scrunch=args.t_scrunch, f_scrunch=args.f_scrunch, burst_n=i)
 
   
   #General plot settings
@@ -133,7 +134,7 @@ def plot_DM_curves(extent, subplot_spec, fig, fmin=None, fmax=None, width=False)
   
   
 def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunch=1., f_scrunch=1., index=None,\
-    width=False, fmin=None, fmax=None, cmap='Greys', log_scale=False, components=None, zap=False, pol=False):
+    width=False, fmin=None, fmax=None, cmap='Greys', log_scale=False, components=None, zap=False, pol=False, burst_n=False):
   #Define subplots
   plot_grid = gridspec.GridSpecFromSubplotSpec(2, 2, subplot_spec, wspace=0., hspace=0., height_ratios=[1,4], width_ratios=[5,1])
   ax1 = plt.Subplot(fig, plot_grid[2])
@@ -196,14 +197,15 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
   if pol:
     ax2.plot(x, ts[1], 'r-')
     ax2.plot(x, ts[2], 'b-')
-  #ax2.tick_params(axis='y', which='both', left='off', right='off', labelleft='off')
-  ax2.tick_params(axis='y', which='right', right='off')
+  ax2.tick_params(axis='y', which='both', left='off', right='off', labelleft='off')
   ax2.tick_params(axis='x', labelbottom='off')
   if width: ax2.set_xlim(-width/2., width/2.)
   else: ax2.set_xlim(extent[0:2])
   y_range = ts[0].max() - ts[0].min()
   ax2.set_ylim(-y_range/4., y_range*6./5.)
-  ax2.set_yticks([ts[0].max(),])
+  #ax2.set_yticks([ts[0].max(),])
+  ax2.annotate("{} mJy".format(ts[0].max()), xy=(0.5,0.1), xycoords='axes fraction')
+  if burst_n: ax2.annotate("Burst {}".format(burst_n), xy=(0.5,0.9), xycoords='axes fraction', ha='right')
   
   #Spectrum
   y = np.linspace(extent[2], extent[3], spectrum.size)
