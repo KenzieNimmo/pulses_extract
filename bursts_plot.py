@@ -251,10 +251,10 @@ def load_DS(archive_name, pol=False, zap=False, t_scrunch=False, f_scrunch=False
   
   #Load timeseries
   if pol:   #ORDINE DELLE OPERAZIONI CORRETTO??
-    I = np.sum(DS[0], axis=0)
-    L = np.sum(np.sqrt(DS[1]**2 + DS[2]**2), axis=0)
-    V = np.sum(DS[3], axis=0)
-    PA = np.sum(np.rad2deg(np.arctan2(DS[2] , DS[1])) / 2., axis=0)
+    I = np.sum(archive[0], axis=0)
+    L = np.sum(np.sqrt(archive[1]**2 + archive[2]**2), axis=0)
+    V = np.sum(archive[3], axis=0)
+    PA = np.sum(np.rad2deg(np.arctan2(archive[2] , archive[1])) / 2., axis=0)
     ts = np.vstack((I, L, V, PA))
   else:
     ts = np.sum(DS, axis=0)
