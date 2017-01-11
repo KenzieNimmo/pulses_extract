@@ -1,11 +1,12 @@
 #!/bin/bash -x
 
-if [ $# -ne 1 ]; then
+if [ $# -ne 1 ] && [ "$2" != "-no_cal" ]; then
    echo "Pipeline to process Arecibo data of FRB121102 on DOP263."
    echo "The pipeline uses pulses stored in a HDF5 database to chop raw data around the pulses."
    echo ""
    echo "Usage: bash chop_raw_data.sh OBS_ID"
    echo "NB: use the command bash to run the pipeline"
+   echo "-no_cal option can be used to ignore calibration file."
    exit
 fi
 
@@ -41,8 +42,13 @@ fi
 #Check that the calibration file exists
 if [ ! -e $RAW_DIR/$CAL_FILE ]; then
   echo ""
-  echo "ATTENTION! Calibration file $CAL_FILE not found. Exiting..."
-  exit 1
+  echo "ATTENTION! Calibration file $CAL_FILE not found."
+  if [ "$2" != "-no_cal" ]; then
+    echo "-no_cal option detected. Processing will continue."
+  else
+    echo "Exiting..."
+    exit 1
+  fi
 fi
 #Check that subbanded fits file exists
 if [ ! -e $SUB_DIR/$FITS_NAME ]; then
