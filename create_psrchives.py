@@ -50,7 +50,7 @@ def read_fits(fits_file):
   
 def dspsr(fits_file, puls=None, par_file=False, profile_bins=4096, parallel=False, DM=560.5, Downfact=False, SMJD=False, width=0.04194304):
   #Read puls
-  if puls:
+  if isinstance(puls, pd.Series):
     DM = puls.DM
     SMJD = puls.SMJD
     Downfact = puls.Downfact

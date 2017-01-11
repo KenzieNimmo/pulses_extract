@@ -22,7 +22,7 @@ date
 SUB_DIR="/psr_archive/hessels/hessels/AO-FRB/subbanded_data"
 GENERAL_OUT_DIR="/psr_archive/hessels/hessels/AO-FRB/pipeline_products"
 RAW_DIR="/psr_archive/hessels/hessels/AO-FRB/raw_data"
-PAR_FILE="/psr_archive/hessels/hessels/AO-FRB/pipeline_products/0531+33.par"
+#PAR_FILE="/psr_archive/hessels/hessels/AO-FRB/pipeline_products/0531+33.par"
 RANKING_BU="/psr_archive/hessels/hessels/AO-FRB/pipeline_products/pulses_rank_BU"
 
 SCRIPT_DIR="$( cd -P "$( dirname "$0" )" && pwd )"
