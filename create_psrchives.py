@@ -152,7 +152,8 @@ if __name__ == '__main__':
   for idx_p, puls in pulses.iterrows():
     print "  Pulse n. {} processing".format(idx_p)
     fits_file = fits_path.format(idx_p) 
-    try: if '*' in fits_file: fits_file = glob(fits_file)[0]
+    try: 
+      if '*' in fits_file: fits_file = glob(fits_file)[0]
     except IndexError: 
       print "PSRCHIVE for pulse {} cannot be created.".format(idx_p)
       with open(os.path.join(args.obsPATH, 'ERRORS.txt'), 'w') as error_file:
