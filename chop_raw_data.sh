@@ -29,7 +29,7 @@ SCRIPT_DIR="$( cd -P "$( dirname "$0" )" && pwd )"
 OBS_ID="$1"
 OUT_DIR="$GENERAL_OUT_DIR/$OBS_ID"
 DB_FILE="$OBS_ID.hdf5"
-CAL_FILE="${OBS_ID:0: -1}$((${OBS_ID: -1} - 1))_cal_0001.fits"
+CAL_FILE="${OBS_ID:0: -4}$((${OBS_ID: -4} - 1))_cal_0001.fits"
 FITS_NAME="${OBS_ID}_subs_0001.fits"
 
 #Check that database exists

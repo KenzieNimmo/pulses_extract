@@ -155,5 +155,5 @@ if __name__ == '__main__':
 
     dspsr(fits_file, puls=puls, profile_bins=args.profile_bins)
     
-    os.remove(par_file)
+    #if args.par_file: os.remove(par_file)
 
