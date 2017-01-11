@@ -43,7 +43,7 @@ fi
 if [ ! -e $RAW_DIR/$CAL_FILE ]; then
   echo ""
   echo "ATTENTION! Calibration file $CAL_FILE not found."
-  if [ "$2" != "-no_cal" ]; then
+  if [ "$2" == "-no_cal" ]; then
     echo "-no_cal option detected. Processing will continue."
   else
     echo "Exiting..."
