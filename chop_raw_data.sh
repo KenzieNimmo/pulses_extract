@@ -30,7 +30,7 @@ SCRIPT_DIR="$( cd -P "$( dirname "$0" )" && pwd )"
 OBS_ID="$1"
 OUT_DIR="$GENERAL_OUT_DIR/$OBS_ID"
 DB_FILE="$OBS_ID.hdf5"
-CAL_FILE="${OBS_ID:0: -4}$((${OBS_ID: -4} - 1))_cal_0001.fits"
+CAL_FILE="${OBS_ID:0: -4}`printf "%04d" $((10#${OBS_ID: -4} - 1))`_cal_0001.fits"
 FITS_NAME="${OBS_ID}_subs_0001.fits"
 
 #Check that database exists
@@ -45,6 +45,7 @@ if [ ! -e $RAW_DIR/$CAL_FILE ]; then
   echo "ATTENTION! Calibration file $CAL_FILE not found."
   if [ "$2" == "-no_cal" ]; then
     echo "-no_cal option detected. Processing will continue."
+    echo ""
   else
     echo "Exiting..."
     exit 1
