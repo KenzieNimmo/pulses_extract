@@ -150,11 +150,9 @@ if __name__ == '__main__':
   fits_path = os.path.join(args.obsPATH, '{}', args.fits_file)
     
   for idx_p, puls in pulses.iterrows():
+    print "  Pulse n. {} processing".format(idx_p)
     fits_file = fits_path.format(idx_p) 
     if '*' in fits_file: fits_file = glob(fits_file)[0]
-    
-    print "  Pulse n. {} processing".format(idx_p)
-    
     dspsr(fits_file, puls=puls, profile_bins=args.profile_bins)
     
     #if args.par_file: os.remove(par_file)
