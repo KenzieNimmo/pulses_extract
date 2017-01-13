@@ -82,8 +82,8 @@ def main():
     
     
     if os.path.basename(archive_name).startswith('puppi_57364_C0531+33_4998_129.02'): 
-      t_scrunch = 4 * t_scrunch
-      f_scrunch = 4 * f_scrunch
+      t_scrunch = 4 * args.t_scrunch
+      f_scrunch = 4 * args.f_scrunch
     else: 
       t_scrunch = args.t_scrunch
       f_scrunch = args.f_scrunch
