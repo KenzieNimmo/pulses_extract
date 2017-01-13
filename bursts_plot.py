@@ -64,11 +64,12 @@ def main():
       t_scrunch = 8 * args.t_scrunch
       f_scrunch = 4 * args.f_scrunch
       pol = False
+      DM_curve = (-2.5, -1, +1)
     else: 
       t_scrunch = args.t_scrunch
       f_scrunch = args.f_scrunch
       pol = args.pol
-    
+      DM_curve = False
       
     #Load archive
     DS, spectrum, ts, extent = load_DS(archive_name, t_scrunch=t_scrunch, f_scrunch=f_scrunch)
@@ -194,8 +195,10 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
   ax1.imshow(DS, cmap=cmap, origin='lower', aspect='auto', interpolation='nearest', extent=extent)
   if DM_curve:
     f = np.linspace(extent[2], extent[3], 1000)
-    t = 4.14881e6 * ((f*1000)**-2 - (fmax*1000)**-2) * 0 + 1.
+    t = 4.14881e6 * ((f*1000)**-2 - (fmax*1000)**-2) * DM_curve(0) + DM_curve(1)
     ax1.plot(t, f, 'w-')
+    t = 4.14881e6 * ((f*1000)**-2 - (fmax*1000)**-2) * DM_curve(0) + DM_curve(2)
+    ax1.plot(t, f, 'w-')    
     
   if width: ax1.set_xlim(-width/2., width/2.)
   ax1.set_ylim(fmin, fmax)
