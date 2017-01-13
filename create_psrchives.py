@@ -18,7 +18,7 @@ from auto_waterfaller import psrchive_plots
 ephemeris = '''PSRJ J0531+33
 RAJ 05:31:58.561
 DECJ 33:08:52.56
-PEPOCH 57388.0
+PEPOCH 55388.0
 P0 {}
 EPHVER 2
 DM {}'''

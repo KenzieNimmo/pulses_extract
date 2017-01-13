@@ -651,9 +651,19 @@ def load_zap_list(archive_name):
 [344, 1500, 3000],
 [353, None, None]
 ]
+    
+  elif os.path.basename(archive_name).startswith('puppi_57364_C0531+33_4998_129.02'):
+    zap_list = [\
+[335, None, None],
+[334, None, None],
+[333, None, None],
+[323, None, None],
+[286, None, None],
+[275, None, None]
+]
 
   else:
-    print "Archive not known. It will not be zapped. Select bins to zap out if you wish."
+    print "Archive {} not known. It will not be zapped. Select bins to zap out if you wish.".format(os.path.basename(archive_name))
     zap_list = []
     
   return zap_list 
