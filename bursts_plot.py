@@ -58,9 +58,18 @@ def main():
     if idx / args.ncols == 0:
       plots_to_skip = args.nrows * args.ncols - len(ar_list) - 1
       if args.ncols - idx == plots_to_skip: skip += plots_to_skip
+
+    
+    if os.path.basename(archive_name).startswith('puppi_57364_C0531+33_4998_129.02'): 
+      t_scrunch = 4 * args.t_scrunch
+      f_scrunch = 4 * args.f_scrunch
+    else: 
+      t_scrunch = args.t_scrunch
+      f_scrunch = args.f_scrunch
+    
       
     #Load archive
-    DS, spectrum, ts, extent = load_DS(archive_name, t_scrunch=args.t_scrunch, f_scrunch=args.f_scrunch)
+    DS, spectrum, ts, extent = load_DS(archive_name, t_scrunch=t_scrunch, f_scrunch=f_scrunch)
     components = burst_components(archive_name)
     if args.zap: extent = None
     
@@ -79,14 +88,6 @@ def main():
       plot_DM_curves(extent, plot_grid[idx], fig, fmin=args.f_min, fmax=args.f_max, width=args.time_window)
       skip += 1
       idx += 1
-    
-    
-    if os.path.basename(archive_name).startswith('puppi_57364_C0531+33_4998_129.02'): 
-      t_scrunch = 4 * args.t_scrunch
-      f_scrunch = 4 * args.f_scrunch
-    else: 
-      t_scrunch = args.t_scrunch
-      f_scrunch = args.f_scrunch
     
     plot(DS, spectrum, ts, extent, plot_grid[idx], fig, ncols=args.ncols, nrows=args.nrows,\
          index=idx, width=args.time_window, fmin=args.f_min, fmax=args.f_max, cmap=args.cmap, log_scale=args.log_scale, components=components,\
