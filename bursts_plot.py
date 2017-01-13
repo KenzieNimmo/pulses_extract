@@ -94,7 +94,7 @@ def main():
     
     plot(DS, spectrum, ts, extent, plot_grid[idx], fig, ncols=args.ncols, nrows=args.nrows,\
          index=idx, width=args.time_window, fmin=args.f_min, fmax=args.f_max, cmap=args.cmap, log_scale=args.log_scale, components=components,\
-         zap=args.zap, pol=pol, t_scrunch=t_scrunch, f_scrunch=f_scrunch, burst_n=i)
+         zap=args.zap, pol=pol, t_scrunch=t_scrunch, f_scrunch=f_scrunch, burst_n=i, DM_curve=DM_curve)
 
   
   #General plot settings
