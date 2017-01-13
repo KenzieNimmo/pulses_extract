@@ -194,8 +194,8 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
   ax1.imshow(DS, cmap=cmap, origin='lower', aspect='auto', interpolation='nearest', extent=extent)
   if DM_curve:
     f = np.linspace(extent[2], extent[3], 1000)
-    t = 4.14881e6 * ((f*1000)**-2 - (fmax*1000)**-2) * -2.5
-    ax1.plot(t, f, 'k-')
+    t = 4.14881e6 * ((f*1000)**-2 - (fmax*1000)**-2) * 0 + 1.
+    ax1.plot(t, f, 'w-')
     
   if width: ax1.set_xlim(-width/2., width/2.)
   ax1.set_ylim(fmin, fmax)
