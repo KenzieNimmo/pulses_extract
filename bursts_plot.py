@@ -204,8 +204,8 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
   y_range = ts[0].max() - ts[0].min()
   ax2.set_ylim(-y_range/4., y_range*6./5.)
   #ax2.set_yticks([ts[0].max(),])
-  ax2.annotate("{:.0f} mJy".format(ts[0].max()), xy=(0.05,0.5), xycoords='axes fraction')
-  if burst_n: ax2.annotate("Burst {}".format(burst_n), xy=(0.95,0.5), xycoords='axes fraction', ha='right')
+  ax2.annotate("{:.0f} mJy".format(ts[0].max()), xy=(0.05,0.75), xycoords='axes fraction')
+  if burst_n: ax2.annotate("Burst {}".format(burst_n), xy=(0.95,0.75), xycoords='axes fraction', ha='right')
   
   #Spectrum
   y = np.linspace(extent[2], extent[3], spectrum.size)
@@ -659,7 +659,11 @@ def load_zap_list(archive_name):
 [333, None, None],
 [323, None, None],
 [286, None, None],
-[275, None, None]
+[275, None, None],
+[188, None, None],
+[324, None, None],
+[276, None, None],
+[278, None, None]
 ]
 
   else:
