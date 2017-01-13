@@ -80,6 +80,14 @@ def main():
       skip += 1
       idx += 1
     
+    
+    if os.path.basename(archive_name).startswith('puppi_57364_C0531+33_4998_129.02'): 
+      t_scrunch = 4 * t_scrunch
+      f_scrunch = 4 * f_scrunch
+    else: 
+      t_scrunch = args.t_scrunch
+      f_scrunch = args.f_scrunch
+    
     plot(DS, spectrum, ts, extent, plot_grid[idx], fig, ncols=args.ncols, nrows=args.nrows,\
          index=idx, width=args.time_window, fmin=args.f_min, fmax=args.f_max, cmap=args.cmap, log_scale=args.log_scale, components=components,\
          zap=args.zap, pol=args.pol, t_scrunch=args.t_scrunch, f_scrunch=args.f_scrunch, burst_n=i)
