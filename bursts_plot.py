@@ -61,16 +61,18 @@ def main():
 
     
     if os.path.basename(archive_name).startswith('puppi_57364_C0531+33_4998_129.02'): 
-      t_scrunch = 8 * args.t_scrunch
+      t_scrunch = 16 * args.t_scrunch
       f_scrunch = 4 * args.f_scrunch
       pol = False
-      DM_curve = (-2.5, -.2, +2)
+      DM_curve = (-2.7, -.2, +2)
+      width = 2 * args.time_window
     else: 
       t_scrunch = args.t_scrunch
       f_scrunch = args.f_scrunch
       pol = args.pol
       DM_curve = False
-      
+      width = args.time_window
+
     #Load archive
     DS, spectrum, ts, extent = load_DS(archive_name, t_scrunch=t_scrunch, f_scrunch=f_scrunch)
     components = burst_components(archive_name)
@@ -222,8 +224,8 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
   y_range = ts[0].max() - ts[0].min()
   ax2.set_ylim(-y_range/4., y_range*6./5.)
   #ax2.set_yticks([ts[0].max(),])
-  ax2.annotate("{:.0f} mJy".format(ts[0].max()), xy=(0.05,0.75), xycoords='axes fraction')
-  if burst_n: ax2.annotate("Burst {}".format(burst_n), xy=(0.95,0.75), xycoords='axes fraction', ha='right')
+  ax2.annotate("{:.0f} mJy".format(ts[0].max()), xy=(0.05,0.5), xycoords='axes fraction')
+  if burst_n: ax2.annotate("Burst {}".format(burst_n), xy=(0.95,0.5), xycoords='axes fraction', ha='right')
   
   #Spectrum
   y = np.linspace(extent[2], extent[3], spectrum.size)
