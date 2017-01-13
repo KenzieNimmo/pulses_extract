@@ -64,7 +64,7 @@ def main():
       t_scrunch = 8 * args.t_scrunch
       f_scrunch = 4 * args.f_scrunch
       pol = False
-      DM_curve = (-2.5, -1, +1)
+      DM_curve = (-2.5, -.2, +2)
     else: 
       t_scrunch = args.t_scrunch
       f_scrunch = args.f_scrunch
