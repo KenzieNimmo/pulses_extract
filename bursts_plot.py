@@ -61,11 +61,13 @@ def main():
 
     
     if os.path.basename(archive_name).startswith('puppi_57364_C0531+33_4998_129.02'): 
-      t_scrunch = 4 * args.t_scrunch
+      t_scrunch = 8 * args.t_scrunch
       f_scrunch = 4 * args.f_scrunch
+      pol = False
     else: 
       t_scrunch = args.t_scrunch
       f_scrunch = args.f_scrunch
+      pol = args.pol
     
       
     #Load archive
@@ -91,7 +93,7 @@ def main():
     
     plot(DS, spectrum, ts, extent, plot_grid[idx], fig, ncols=args.ncols, nrows=args.nrows,\
          index=idx, width=args.time_window, fmin=args.f_min, fmax=args.f_max, cmap=args.cmap, log_scale=args.log_scale, components=components,\
-         zap=args.zap, pol=args.pol, t_scrunch=t_scrunch, f_scrunch=f_scrunch, burst_n=i)
+         zap=args.zap, pol=pol, t_scrunch=t_scrunch, f_scrunch=f_scrunch, burst_n=i)
 
   
   #General plot settings
@@ -252,7 +254,7 @@ def load_DS(archive_name, zap=False, t_scrunch=False, f_scrunch=False):
   for i in range(4): zap_ar(archive_name, archive[i])
 
   if t_scrunch: archive = np.sum(np.reshape(archive, (archive.shape[0], archive.shape[1], archive.shape[2] / t_scrunch, t_scrunch)), axis=3)
-  if f_scrunch: DS = np.sum(np.reshape(archive, (archive.shape[0], archive.shape[1]  / t_scrunch, t_scrunch, archive.shape[2])), axis=2)
+  if f_scrunch: archive = np.sum(np.reshape(archive, (archive.shape[0], archive.shape[1]  / f_scrunch, f_scrunch, archive.shape[2])), axis=2)
   
   #Load dynamic spectrum
   if pol_info: DS = archive[0]
