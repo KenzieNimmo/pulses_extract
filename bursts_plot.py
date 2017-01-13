@@ -145,7 +145,7 @@ def plot_DM_curves(extent, subplot_spec, fig, fmin=None, fmax=None, width=False)
   
   
 def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunch=1., f_scrunch=1., index=None,\
-    width=False, fmin=None, fmax=None, cmap='Greys', log_scale=False, components=None, zap=False, pol=False, burst_n=False):
+    width=False, fmin=None, fmax=None, cmap='Greys', log_scale=False, components=None, zap=False, pol=False, burst_n=False, DM_curve=False):
   #Define subplots
   plot_grid = gridspec.GridSpecFromSubplotSpec(2, 2, subplot_spec, wspace=0., hspace=0., height_ratios=[1,4], width_ratios=[5,1])
   ax1 = plt.Subplot(fig, plot_grid[2])
@@ -192,7 +192,11 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
     DS = np.log(DS)
     
   ax1.imshow(DS, cmap=cmap, origin='lower', aspect='auto', interpolation='nearest', extent=extent)
-  
+  if DM_curve:
+    f = np.linspace(extent[2], extent[3], 1000)
+    t = 4.14881e6 * ((f*1000)**-2 - (fmax*1000)**-2) * -2.5
+    ax1.plot(t, f, 'k-')
+    
   if width: ax1.set_xlim(-width/2., width/2.)
   ax1.set_ylim(fmin, fmax)
   
