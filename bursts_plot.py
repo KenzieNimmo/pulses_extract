@@ -232,10 +232,12 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
 def load_DS(archive_name, zap=False, t_scrunch=False, f_scrunch=False):
   #Load archive
   load_archive = psrchive.Archive_load(archive_name)
-  load_archive.remove_baseline()
+  load_archive.tscrunch()
   load_archive.convert_state('Stokes')
+  load_archive.remove_baseline()
   archive = load_archive.get_data().squeeze()
-  if len(archive.shape) != 3: raise AttributeError('Archive not valid')  #MIGLIORARE!
+  if len(archive.shape) != 3: pol_info = False
+  else: pol_info = True
 
   #Zap archive
   for i in range(4): zap_ar(archive_name, archive[i])
@@ -244,17 +246,20 @@ def load_DS(archive_name, zap=False, t_scrunch=False, f_scrunch=False):
   if f_scrunch: DS = np.sum(np.reshape(archive, (archive.shape[0], archive.shape[1]  / t_scrunch, t_scrunch, archive.shape[2])), axis=2)
   
   #Load dynamic spectrum
-  DS = archive[0]
+  if pol_info: DS = archive[0]
+  else: DS = archive
   
   #Load frequency spectrum
   spectrum = np.sum(DS, axis=1)
   
   #Load timeseries
   I = np.sum(DS, axis=0)
-  L = np.sqrt(np.sum(archive[1], axis=0)**2 + np.sum(archive[2], axis=0)**2)
-  L -= np.median(L)
-  V = np.sum(archive[3], axis=0)
-  PA = np.rad2deg(np.arctan2(np.sum(archive[2], axis=0) , np.sum(archive[1], axis=0))) / 2.
+  if pol_info:
+    L = np.sqrt(np.sum(archive[1], axis=0)**2 + np.sum(archive[2], axis=0)**2)
+    L -= np.median(L)
+    V = np.sum(archive[3], axis=0)
+    PA = np.rad2deg(np.arctan2(np.sum(archive[2], axis=0) , np.sum(archive[1], axis=0))) / 2.
+  else: L = V = PA = np.zeros_like(I)
   ts = np.vstack((I, L, V, PA))
   
   #Load extensions
