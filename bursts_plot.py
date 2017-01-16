@@ -64,7 +64,7 @@ def main():
       t_scrunch = 16 * args.t_scrunch
       f_scrunch = 4 * args.f_scrunch
       pol = False
-      DM_curve = (-2.7, -.2, +2)
+      DM_curve = (-2.5, 0., +10000)
       width = 2 * args.time_window
     else: 
       t_scrunch = args.t_scrunch
@@ -198,9 +198,9 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
   if DM_curve:
     f = np.linspace(extent[2], extent[3], 1000)
     t = 4.14881e6 * ((f*1000)**-2 - (fmax*1000)**-2) * DM_curve[0] + DM_curve[1]
-    ax1.plot(t, f, 'w-')
+    ax1.plot(t, f, 'w--')
     t = 4.14881e6 * ((f*1000)**-2 - (fmax*1000)**-2) * DM_curve[0] + DM_curve[2]
-    ax1.plot(t, f, 'w-')    
+    ax1.plot(t, f, 'w--')    
     
   if width: ax1.set_xlim(-width/2., width/2.)
   ax1.set_ylim(fmin, fmax)
