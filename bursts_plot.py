@@ -95,7 +95,7 @@ def main():
       idx += 1
     
     plot(DS, spectrum, ts, extent, plot_grid[idx], fig, ncols=args.ncols, nrows=args.nrows,\
-         index=idx, width=args.time_window, fmin=args.f_min, fmax=args.f_max, cmap=args.cmap, log_scale=args.log_scale, components=components,\
+         index=idx, width=width, fmin=args.f_min, fmax=args.f_max, cmap=args.cmap, log_scale=args.log_scale, components=components,\
          zap=args.zap, pol=pol, t_scrunch=t_scrunch, f_scrunch=f_scrunch, burst_n=i, DM_curve=DM_curve)
 
   
@@ -195,7 +195,7 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
     DS = np.log(DS)
     
   ax1.imshow(DS, cmap=cmap, origin='lower', aspect='auto', interpolation='nearest', extent=extent)
-  if DM_curve:
+  if DM_curve and not zap:
     f = np.linspace(extent[2], extent[3], 1000)
     t = 4.14881e6 * ((f*1000)**-2 - (fmax*1000)**-2) * DM_curve[0] + DM_curve[1]
     ax1.plot(t, f, 'w--')
