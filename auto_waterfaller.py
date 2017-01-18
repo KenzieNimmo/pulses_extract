@@ -29,7 +29,7 @@ def plotter(data, start, plot_duration, t, DM, IMJD, SMJD, duration, top_freq, s
 			directory, FRB_name, observation, pulse_id, zoom=True, idx='', downsamp=True):
 	fig = plt.figure(figsize=(8,5))
 	ax1 = plt.subplot2grid((3,4), (1,1), rowspan=3, colspan=3)
-	ax2 = plt.subplot2grid((3,4), (0,0), rowspan=3)
+	ax2 = plt.subplot2grid((3,4), (0,0), rowspan=3) #row = right, col = left
 	ax3 = plt.subplot2grid((3,4), (0,1), colspan=3)
 
 	ax2.axis([0,7,0,7])
