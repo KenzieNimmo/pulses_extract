@@ -128,6 +128,7 @@ def masterlist_viewer(txtfile, path_to_pulses, view_only_mode=False, multicompon
 		else:
 			annotated_file = txtfile.split('.')[0]
 			unfinished = annotated_file + '_annotated_unfinished.txt'
+			continued = annotated_file + '_annotated_continued.txt'
 			annotated_file = annotated_file + '_annotated.txt'
 			if start:
 				start_idx = np.where(cands==start)[0][0]
@@ -169,15 +170,21 @@ def masterlist_viewer(txtfile, path_to_pulses, view_only_mode=False, multicompon
 					components = components.flatten()
 					multi_bursts = multi_bursts.flatten()
 					comments = comments.flatten()
-					if cand == cands[-1] and not start: #This is a safety, in case classification is interrupted, you don't lose progress and can start classifying at last index and then merge files manually when done.
+					if cand == cands[-1] and not start: 
 						np.savetxt(annotated_file, np.column_stack([pulse_IDs, components, multi_bursts, comments]),\
 				 					delimiter='\t\t', header='PulseID\tAdditional\tAdditional\tComment\n\t\tcomponents\tbursts',fmt="%s")
+						os.remove(unfinished)
+						
+					elif start: #This is a safety, in case classification is interrupted, you don't lose progress and can start classifying at last index and then merge files manually when done.
+						np.savetxt(continued, np.column_stack([pulse_IDs, components, multi_bursts, comments]),\
+				 					delimiter='\t\t', header='PulseID\tAdditional\tAdditional\tComment\n\t\tcomponents\tbursts',fmt="%s")
+
 					else:
 						np.savetxt(unfinished, np.column_stack([pulse_IDs, components, multi_bursts, comments]),\
 				 					delimiter='\t\t', header='PulseID\tAdditional\tAdditional\tComment\n\t\tcomponents\tbursts',fmt="%s")
 				else:
 					pass
-			#os.remove(txtfile)
+			#
 def viewer(txtfile, path_to_pulses, obs, view_only_mode=False,ranks_to_view=None):
 	#put txtfile columns into numpy arrays:
 	with open(txtfile, 'r') as tf:
