@@ -29,7 +29,7 @@ def plotter(data, start, plot_duration, t, DM, IMJD, SMJD, duration, top_freq, s
 			directory, FRB_name, observation, pulse_id, zoom=True, idx='', downsamp=True):
 	fig = plt.figure(figsize=(8,5))
 	ax1 = plt.subplot2grid((3,4), (1,1), rowspan=3, colspan=3)
-	ax2 = plt.subplot2grid((3,4), (0,0), rowspan=3) #row = right, col = left
+	ax2 = plt.subplot2grid((3,4), (0,0), rowspan=3) #row = right, col = left, row = left, col=right
 	ax3 = plt.subplot2grid((3,4), (0,1), colspan=3)
 
 	ax2.axis([0,7,0,7])
@@ -207,21 +207,36 @@ def plot_statistics(dm, time, SNR, duration, Rank, folder='.', observation='', r
 		rank = ''
 	plt.savefig('%s/statistical_plots_%s%s.png'%(folder,observation,rank), bbox_inches='tight')
 
-#def psrchive_plots(psrchives_path):
-	#run auto_waterfaller in /TEST
-	#for dirpath, dirnames, filenames in os.walk(psrchives_path):
-		#for archive in [archives for archives in filenames if archives.endswith("6085.ar")]:
-			#full_path = str(os.path.join(psrchives_path,archive))
-			#full_path_no_ext = os.path.splitext(full_path)[0]
-			#psrplot version
-			#subprocess.call(['psrplot','-p','freq+','-c','psd=0','-c','above:l=','-c','above:c=%s'%full_path_no_ext,'-D', "%s.ps /CPS"%full_path_no_ext, full_path])
-			#subprocess.call(['convert', '%s.ps'%full_path_no_ext,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s.png'%full_path_no_ext])
-			##produce dynamic spectrum
-			#subprocess.call(['pav','-GTp','-g',"%s_DS.ps /CPS"%full_path_no_ext,full_path])
-			#subprocess.call(['convert', '%s_DS.ps'%full_path_no_ext,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s_DS.png'%full_path_no_ext])
-			##produce pulse profile	
-			#subprocess.call(['pav','-DFp','-g',"%s_profile.ps /CPS"%full_path_no_ext,full_path])
-			#subprocess.call(['convert', '%s_profile.ps'%full_path_no_ext,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s_profile.png'%full_path_no_ext])
+def master_statistics(dm, SNR, duration, figtitle, figname):
+	Rank = np.zeros(len(dm))
+	#fig = plt.figure(figsize=(8,6))
+	ax1 = plt.subplot2grid((2,3), (0,0)) #row,col,row,col
+	ax2 = plt.subplot2grid((2,3), (0,1))
+	ax3 = plt.subplot2grid((2,3), (0,2))
+	ax4 = plt.subplot2grid((2,3), (1,0))
+	ax5 = plt.subplot2grid((2,3), (1,1))
+	ax6 = plt.subplot2grid((2,3), (1,2))	
+
+	histogram(dm, ax = ax1, title='Distribution of Dispersion Measures',\
+		                                            xlabel=(r'DM (pc cm$^{-3}$)'))
+
+	histogram(SNR, ax= ax2, title='Distribution of Signal to Noise Ratios',\
+		                                            xlabel='S/N', logy=True)
+
+	histogram(duration*1000., ax=ax3, title='Distribution of Burst Durations',\
+		                                            xlabel='Duration (ms)')
+
+	scatter(dm, SNR, ax4, title='Dispersion Measure v. Signal to Noise Ratio',\
+									 xlabel=(r'DM (pc cm$^{-3}$)'), ylabel='SNR', Rank=Rank)
+	scatter(duration*1000., SNR, ax5, title='Pulse Duration v. Signal to Noise Ratio',\
+									 xlabel='Duration (ms)', ylabel='SNR', Rank=Rank)
+	scatter(duration*1000., dm, ax6, title='Pulse Duration v. Dispersion Measure',\
+									 xlabel='Duration (ms)', ylabel=(r'DM (pc cm$^{-3}$)'), Rank=Rank)
+	ax4.locator_params(axis='x',nbins=8)
+	ax6.locator_params(axis='y', nbins=8)
+	plt.tight_layout(w_pad = 0.3, h_pad = 0.1)
+	plt.suptitle(figtitle, y=1.04)
+	plt.savefig(figname, bbox_inches='tight')
 
 def psrchive_plots(archive_name): #assuming: (full name of the archive with path)
 		folder, ar_name = os.path.split(archive_name)
@@ -310,25 +325,38 @@ def main(fits, time, DM=560., sigma=0., duration=0.01, pulse_id=0, top_freq=0., 
 
 				sigma[i], directory, FRB_name, observation, zoom=True, idx=i, pulse_id=pulse_id[i],\
 			 	downsamp=downsamp[i])
+def dm_snr(database, pulse_id):
+	events = pd.read_hdf(database, 'events')
+	pulse_events = events[events.Pulse == pulse_id]
+	DMs = pulse_events['DM'].as_matrix()
+	SNRs = pulse_events['Sigma'].as_matrix()
+	plt.scatter(DMs, SNRs, c='k')
+	plt.xlabel('DM')
+	plt.ylabel('S/N')
+	obs = os.path.split(database)[1]
+	obs = os.path.splitext(obs)[0]
+	plt.title('%s\nPulse ID %d'%(obs, pulse_id))
+	plt.savefig('/psr_archive/hessels/hessels/AO-FRB/pipeline_products/FRB_statistics/%s_%d.png'%(obs, pulse_id))
 
 if __name__ == '__main__':
 	#DM, sigma, time, downfact = np.loadtxt(sys.argv[2], usecols=(0,1,2,4), unpack=True)
 	#downsamp = np.zeros(len(downfact)) + 1. #just a place holder so my code runs upon testing.
 	#main(sys.argv[1],time, DM, sigma, downsamp = downsamp)
-	database = '/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/output/puppi_57614_C0531+33_0803/pulses/puppi_57614_C0531+33_0803.hdf5'#'/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/TEST/SinglePulses.hdf5'#'/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/output/puppi_57614_C0531+33_0803/OLD/SinglePulses.hdf5'
-	pulses = pd.read_hdf(database,'pulses')
-	dm = np.array(pulses.DM)
-	SNR = np.array(pulses.Sigma)
-	time = np.array(pulses.Time)
-	duration = np.array(pulses.Duration)
-	observation = "test_observation"
-	#Rank = np.random.randint(0,3,len(time))
-	Rank = np.loadtxt('/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/TEST/puppi_57614_C0531+33_0803_pulses.txt', usecols=(1,), dtype='int')
-	plot_statistics(dm, time, SNR, duration, Rank, folder='', observation=observation)
-	#plt.savefig('test_stat_plot.png', bbox_inches='tight', dpi=300)
-	
-	#psrchive_plots('psrchives/12.ar')
-	
+	#database = '/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/output/puppi_57614_C0531+33_0803/pulses/puppi_57614_C0531+33_0803.hdf5'#'/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/TEST/SinglePulses.hdf5'#'/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/output/puppi_57614_C0531+33_0803/OLD/SinglePulses.hdf5'
+	#database = '/psr_archive/hessels/hessels/AO-FRB/pipeline_products/20170112_pulses_archive.hdf5'
+	#database = '/Users/Kelly/UvA/Masters\ Project/arecibo_pipeline/20170112_pulses_archive.hdf5'
+	#pulses = pd.read_hdf(database,'pulses')
+	#dm = np.array(pulses.DM)
+	#SNR = np.array(pulses.Sigma)
+	#time = np.array(pulses.Time)
+	#duration = np.array(pulses.Duration)
+	#figtitle = "FRB121102"
+	#figname = "FRB121101_statistics.png"
+	#master_statistics(dm, SNR, duration, figtitle, figname)
+	database = '/psr_archive/hessels/hessels/AO-FRB/pipeline_products/puppi_57644_C0531+33_0021/pulses/puppi_57644_C0531+33_0021.hdf5'
+	pulse_ids = [5553,5568,5663,5684,5839,5999,5064,3203, 2461, 4664, 4461,5267]
+	for pulse_id in pulse_ids:
+		dm_snr(database, pulse_id)
 
 
 
