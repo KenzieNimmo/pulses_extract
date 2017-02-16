@@ -328,16 +328,14 @@ def main(fits, time, DM=560., sigma=0., duration=0.01, pulse_id=0, top_freq=0., 
 def dm_snr(database, pulse_id):
 	events = pd.read_hdf(database, 'events')
 	pulse_events = events[events.Pulse == pulse_id]
-	DMs = pulse_events['DM'].as_matrix()
-	SNRs = pulse_events['Sigma'].as_matrix()
-	plt.scatter(DMs, SNRs, c='k')
+	plt.scatter(pulse_events.DM, pulse_events.Sigma, c='k')
 	plt.xlabel('DM')
 	plt.ylabel('S/N')
 	obs = os.path.split(database)[1]
 	obs = os.path.splitext(obs)[0]
 	plt.title('%s\nPulse ID %d'%(obs, pulse_id))
 	plt.savefig('/psr_archive/hessels/hessels/AO-FRB/pipeline_products/FRB_statistics/%s_%d.png'%(obs, pulse_id))
-
+	plt.close('all')
 if __name__ == '__main__':
 	#DM, sigma, time, downfact = np.loadtxt(sys.argv[2], usecols=(0,1,2,4), unpack=True)
 	#downsamp = np.zeros(len(downfact)) + 1. #just a place holder so my code runs upon testing.
