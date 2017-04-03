@@ -14,8 +14,10 @@ import auto_waterfaller
 from extract_psrfits_subints import extract_subints_from_observation
 
 
-DM_low = 461.           #Lowest de-dispersed value
-DM_high = 661.          #Highest de-dispersed value
+DM_low = 461.           #Lowest used DM value
+DM_high = 661.          #Highest used DM value
+DM_search_low = 548.    #Lowest DM value to search
+DM_search_hish = 620.   #Highest DM value to search
 SNR_peak_min = 8.       #Minumum peak SNR value
 SNR_min = 6.            #Minumum SNR value
 Downfact_max = 100      #Maximum Downfact value
@@ -145,10 +147,12 @@ def pulses_database(args, header, events=None):
   pulses.dTime=pulses.dTime.astype(np.float32)
   pulses['N_events'] = gb.DM.count()
   pulses.N_events = pulses.N_events.astype(np.int16)
+  pulses['Obs_ID'] = os.path.splitext(args.db_name)[0]
 
   pulses = pulses[pulses.N_events > 5]
   pulses = pulses[pulses.Sigma >= SNR_peak_min]
   pulses = pulses[pulses.Downfact <= Downfact_max]
+  pulses = pulses[(pulses.DM >= DM_search_low) & (pulses.DM <= DM_search_high)]
   
   RFIexcision(events, pulses)
   

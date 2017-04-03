@@ -13,25 +13,25 @@ mpl.rc('font',size=20)
 mpl.rc('lines', linewidth=2)
 
 def parser():
-    # Command-line options
-    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-                                    description="Plot dynamic spectrum from multiple archives with 1 polarisation and 1 subintegration.")
-    parser.add_argument('archives_list', help="Name of the psrchive files to plot, scrunched in time and polarisation.", nargs='+')
-    parser.add_argument('-o', help="Plot name.", default='bursts.png')
-    parser.add_argument('-show', help="Show the plot.", action='store_false')
-    parser.add_argument('-save_fig', help="Save the plot.", action='store_true')
-    parser.add_argument('-zap', help="Plot to manually zap bins out.", action='store_true')
-    parser.add_argument('-ncols', help="Number of columns in the general plot.", default=1, type=int)
-    parser.add_argument('-nrows', help="Number of rows in the general plot.", default=1, type=int)
-    parser.add_argument('-t_scrunch', help="Time scrunch archives by this factor.", default=1., type=int)
-    parser.add_argument('-f_scrunch', help="Frequency scrunch archives by this factor.", default=1., type=int)
-    parser.add_argument('-time_window', help="Time window around the burst in ms.", default=False, type=float)
-    parser.add_argument('-f_min', help="Minimum frequency to plot in GHz.", default=None, type=float)
-    parser.add_argument('-f_max', help="Maximum frequency to plot in GHz.", default=None, type=float)
-    parser.add_argument('-cmap', help="Colormap to use in the plots. Other useful: RdGy_r", default='Greys')
-    parser.add_argument('-log_scale', help="Logaritmic color scale.", action='store_true')
-    parser.add_argument('-pol', help="Plot polarisation information.", action='store_true')
-    return parser.parse_args()
+  # Command-line options
+  parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+                                  description="Plot dynamic spectrum from multiple archives with 1 polarisation and 1 subintegration.")
+  parser.add_argument('archives_list', help="Name of the psrchive files to plot, scrunched in time and polarisation.", nargs='+')
+  parser.add_argument('-o', help="Plot name.", default='bursts.png')
+  parser.add_argument('-show', help="Show the plot.", action='store_false')
+  parser.add_argument('-save_fig', help="Save the plot.", action='store_true')
+  parser.add_argument('-zap', help="Plot to manually zap bins out.", action='store_true')
+  parser.add_argument('-ncols', help="Number of columns in the general plot.", default=1, type=int)
+  parser.add_argument('-nrows', help="Number of rows in the general plot.", default=1, type=int)
+  parser.add_argument('-t_scrunch', help="Time scrunch archives by this factor.", default=1., type=int)
+  parser.add_argument('-f_scrunch', help="Frequency scrunch archives by this factor.", default=1., type=int)
+  parser.add_argument('-time_window', help="Time window around the burst in ms.", default=False, type=float)
+  parser.add_argument('-f_min', help="Minimum frequency to plot in GHz.", default=None, type=float)
+  parser.add_argument('-f_max', help="Maximum frequency to plot in GHz.", default=None, type=float)
+  parser.add_argument('-cmap', help="Colormap to use in the plots. Other useful: RdGy_r", default='Greys')
+  parser.add_argument('-log_scale', help="Logaritmic color scale.", action='store_true')
+  parser.add_argument('-pol', help="Plot polarisation information.", action='store_true')
+  return parser.parse_args()
 
 
 
@@ -198,9 +198,9 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
   if DM_curve and not zap:
     f = np.linspace(extent[2], extent[3], 1000)
     t = 4.14881e6 * ((f*1000)**-2 - (fmax*1000)**-2) * DM_curve[0] + DM_curve[1]
-    ax1.plot(t, f, 'w--')
+    ax1.plot(t, f, 'w-')
     t = 4.14881e6 * ((f*1000)**-2 - (fmax*1000)**-2) * DM_curve[0] + DM_curve[2]
-    ax1.plot(t, f, 'w--')    
+    ax1.plot(t, f, 'w-')    
     
   if width: ax1.set_xlim(-width/2., width/2.)
   ax1.set_ylim(fmin, fmax)
