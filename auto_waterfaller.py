@@ -26,46 +26,68 @@ import subprocess
 from PIL import Image
 
 def plotter(data, start, plot_duration, t, DM, IMJD, SMJD, duration, top_freq, sigma, 
-			directory, FRB_name, observation, pulse_id, zoom=True, idx='', downsamp=True):
+			directory, FRB_name, observation, zero_dm_data, zero_dm_start, pulse_id, pulse_events, zoom=True, idx='', downsamp=True):
+	
 	fig = plt.figure(figsize=(8,5))
-	ax1 = plt.subplot2grid((3,4), (1,1), rowspan=3, colspan=3)
-	ax2 = plt.subplot2grid((3,4), (0,0), rowspan=3)
-	ax3 = plt.subplot2grid((3,4), (0,1), colspan=3)
+	ax1 = plt.subplot2grid((3,3), (1,1), rowspan=2, colspan=3)
+	ax2 = plt.subplot2grid((3,3), (1,0), rowspan=3) #row = right, col = left, row = left, col=right
+	ax3 = plt.subplot2grid((3,3), (0,1), colspan=3)
+	ax4 = plt.subplot2grid((3,3), (0,0))
 
-	ax2.axis([0,7,0,7])
-	ax2.annotate('Pulse ID \n%i'%pulse_id, xy=(0,6))
-	ax2.annotate('DM \n%d'%DM, xy=(0,5))
-	ax2.annotate('MJD \n%.8f'%(IMJD+SMJD), xy=(0,4))
-	ax2.annotate('Time (s) \n%0.3f'%t, xy=(0,3))
-	ax2.annotate('Duration (ms) \n%0.2f'%(duration*1000.), xy=(0,2))
-	ax2.annotate('Top frequency \n%0.2f'%top_freq, xy=(0,1))
-	ax2.annotate('Sigma \n%0.2f'%sigma, xy=(0,0))
-
+	fontsize = 11
+	ax2.axis([0,7,0,11])
+	ax2.annotate('Pulse ID: %i'%pulse_id, xy=(0,9),fontsize=fontsize)
+	ax2.annotate('DM: %d'%DM, xy=(0,7.5), fontsize=fontsize)
+	ax2.annotate('MJD: %.8f'%(IMJD+SMJD), xy=(0,6), fontsize=fontsize)
+	ax2.annotate('Time (s): %0.3f'%t, xy=(0,4.5), fontsize=fontsize)
+	ax2.annotate('Duration (ms): %0.2f'%(duration*1000.), xy=(0,3), fontsize=fontsize)
+	ax2.annotate('Top frequency: %0.2f'%top_freq, xy=(0,1.5), fontsize=fontsize)
+	ax2.annotate('Sigma: %0.2f'%sigma, xy=(0,0), fontsize=fontsize)
+	
+	zerodm_timeseries(ax3, plot_duration, zero_dm_data, zero_dm_start)
 	plot_waterfall(data, start, plot_duration, 
 	               integrate_ts=True, integrate_spec=False, show_cb=False, 
 	               cmap_str="gist_yarg", sweep_dms=[], sweep_posns=[],
 	               ax_im=ax1, ax_ts=ax3, ax_spec=None, interactive=False)
-
-
+	
+	dm_snr(pulse_events, ax=ax4)
 	ax3.axvline(t, c='r')
+	ax3.legend(loc=1, fontsize=8, frameon=False)
 	ax2.axis('off')
-	fig.tight_layout(w_pad = 8, h_pad = 0.5)
-
+	ax1.set_xlabel('Time (s)')
+	fig.tight_layout(w_pad = 2, h_pad = 0.0)
+	plt.subplots_adjust(hspace=0.3)#, bottom=0.05)
 	if zoom and downsamp:
 		title = (' [close up with downsamp = %d]'%downsamp)
 		name = '_zoomed_downsamped'
+		#ax1.locator_params(axis='x', tight=True, nbins=4)
+		#ax1.xaxis.set_minor_locator(minorLocator)
+		#ax1.tick_params(axis='x',which='minor',bottom='on', top='on')
+		ax1.ticklabel_format(style='sci', axis='x', scilimits=(0,0), useOffset=True)
 	elif zoom:
 		title = (' [close up]')
 		name = '_zoomed'
+		#ax1.locator_params(axis='x', tight=True, nbins=4)
+		#ax1.xaxis.set_minor_locator(minorLocator)
+		#ax1.tick_params(axis='x',which='minor',bottom='on', top='on')
+		ax1.ticklabel_format(style='sci', axis='x', scilimits=(0,0), useOffset=True)
 	else:
 		title = name = ''
-          
 	plt.suptitle('%s %.8f %s\n %s'%(FRB_name, IMJD + SMJD, title, observation), y=1.05)
 	if not os.path.isdir('%s/%s'%(directory, pulse_id)): os.makedirs('%s/%s'%(directory, pulse_id))
 	plt.savefig('%s/%s/%s_%s%s.png'%(directory, pulse_id, observation, pulse_id, name),\
-										   bbox_inches='tight', pad_inches=0.2, dpi=300)
+									   bbox_inches='tight', pad_inches=0.2, dpi=300)
 	fig.clf()
 	plt.close('all')
+
+
+def zerodm_timeseries(ax, plot_duration, data, zero_dm_start):
+		nbinlim = np.int(plot_duration/data.dt)
+		Data = np.array(data.data[..., :nbinlim])
+		Dedisp_ts = Data.sum(axis=0)
+		times = (np.arange(data.numspectra)*data.dt + zero_dm_start)[..., :nbinlim]
+		ax.plot(times, Dedisp_ts, c="0.6", zorder=2, label='zero-dm filtering')
+		ax.set_xlim([times.min(),times.max()])
 
 def histogram(data, ax, title='', xlabel='', color='', bins=None, stacked=False, logy=False, logx=False, ranked=False):
 	"""
@@ -111,7 +133,6 @@ def histogram(data, ax, title='', xlabel='', color='', bins=None, stacked=False,
 	t.set_y(1.09)
 	ax.tick_params(axis='x', labelsize=8)
 	ax.tick_params(axis='y', labelsize=8)
-
 
 def toa_plotter(time, SN, duration, Rank, observation, ax=None):
 	"""
@@ -207,21 +228,36 @@ def plot_statistics(dm, time, SNR, duration, Rank, folder='.', observation='', r
 		rank = ''
 	plt.savefig('%s/statistical_plots_%s%s.png'%(folder,observation,rank), bbox_inches='tight')
 
-#def psrchive_plots(psrchives_path):
-	#run auto_waterfaller in /TEST
-	#for dirpath, dirnames, filenames in os.walk(psrchives_path):
-		#for archive in [archives for archives in filenames if archives.endswith("6085.ar")]:
-			#full_path = str(os.path.join(psrchives_path,archive))
-			#full_path_no_ext = os.path.splitext(full_path)[0]
-			#psrplot version
-			#subprocess.call(['psrplot','-p','freq+','-c','psd=0','-c','above:l=','-c','above:c=%s'%full_path_no_ext,'-D', "%s.ps /CPS"%full_path_no_ext, full_path])
-			#subprocess.call(['convert', '%s.ps'%full_path_no_ext,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s.png'%full_path_no_ext])
-			##produce dynamic spectrum
-			#subprocess.call(['pav','-GTp','-g',"%s_DS.ps /CPS"%full_path_no_ext,full_path])
-			#subprocess.call(['convert', '%s_DS.ps'%full_path_no_ext,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s_DS.png'%full_path_no_ext])
-			##produce pulse profile	
-			#subprocess.call(['pav','-DFp','-g',"%s_profile.ps /CPS"%full_path_no_ext,full_path])
-			#subprocess.call(['convert', '%s_profile.ps'%full_path_no_ext,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s_profile.png'%full_path_no_ext])
+def master_statistics(dm, SNR, duration, figtitle, figname):
+	Rank = np.zeros(len(dm))
+	#fig = plt.figure(figsize=(8,6))
+	ax1 = plt.subplot2grid((2,3), (0,0)) #row,col,row,col
+	ax2 = plt.subplot2grid((2,3), (0,1))
+	ax3 = plt.subplot2grid((2,3), (0,2))
+	ax4 = plt.subplot2grid((2,3), (1,0))
+	ax5 = plt.subplot2grid((2,3), (1,1))
+	ax6 = plt.subplot2grid((2,3), (1,2))	
+
+	histogram(dm, ax = ax1, title='Distribution of Dispersion Measures',\
+		                                            xlabel=(r'DM (pc cm$^{-3}$)'))
+
+	histogram(SNR, ax= ax2, title='Distribution of Signal to Noise Ratios',\
+		                                            xlabel='S/N', logy=True)
+
+	histogram(duration*1000., ax=ax3, title='Distribution of Burst Durations',\
+		                                            xlabel='Duration (ms)')
+
+	scatter(dm, SNR, ax4, title='Dispersion Measure v. Signal to Noise Ratio',\
+									 xlabel=(r'DM (pc cm$^{-3}$)'), ylabel='SNR', Rank=Rank)
+	scatter(duration*1000., SNR, ax5, title='Pulse Duration v. Signal to Noise Ratio',\
+									 xlabel='Duration (ms)', ylabel='SNR', Rank=Rank)
+	scatter(duration*1000., dm, ax6, title='Pulse Duration v. Dispersion Measure',\
+									 xlabel='Duration (ms)', ylabel=(r'DM (pc cm$^{-3}$)'), Rank=Rank)
+	ax4.locator_params(axis='x',nbins=8)
+	ax6.locator_params(axis='y', nbins=8)
+	plt.tight_layout(w_pad = 0.3, h_pad = 0.1)
+	plt.suptitle(figtitle, y=1.04)
+	plt.savefig(figname, bbox_inches='tight')
 
 def psrchive_plots(archive_name): #assuming: (full name of the archive with path)
 		folder, ar_name = os.path.split(archive_name)
@@ -254,7 +290,7 @@ def psrchive_plots(archive_name): #assuming: (full name of the archive with path
 		#os.remove('%s_profile.ps'%os.path.join(folder,plot_name))
 		#psrplot -p freq+ -c psd=0 archive.ar
 
-def main(fits, time, DM=560., sigma=0., duration=0.01, pulse_id=0, top_freq=0., directory='.',\
+def main(fits, database, time, DM, sigma, duration=0.01, pulse_id=4279, top_freq=0., directory='.',\
 		  FRB_name='FRB121102', downsamp=1.):
         num_elements = time.size
         if isinstance(DM, float) or isinstance(DM, int): DM = np.zeros(num_elements) + DM
@@ -267,6 +303,8 @@ def main(fits, time, DM=560., sigma=0., duration=0.01, pulse_id=0, top_freq=0., 
 	observation = os.path.basename(fits)
 	observation = observation[:observation.find('_subs_')]	
 
+	events = pd.read_hdf(database, 'events')
+
 	#Open header of the fits file
 	with psrfits.pyfits.open(fits, memmap=True) as fn:
   		header = fn['SUBINT'].header + fn['PRIMARY'].header
@@ -277,58 +315,92 @@ def main(fits, time, DM=560., sigma=0., duration=0.01, pulse_id=0, top_freq=0., 
 	#Fractional day
 	SMJD = (header['STT_SMJD'] + time) / 86400.
 
-	for i, t in enumerate(time): 
+	for i, t in enumerate(time):
+		pulse_events = events[events.Pulse == pulse_id[i]]
+		#pulse_events = events[events.Pulse == 4279] #remove this later
 		start_time = t - 0.05
 		plot_duration = 0.1
+        #zero-DM filering version
+		zero_dm_data, nbinsextra, nbins, zero_dm_start = waterfall(rawdata, start_time, plot_duration, DM[i],\
+				nbins=None, nsub=None, subdm = DM, zerodm=True, downsamp=1,\
+				scaleindep=False, width_bins=1, mask=False, maskfn=None,\
+				bandpass_corr=False, ref_freq=None)
+		#non-zero-DM filtering version
 		data, nbinsextra, nbins, start = waterfall(rawdata, start_time, plot_duration, DM[i],\
 				nbins=None, nsub=None, subdm = DM, zerodm=False, downsamp=1,\
 				scaleindep=False, width_bins=1, mask=False, maskfn=None,\
 				bandpass_corr=False, ref_freq=None)
 
 		plotter(data, start, plot_duration, t, DM[i], IMJD, SMJD[i], duration[i], top_freq,\
-			sigma[i], directory, FRB_name, observation, zoom=False, idx=i, pulse_id=pulse_id[i], downsamp=False)
-                
+			sigma[i], directory, FRB_name, observation, zero_dm_data, zero_dm_start, pulse_events=pulse_events, zoom=False, idx=i, pulse_id=pulse_id[i], downsamp=False)
+
         #Zoomed version
  		start_time = t - 0.01
 		plot_duration = 0.03
 
+		zero_dm_data, nbinsextra, nbins, zero_dm_start = waterfall(rawdata, start_time, plot_duration, DM[i],\
+				nbins=None, nsub=None, subdm = DM, zerodm=True, downsamp=1,\
+				scaleindep=False, width_bins=1, mask=False, maskfn=None,\
+				bandpass_corr=False, ref_freq=None)
 		data, nbinsextra, nbins, start = waterfall(rawdata, start_time, plot_duration, DM[i],\
 				nbins=None, nsub=None, subdm = DM, zerodm=False, downsamp=1,\
 				scaleindep=False, width_bins=1, mask=False, maskfn=None,\
 				bandpass_corr=False, ref_freq=None)
-
 		plotter(data, start, plot_duration, t, DM[i], IMJD, SMJD[i], duration[i], top_freq,\
-			sigma[i], directory, FRB_name, observation, zoom=True, idx=i, pulse_id=pulse_id[i], downsamp=False)               
+			sigma[i], directory, FRB_name, observation, zero_dm_data, zero_dm_start, pulse_events=pulse_events, zoom=True, idx=i, pulse_id=pulse_id[i], downsamp=False)               
         
         #downsamped version (zoomed)
+		zero_dm_data, nbinsextra, nbins, zero_dm_start = waterfall(rawdata, start_time, plot_duration, DM[i],\
+				nbins=None, nsub=None, subdm = DM, zerodm=True, downsamp=downsamp[i],\
+				scaleindep=False, width_bins=1, mask=False, maskfn=None,\
+				bandpass_corr=False, ref_freq=None)
 		data, nbinsextra, nbins, start = waterfall(rawdata, start_time, plot_duration, DM[i],\
 				nbins=None, nsub=None, subdm = DM, zerodm=False, downsamp=downsamp[i],\
 				scaleindep=False, width_bins=1, mask=False, maskfn=None,\
 				bandpass_corr=False, ref_freq=None)
-
 		plotter(data, start, plot_duration, t, DM[i], IMJD, SMJD[i], duration[i], top_freq,\
-
-				sigma[i], directory, FRB_name, observation, zoom=True, idx=i, pulse_id=pulse_id[i],\
+				sigma[i], directory, FRB_name, observation, zero_dm_data, zero_dm_start, pulse_events=pulse_events, zoom=True, idx=i, pulse_id=pulse_id[i],\
 			 	downsamp=downsamp[i])
+		
+
+def dm_snr(pulse_events, ax=None):
+	plt.scatter(pulse_events.DM, pulse_events.Sigma, marker='o', s=10, facecolors='none', edgecolors ='k')
+	ax.set_xlabel(r'DM (pc cm$^{-3}$)', fontsize=10)
+	ax.set_ylabel('S/N', fontsize=10)
+	ax.tick_params(axis='x', labelsize=10)
+	ax.tick_params(axis='y', labelsize=10)
+	ax.locator_params(axis='x',nbins=3)
+	ax.locator_params(axis='y',nbins=5)
 
 if __name__ == '__main__':
-	#DM, sigma, time, downfact = np.loadtxt(sys.argv[2], usecols=(0,1,2,4), unpack=True)
-	#downsamp = np.zeros(len(downfact)) + 1. #just a place holder so my code runs upon testing.
-	#main(sys.argv[1],time, DM, sigma, downsamp = downsamp)
-	database = '/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/output/puppi_57614_C0531+33_0803/pulses/puppi_57614_C0531+33_0803.hdf5'#'/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/TEST/SinglePulses.hdf5'#'/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/output/puppi_57614_C0531+33_0803/OLD/SinglePulses.hdf5'
-	pulses = pd.read_hdf(database,'pulses')
-	dm = np.array(pulses.DM)
-	SNR = np.array(pulses.Sigma)
-	time = np.array(pulses.Time)
-	duration = np.array(pulses.Duration)
-	observation = "test_observation"
-	#Rank = np.random.randint(0,3,len(time))
-	Rank = np.loadtxt('/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/TEST/puppi_57614_C0531+33_0803_pulses.txt', usecols=(1,), dtype='int')
-	plot_statistics(dm, time, SNR, duration, Rank, folder='', observation=observation)
-	#plt.savefig('test_stat_plot.png', bbox_inches='tight', dpi=300)
-	
-	#psrchive_plots('psrchives/12.ar')
-	
+	#DM, sigma, time, downfact = np.loadtxt(sys.argv[2], usecols=(0,1,2,4), unpack=True) #argv[2] = .singlepulse
+	#downsamp = np.zeros(len(downfact)) + 1. #just a place holder so my code runs upon testing.	
+	#main(sys.argv[1],time, DM, sigma, downsamp = downsamp) #arg1 = fitsfile
+	singlepulse_file = 'puppi_57614_C0531+33_0803_subs_0001_TOPO_DM561.00.singlepulse'
+	DM, sigma, time, downfact = np.loadtxt(singlepulse_file, usecols=(0,1,2,4), unpack=True)
+	time = time[17:18]
+	sigma = sigma[17:18]
+	downfact = downfact[17:18]
+	DM = DM[17:18]
+	database = 'puppi_57614_C0531+33_0803.hdf5'
+	downsamp = np.zeros(len(downfact)) + 1.
+	main('puppi_57614_C0531+33_0803_subs_0001.fits', database, time, DM, sigma, downsamp = downsamp)
+
+	#database = '/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/output/puppi_57614_C0531+33_0803/pulses/puppi_57614_C0531+33_0803.hdf5'#'/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/TEST/SinglePulses.hdf5'#'/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/output/puppi_57614_C0531+33_0803/OLD/SinglePulses.hdf5'
+	#database = '/psr_archive/hessels/hessels/AO-FRB/pipeline_products/20170112_pulses_archive.hdf5'
+	#database = '/Users/Kelly/UvA/Masters\ Project/arecibo_pipeline/20170112_pulses_archive.hdf5'
+	#pulses = pd.read_hdf(database,'pulses')
+	#dm = np.array(pulses.DM)
+	#SNR = np.array(pulses.Sigma)
+	#time = np.array(pulses.Time)
+	#duration = np.array(pulses.Duration)
+	#figtitle = "FRB121102"
+	#figname = "FRB121101_statistics.png"
+	#master_statistics(dm, SNR, duration, figtitle, figname)
+	#database = '/psr_archive/hessels/hessels/AO-FRB/pipeline_products/puppi_57644_C0531+33_0021/pulses/puppi_57644_C0531+33_0021.hdf5'
+	#pulse_ids = [5553,5568,5663,5684,5839,5999,5064,3203, 2461, 4664, 4461,5267]
+	#for pulse_id in pulse_ids:
+	#	dm_snr(database, pulse_id)
 
 
 

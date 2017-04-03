@@ -186,7 +186,7 @@ def waterfall(rawdatafile, start, duration, dm=None, nbins=None, nsub=None,\
 
     return data, nbinsextra, nbins, start
 
-def plot_waterfall(data, start, duration, 
+def plot_waterfall(data, start, duration, colour="k",
                    integrate_ts=False, integrate_spec=False, show_cb=False, 
                    cmap_str="gist_yarg", sweep_dms=[], sweep_posns=[],
                    ax_im=None, ax_ts=None, ax_spec=None, interactive=True):
@@ -248,7 +248,7 @@ def plot_waterfall(data, start, duration,
         Data = np.array(data.data[..., :nbinlim])
         Dedisp_ts = Data.sum(axis=0)
         times = (np.arange(data.numspectra)*data.dt + start)[..., :nbinlim]
-        ax_ts.plot(times, Dedisp_ts,"k")
+        ax_ts.plot(times, Dedisp_ts, colour) #edited: added colour=k for autowater_faller plotter func
         ax_ts.set_xlim([times.min(),times.max()])
 	plt.setp(ax_ts.get_xticklabels(), visible = False)
 	plt.setp(ax_ts.get_yticklabels(), visible = False)
