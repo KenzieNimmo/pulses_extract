@@ -32,6 +32,7 @@ script_dir = cwd + "/pulses_extract/src"
 base = "4bit-p2030.20160702.FRB130628_0"
 beam = 0
 subband = 0
+infile = glob("%s.b%ds%d*.fits"%(base,beam,subband))[0]
 """
 ### ONE SUBBAND VERSION ###
 path = "/data/gourdji/FRB130628_pipeline/test" #come back to this
@@ -117,7 +118,6 @@ for beam in beams:
 #PUT BACK INDENTS (2) (should be inside subband loop)
 execute("cd /data/gourdji/FRB130628_pipeline/test/%s_b%ds%d_TEST_proc"%(base,beam,subband)) #hard code path later
 #execute("mkdir obs_data")
-infile = glob("%s.b%ds%d*.fits"%(base,beam,subband))[0] #testing purposes. remove later
 execute("mkdir pulses")
 #execute("mkdir periodic_cands")
 #execute("mkdir TEMP")
