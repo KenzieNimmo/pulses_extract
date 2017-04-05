@@ -185,10 +185,10 @@ pulses.index = pulses.Pulse #let the Pulse val be the new index (makes sense sin
                     #args.events_dDM, args.events_dt, args.DM_step) #what does this do?
 
   #events = events[events.Pulse >= 0]
-
+"""
  ###combined subbands version###
- """
- """
+ 
+"""
 #base = argv[1] #base name of fits file, up until beam number "b".
 #base = argv[1] #up until channel "s".
 base = "4bit-p2030.20160702.FRB130628_0"
