@@ -19,9 +19,23 @@ parameters = {
     'Downfact_max' : 100,
     },
   
-  "FRB130628_Alfa": {
-    
-    
-  }
-  
+  "FRB130628_Alfa_s0": {
+    'DM_low' : 0.,
+    'DM_high' : 575.,
+    'DM_search_low' : 370..,
+    'DM_search_high' : 570.,
+    'SNR_peak_min' : 8.,
+    'SNR_min' : 6.,
+    'Downfact_max' : 100,
+  },
+
+  "FRB130628_Alfa_s1": {
+    'DM_low' : 0.,
+    'DM_high' : 590.,
+    'DM_search_low' : 370.,
+    'DM_search_high' : 570.,
+    'SNR_peak_min' : 8.,
+    'SNR_min' : 6.,
+    'Downfact_max' : 100,
+  } 
 }
