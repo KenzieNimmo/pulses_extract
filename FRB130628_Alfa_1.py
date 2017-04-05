@@ -29,10 +29,12 @@ def make_prepsubband(infile,downsamp,lodm,dmstep,numdms,maskfile,base,beam,subba
 cwd = os.getcwd()
 script_dir = cwd + "/pulses_extract/src"
 #execute("source /opt/pulsar/pulsar.sh")
-
-
+base = "4bit-p2030.20160702.FRB130628_0"
+beam = 0
+subband = 0
+"""
 ### ONE SUBBAND VERSION ###
-path = "/data/gourdji/FRB130628_pipeline/test"
+path = "/data/gourdji/FRB130628_pipeline/test" #come back to this
 base = "4bit-p2030.20160702.FRB130628_1"
 beams = range(7)
 subbands = range(2)
@@ -109,13 +111,20 @@ for beam in beams:
 			 #%s/%s_b%ds%d_TEST_proc/%s_b%ds%d_ZERO_SNR5_singlepulse.ps"%(path,base,beam,subband,base,beam,subband,path,base,beam,subband,base,beam,subband))
 		#execute("single_pulse_search.py -t 10 %s/%s_b%ds%d_TEST_proc/*.singlepulse"%(path,base,beam,subband))
 		#subprocess.Popen("single_pulse_search.py -t 10 *.singlepulse", shell=True, cwd='%s_b%ds%d_TEST_proc'%(base,beam,subband))
-
+"""
 
 ##### STEP 2: ONCE SINGLEPULSE FILES ARE CREATED FOR EACH DM #####
-		execute("cd %s_b%ds%d_TEST_proc"%(base,beam,subband))
-		execute("mkdir obs_data")
+		execute("cd /data/gourdji/FRB130628_pipeline/test/%s_b%ds%d_TEST_proc"%(base,beam,subband)) #hard code path later
+		#execute("mkdir obs_data")
 		execute("mkdir pulses")
 		#execute("mkdir periodic_cands")
+		#execute("mkdir TEMP")
+		#execute("cd TEMP")
+		execute("%s/pulses_extract.py -db_name %s_b%ds%d_SinglePulses.hdf5 -fits %s\
+		 		-store_events -idL %s_b%ds%d_ZERO_DM* -store_dir pulses \
+  				-plot_pulses -plot_statistics -parameters_id FRB130628_Alfa_s%d > /dev/null"\
+				%(script_dir,base,beam,subband,infile,subband))
+		
 """
 #concatenate all singlepulse files to create one master file
 #"find -maxdepth 1 -name "%s_b%ds%d_ZERO_DM*" | xargs -n 1 "%(base,beam,subband)
