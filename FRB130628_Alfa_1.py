@@ -116,9 +116,10 @@ for beam in beams:
 
 ##### STEP 2: ONCE SINGLEPULSE FILES ARE CREATED FOR EACH DM #####
 #PUT BACK INDENTS (2) (should be inside subband loop)
-execute("cd /data/gourdji/FRB130628_pipeline/test/%s_b%ds%d_TEST_proc"%(base,beam,subband)) #hard code path later
+os.chdir("%s/%s_b%ds%d_TEST_proc"%(cwd,base,beam,subband)) #hard code path later
+execute("pwd")
 #execute("mkdir obs_data")
-execute("mkdir pulses")
+#execute("mkdir pulses")
 #execute("mkdir periodic_cands")
 #execute("mkdir TEMP")
 #execute("cd TEMP")
