@@ -9,7 +9,7 @@ import numpy as np
 from scipy import special
 import pyfits
 
-from src import C_Funct
+import C_Funct
 import auto_waterfaller
 from extract_psrfits_subints import extract_subints_from_observation
 from obs_parameters import parameters
