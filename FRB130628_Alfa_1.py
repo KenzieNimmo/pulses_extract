@@ -119,7 +119,7 @@ for beam in beams:
 os.chdir("%s/%s_b%ds%d_TEST_proc"%(cwd,base,beam,subband)) #hard code path later
 execute("pwd")
 #execute("mkdir obs_data")
-#execute("mkdir pulses")
+execute("mkdir pulses")
 #execute("mkdir periodic_cands")
 #execute("mkdir TEMP")
 #execute("cd TEMP")
