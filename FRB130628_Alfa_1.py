@@ -123,7 +123,7 @@ execute("mkdir pulses")
 #execute("mkdir periodic_cands")
 #execute("mkdir TEMP")
 #execute("cd TEMP")
-execute("%s/pulses_extract.py -db_name %s_b%ds%d_SinglePulses.hdf5 -fits %s\
+execute("python %s/pulses_extract.py -db_name %s_b%ds%d_SinglePulses.hdf5 -fits %s\
  		-store_events -idL %s_b%ds%d_ZERO_DM* -store_dir pulses \
 			-plot_pulses -plot_statistics -parameters_id FRB130628_Alfa_s%d > /dev/null"\
 		%(script_dir,base,beam,subband,infile,base,beam,subband,subband))
