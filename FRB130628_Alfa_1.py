@@ -32,7 +32,7 @@ script_dir = cwd + "/pulses_extract/src"
 base = "4bit-p2030.20160702.FRB130628_0"
 beam = 0
 subband = 0
-infile = glob("%s.b%ds%d*.fits"%(base,beam,subband))[0]
+infile = cwd + "/" + glob("%s.b%ds%d*.fits"%(base,beam,subband))[0]
 """
 ### ONE SUBBAND VERSION ###
 path = "/data/gourdji/FRB130628_pipeline/test" #come back to this
