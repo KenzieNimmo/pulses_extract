@@ -127,6 +127,14 @@ execute("python %s/pulses_extract.py -db_name %s_b%ds%d_SinglePulses.hdf5 -fits 
  		-store_events -idL %s_b%ds%d_ZERO_DM -store_dir pulses \
 			-plot_pulses -plot_statistics -parameters_id FRB130628_Alfa_s%d > /dev/null"\
 		%(script_dir,base,beam,subband,infile,base,beam,subband,subband))
+#Use this for debugging so can print messages within pulses_extract.py 
+#remove > dev/null since otherwise won't print output on command line
+#process = subprocess.Popen("python %s/pulses_extract.py -db_name %s_b%ds%d_SinglePulses.hdf5 -fits %s\
+#		-store_events -idL %s_b%ds%d_ZERO_DM -store_dir pulses \
+#			-plot_pulses -plot_statistics -parameters_id FRB130628_Alfa_s%d"\ 
+#		%(script_dir,base,beam,subband,infile,base,beam,subband,subband), shell=True, stdout=subprocess.PIPE)
+#stdout = process.communicate()[0]
+#print "STDOUT: %s"%stdout
 		
 """
 #concatenate all singlepulse files to create one master file
