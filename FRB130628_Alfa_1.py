@@ -53,7 +53,8 @@ calls = range(calls)
 for beam in beams:
 	for subband in subbands:
 		print "NOW PROCESSING SUBBAND %d of BEAM %d"%(subband,beam)
-		infile = cwd + "/" + glob("%s.b%ds%d*.fits"%(base,beam,subband))[0]
+		infile = glob("%s.b%ds%d*.fits"%(base,beam,subband))[0]
+		print infile
 		execute("rfifind -time 2.0 -psrfits -noscales -nooffsets -o %s_b%ds%d %s"%(base,beam,subband,infile))
 		maskfile = glob("%s_b%ds%d*_rfifind.mask"%(base,beam,subband))[0]
 		lodm = 0.
