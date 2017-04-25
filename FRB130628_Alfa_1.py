@@ -41,7 +41,7 @@ base = "4bit-p2030.20160702.FRB130628_0"
 #beams = range(7)
 #subbands = range(2)
 beams = [0]
-subbands[1]
+subbands = [1]
 dmstep = 1.00
 numdms = 96
 downsamp = 3
