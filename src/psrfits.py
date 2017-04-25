@@ -109,8 +109,8 @@ class PsrfitsFile(object):
         
         shp = subintdata.squeeze().shape
         if ((self.nbits < 8) and \
-            (shp[0] != self.nsamp_per_subint) and \
-            (shp[1] != self.nchan * self.nbits / 8)):
+            (shp[0] != self.nsamp_per_subint)): #and \ ####Commented out by Kelly Gourdji####
+            #(shp[1] != self.nchan * self.nbits / 8)):
             subintdata = subintdata.reshape(self.nsamp_per_subint,
                                             self.nchan * self.nbits / 8)
         if self.nbits == 4:
