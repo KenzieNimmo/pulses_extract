@@ -26,8 +26,10 @@ def make_prepsubband(infile,downsamp,lodm,dmstep,numdms,maskfile,base,beam,subba
 			 %s_b%ds%d_ZERO %s"\
 			%(downsamp,lodm,dmstep,numdms,maskfile,base,beam,subband,infile))
 
-cwd = os.getcwd()
-script_dir = cwd + "/pulses_extract/src"
+#cwd = os.getcwd()
+general_dir = "/data/gourdji/FRB130628_pipeline/test" #Where everything pipeline related is stored 
+script_dir = general_dir + "/pulses_extract/src"
+fits_dir = general_dir
 ### test variables ###
 #base = "4bit-p2030.20160702.FRB130628_0"
 #beam = 0
@@ -36,12 +38,12 @@ script_dir = cwd + "/pulses_extract/src"
 ########################
 
 ### ONE SUBBAND VERSION ###
-path = "/data/gourdji/FRB130628_pipeline/test" #come back to this
-base = "4bit-p2030.20160702.FRB130628_0"
-#beams = range(7)
-#subbands = range(2)
-beams = [0]
-subbands = [1]
+#path = "/data/gourdji/FRB130628_pipeline/test" #come back to this
+base = "4bit-p2030.20160702.FRB130628_1" #TURN INTO SCRIPT ARGUMENT
+beams = range(7)
+subbands = range(2)
+#beams = [0]
+#subbands = [1]
 dmstep = 1.00
 numdms = 96
 downsamp = 3
@@ -53,7 +55,14 @@ calls = range(calls)
 for beam in beams:
 	for subband in subbands:
 		print "NOW PROCESSING SUBBAND %d of BEAM %d"%(subband,beam)
-		infile = cwd + "/" + glob("%s.b%ds%d*.fits"%(base,beam,subband))[0]
+		execute("mkdir %s_b%ds%d_TEST_proc"%(base,beam,subband))
+		outdir = '%s/%s_b%ds%d_TEST_proc'%(general_dir,base,beam,subband)
+		os.chdir(outdir)
+		execute("mkdir obs_data")
+		execute("mkdir pulses")
+		execute("mkdir TEMP")
+		os.chdir("TEMP")
+		infile = fits_dir + "/" + glob("%s.b%ds%d*.fits"%(base,beam,subband))[0]
 		execute("rfifind -time 2.0 -psrfits -noscales -nooffsets -o %s_b%ds%d %s"%(base,beam,subband,infile))
 		maskfile = glob("%s_b%ds%d*_rfifind.mask"%(base,beam,subband))[0]
 		lodm = 0.
@@ -105,9 +114,9 @@ for beam in beams:
 
 		execute("ls %s_b%ds%d_ZERO*.dat | xargs -n 1 single_pulse_search.py --noplot -m 70 -t 5.0"%(base,beam,subband))
 		execute("single_pulse_search.py -t 10 %s_b%ds%d_ZERO*singlepulse"%(base,beam,subband))
-		execute("mkdir %s_b%ds%d_TEST_proc"%(base,beam,subband))
-		execute("mv %s_b%ds%d_ZERO* %s_b%ds%d_TEST_proc"%(base,beam,subband,base,beam,subband))
-		execute("mv %s_b%ds%d_rfifind.* %s_b%ds%d_TEST_proc"%(base,beam,subband,base,beam,subband))
+		
+		#execute("mv %s_b%ds%d_ZERO* %s_b%ds%d_TEST_proc"%(base,beam,subband,base,beam,subband))
+		#execute("mv %s_b%ds%d_rfifind.* %s_b%ds%d_TEST_proc"%(base,beam,subband,base,beam,subband))
 		#this was used to perform actions on files already moved out of the "test" directory.
 		#if not os.path.isfile("%s/%s_b%ds%d_TEST_proc/%s_b%ds%d_ZERO_SNR5_singlepulse.ps"\
 														#%(path,base,beam,subband,base,beam,subband)):
@@ -119,16 +128,17 @@ for beam in beams:
 
 ##### STEP 2: ONCE SINGLEPULSE FILES ARE CREATED FOR EACH DM #####
 #PUT BACK INDENTS (2) (should be inside subband loop)
-		os.chdir("%s/%s_b%ds%d_TEST_proc"%(cwd,base,beam,subband)) #hard code path later
-		#execute("mkdir obs_data")
-		execute("mkdir pulses")
-		#execute("mkdir periodic_cands")
-		#execute("mkdir TEMP")
-		#execute("cd TEMP")
 		execute("python %s/pulses_extract.py -db_name %s_b%ds%d_TEST_proc.hdf5 -fits %s\
-		 		-store_events -idL %s_b%ds%d_ZERO_DM -store_dir pulses \
+		 		-store_events -idL %s_b%ds%d_ZERO_DM -store_dir %s/pulses \
 					-plot_pulses -plot_statistics -parameters_id FRB130628_Alfa_s%d > /dev/null"\
-				%(script_dir,base,beam,subband,infile,base,beam,subband,subband))
+				%(script_dir,base,beam,subband,infile,base,beam,subband,outdir,subband))
+		execute("cp %s_b%ds%d_ZERO_singlepulse.ps %s/obs_data"%(base,beam,subband,outdir))
+		execute("cp %s_b%ds%d_ZERO_DM470.00.dat %s/obs_data"%(base,beam,subband,outdir))
+		execute("cp %s_b%ds%d_ZERO_DM470.00.dat %s/obs_data"%(base,beam,subband,outdir))
+		execute("rm -rf %s/TEMP"%outdir)
+		os.chdir(general_dir)
+
+
 #Use this for debugging so can print messages within pulses_extract.py 
 #remove > dev/null since otherwise won't print output on command line
 #process = subprocess.Popen("python %s/pulses_extract.py -db_name %s_b%ds%d_SinglePulses.hdf5 -fits %s\
