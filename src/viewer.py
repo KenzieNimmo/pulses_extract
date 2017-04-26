@@ -226,7 +226,7 @@ def viewer(txtfile, path_to_pulses, obs, view_only_mode=False,ranks_to_view=None
 			#root.geometry("800x500")
 			root.bind('<Return>', next_image)
 			for file in os.listdir(path):
-				if file.startswith('FRB'): #avoid looking at diagnostic plot
+				if file.startswith(file_id): #avoid looking at diagnostic plot. 
 					img = Image.open(os.path.join(path, file))
 					img = img.resize((800, 500), Image.ANTIALIAS)
 					root.geometry('%dx%d' % (img.size[0],img.size[1]))
@@ -267,6 +267,7 @@ if __name__ == '__main__':
 		parser.add_argument('-multicomponents', help="Use this option to view only bursts that show multiple components. To be used in master view-only mode.", action='store_true')
 		parser.add_argument('-multibursts', help="Use this option to view only candidates showing additional bursts. To be used in master view-only mode.", action='store_true')
 		parser.add_argument('-start', help="Start viewer at this pulse ID (works exclusively in master mode at the moment).", default=None, type=int)
+		parser.add_argument('FRB_name', help="Name of FRB being viewed e.g.'FRB121102'. Default: FRB121102", default="FRB121102", type=str)
 		return parser.parse_args()
 	args = parser()
 
@@ -277,7 +278,11 @@ if __name__ == '__main__':
 		obs_path = '/psr_archive/hessels/hessels/AO-FRB/pipeline_products/'
 	path_to_pulses = obs_path + obs + '/pulses/' #remove pulses directory from path if dealing with global list hdf5 file
 	filename = path_to_pulses + obs + '.hdf5' #for select_cands
-
+	if args.FRB_name == "FRB121102":#This only works for observations run using early version of pipeline
+		file_id = "FRB" 			#where files start with "FRB".In latest version, look at fits arg of pulses_extract. I think "puppi"
+		#file_id = "puppi"			
+	if args.FRB_name == "FRB130628":
+		file_id = "4"
 	if args.master:
 		path_to_pulses = obs_path
 		filename = path_to_pulses + obs + '.hdf5'
