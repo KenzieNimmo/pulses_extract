@@ -267,17 +267,17 @@ if __name__ == '__main__':
 		parser.add_argument('-multicomponents', help="Use this option to view only bursts that show multiple components. To be used in master view-only mode.", action='store_true')
 		parser.add_argument('-multibursts', help="Use this option to view only candidates showing additional bursts. To be used in master view-only mode.", action='store_true')
 		parser.add_argument('-start', help="Start viewer at this pulse ID (works exclusively in master mode at the moment).", default=None, type=int)
-		parser.add_argument('FRB_name', help="Name of FRB being viewed e.g.'FRB121102'. Default: FRB121102", default="FRB121102", type=str)
+		parser.add_argument('-FRB', help="Name of FRB being viewed e.g.'121102'. Default: 121102", default=121102, type=int)
 		return parser.parse_args()
 	args = parser()
 
 	obs = args.observation
-	if args.FRB_name == "FRB121102":#This only works for observations run using early version of pipeline
+	if args.FRB == 121102:#This only works for observations run using early version of pipeline
 		file_id = "FRB" 			#where files start with "FRB".In latest version, look at fits arg of pulses_extract. I think "puppi"
 		#file_id = "puppi"
 		obs_path = '/psr_archive/hessels/hessels/AO-FRB/pipeline_products/'
 
-	if args.FRB_name == "FRB130628":
+	if args.FRB == 130628:
 		file_id = "4"
 		obs_path = '/data/gourdji/FRB130628_pipeline/test/'
 	
