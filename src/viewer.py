@@ -262,7 +262,7 @@ if __name__ == '__main__':
 		 					candidates of ranks 1 and 2 type: -rank 12. Default: Rank 0 only", default=[0], type=list)
 		parser.add_argument('observation', help="Name of observation to view/rank. If using master option, this is the file name without the extension.")
 		parser.add_argument('-create_cand_list', help="Create a list of candidates to rank", action='store_true')
-		parser.add_argument('-not_dop263', help="If you want to run script outside of dop263 (script must be in same dir as observation dir).", action='store_true')
+		parser.add_argument('-not_dop263', help="If running script outside of dop263 (script must be in same dir as observation dir).", action='store_true')
 		parser.add_argument('-master', help="Use this option if you want to view the master list of FRB pulses.", action='store_true')
 		parser.add_argument('-multicomponents', help="Use this option to view only bursts that show multiple components. To be used in master view-only mode.", action='store_true')
 		parser.add_argument('-multibursts', help="Use this option to view only candidates showing additional bursts. To be used in master view-only mode.", action='store_true')
@@ -272,17 +272,21 @@ if __name__ == '__main__':
 	args = parser()
 
 	obs = args.observation
-	if args.not_dop263:
-		obs_path = ''
-	else:
-		obs_path = '/psr_archive/hessels/hessels/AO-FRB/pipeline_products/'
-	path_to_pulses = obs_path + obs + '/pulses/' #remove pulses directory from path if dealing with global list hdf5 file
-	filename = path_to_pulses + obs + '.hdf5' #for select_cands
 	if args.FRB_name == "FRB121102":#This only works for observations run using early version of pipeline
 		file_id = "FRB" 			#where files start with "FRB".In latest version, look at fits arg of pulses_extract. I think "puppi"
-		#file_id = "puppi"			
+		#file_id = "puppi"
+		obs_path = '/psr_archive/hessels/hessels/AO-FRB/pipeline_products/'
+
 	if args.FRB_name == "FRB130628":
 		file_id = "4"
+		obs_path = '/data/gourdji/FRB130628_pipeline/test/'
+	
+	if args.not_dop263:
+		obs_path = ''
+
+	path_to_pulses = obs_path + obs + '/pulses/' #remove pulses directory from path if dealing with global list hdf5 file
+	filename = path_to_pulses + obs + '.hdf5' #for select_cands
+
 	if args.master:
 		path_to_pulses = obs_path
 		filename = path_to_pulses + obs + '.hdf5'
