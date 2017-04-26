@@ -7,6 +7,7 @@ parameters = {
     'SNR_peak_min' : 8.,       #Minumum peak SNR value
     'SNR_min' : 6.,            #Minumum SNR value
     'Downfact_max' : 100,      #Maximum Downfact value
+    'FRB_name' : "FRB",
     },
   
   "FRB121102_Puppi": {
@@ -17,6 +18,7 @@ parameters = {
     'SNR_peak_min' : 8.,
     'SNR_min' : 6.,
     'Downfact_max' : 100,
+    'FRB_name' : "FRB121102",
     },
   
   "FRB130628_Alfa_s0": {
@@ -27,6 +29,7 @@ parameters = {
     'SNR_peak_min' : 5.,
     'SNR_min' : 6.,
     'Downfact_max' : 100,
+    'FRB_name' : "FRB130628",
   },
 
   "FRB130628_Alfa_s1": {
@@ -37,5 +40,6 @@ parameters = {
     'SNR_peak_min' : 5.,
     'SNR_min' : 6.,
     'Downfact_max' : 100,
+    'FRB_name' : "FRB130628",
   } 
 }

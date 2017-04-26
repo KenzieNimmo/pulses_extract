@@ -70,7 +70,7 @@ def main():
       database_path = os.path.join(args.store_dir,args.db_name)
       auto_waterfaller.main(args.fits, database_path, np.array(pulses.Time), np.array(pulses.DM), np.array(pulses.Sigma), \
                                              np.array(pulses.Duration), top_freq=pulses.top_Freq.iloc[0], \
-                                             downsamp=np.clip(np.array(pulses.Downfact) / 5, 1, 1000), directory=args.store_dir, pulse_id=np.array(pulses.index))
+                                             downsamp=np.clip(np.array(pulses.Downfact) / 5, 1, 1000), FRB_name=params['FRB_name'], directory=args.store_dir, pulse_id=np.array(pulses.index))
   
   if args.extract_raw: 
     real_pulses = pulses[(pulses.Pulse == 0) | (pulses.Pulse == 1)]

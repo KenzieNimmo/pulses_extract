@@ -119,17 +119,16 @@ for beam in beams:
 
 ##### STEP 2: ONCE SINGLEPULSE FILES ARE CREATED FOR EACH DM #####
 #PUT BACK INDENTS (2) (should be inside subband loop)
-os.chdir("%s/%s_b%ds%d_TEST_proc"%(cwd,base,beam,subband)) #hard code path later
-execute("pwd")
-#execute("mkdir obs_data")
-execute("mkdir pulses")
-#execute("mkdir periodic_cands")
-#execute("mkdir TEMP")
-#execute("cd TEMP")
-execute("python %s/pulses_extract.py -db_name %s_b%ds%d_TEST_proc.hdf5 -fits %s\
- 		-store_events -idL %s_b%ds%d_ZERO_DM -store_dir pulses \
-			-plot_pulses -plot_statistics -parameters_id FRB130628_Alfa_s%d > /dev/null"\
-		%(script_dir,base,beam,subband,infile,base,beam,subband,subband))
+		os.chdir("%s/%s_b%ds%d_TEST_proc"%(cwd,base,beam,subband)) #hard code path later
+		#execute("mkdir obs_data")
+		execute("mkdir pulses")
+		#execute("mkdir periodic_cands")
+		#execute("mkdir TEMP")
+		#execute("cd TEMP")
+		execute("python %s/pulses_extract.py -db_name %s_b%ds%d_TEST_proc.hdf5 -fits %s\
+		 		-store_events -idL %s_b%ds%d_ZERO_DM -store_dir pulses \
+					-plot_pulses -plot_statistics -parameters_id FRB130628_Alfa_s%d > /dev/null"\
+				%(script_dir,base,beam,subband,infile,base,beam,subband,subband))
 #Use this for debugging so can print messages within pulses_extract.py 
 #remove > dev/null since otherwise won't print output on command line
 #process = subprocess.Popen("python %s/pulses_extract.py -db_name %s_b%ds%d_SinglePulses.hdf5 -fits %s\
