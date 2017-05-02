@@ -64,7 +64,8 @@ for beam in beams:
 		execute("mkdir TEMP")
 		#os.chdir("TEMP")
 		execute("cd TEMP")
-		infile = fits_dir + "/" + glob("%s/%s.b%ds%d*.fits"%(fits_dir,base,beam,subband))[0]
+		#infile = fits_dir + "/" + glob("%s/%s.b%ds%d*.fits"%(fits_dir,base,beam,subband))[0]
+		infile = glob("%s/%s.b%ds%d*.fits"%(fits_dir,base,beam,subband))[0]
 		execute("rfifind -time 2.0 -psrfits -noscales -nooffsets -o %s_b%ds%d %s"%(base,beam,subband,infile))
 		maskfile = glob("%s_b%ds%d*_rfifind.mask"%(base,beam,subband))[0]
 		lodm = 0.
