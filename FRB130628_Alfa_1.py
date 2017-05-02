@@ -18,7 +18,7 @@ import numpy as np
 
 def execute(command):
 	print command
-	subprocess.call(command, shell=True)
+	subprocess.Popen(command, shell=True, executable='/bin/bash')
 
 def make_prepsubband(infile,downsamp,lodm,dmstep,numdms,maskfile,base,beam,subband):
 	execute("prepsubband -nsub 120 -noscales -nooffsets -downsamp %d -lodm %f\
