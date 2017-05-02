@@ -58,12 +58,12 @@ for beam in beams:
 		execute("mkdir %s_b%ds%d_TEST_proc"%(base,beam,subband))
 		outdir = '%s/%s_b%ds%d_TEST_proc'%(general_dir,base,beam,subband)
 		#os.chdir(outdir)
-		execute("cd outdir")
-		execute("mkdir obs_data")
-		execute("mkdir pulses")
-		execute("mkdir TEMP")
+		execute("cd %s"%outdir)
+		execute("mkdir %s/obs_data"%outdir)
+		execute("mkdir %s/pulses"%outdir)
+		execute("mkdir %s/TEMP"%outdir)
 		#os.chdir("TEMP")
-		execute("cd TEMP")
+		execute("cd %s/TEMP"%outdir)
 		#infile = fits_dir + "/" + glob("%s/%s.b%ds%d*.fits"%(fits_dir,base,beam,subband))[0]
 		infile = glob("%s/%s.b%ds%d*.fits"%(fits_dir,base,beam,subband))[0]
 		execute("rfifind -time 2.0 -psrfits -noscales -nooffsets -o %s_b%ds%d %s"%(base,beam,subband,infile))
@@ -140,7 +140,7 @@ for beam in beams:
 		execute("cp %s_b%ds%d_ZERO_DM470.00.dat %s/obs_data"%(base,beam,subband,outdir))
 		execute("rm -rf %s/TEMP"%outdir)
 		#os.chdir(general_dir)
-		execute("cd general_dir")
+		execute("cd %s"%general_dir)
 
 
 #Use this for debugging so can print messages within pulses_extract.py 
