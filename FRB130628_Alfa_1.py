@@ -57,11 +57,13 @@ for beam in beams:
 		print "NOW PROCESSING SUBBAND %d of BEAM %d"%(subband,beam)
 		execute("mkdir %s_b%ds%d_TEST_proc"%(base,beam,subband))
 		outdir = '%s/%s_b%ds%d_TEST_proc'%(general_dir,base,beam,subband)
-		os.chdir(outdir)
+		#os.chdir(outdir)
+		execute("cd outdir")
 		execute("mkdir obs_data")
 		execute("mkdir pulses")
 		execute("mkdir TEMP")
-		os.chdir("TEMP")
+		#os.chdir("TEMP")
+		execute("cd TEMP")
 		infile = fits_dir + "/" + glob("%s/%s.b%ds%d*.fits"%(fits_dir,base,beam,subband))[0]
 		execute("rfifind -time 2.0 -psrfits -noscales -nooffsets -o %s_b%ds%d %s"%(base,beam,subband,infile))
 		maskfile = glob("%s_b%ds%d*_rfifind.mask"%(base,beam,subband))[0]
@@ -136,7 +138,8 @@ for beam in beams:
 		execute("cp %s_b%ds%d_ZERO_DM470.00.dat %s/obs_data"%(base,beam,subband,outdir))
 		execute("cp %s_b%ds%d_ZERO_DM470.00.dat %s/obs_data"%(base,beam,subband,outdir))
 		execute("rm -rf %s/TEMP"%outdir)
-		os.chdir(general_dir)
+		#os.chdir(general_dir)
+		execute(cd general_dir)
 
 
 #Use this for debugging so can print messages within pulses_extract.py 
