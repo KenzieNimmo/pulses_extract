@@ -20,11 +20,11 @@ def execute(command,working_dir=None):
 	print command
 	subprocess.Popen(command, shell=True, executable='/bin/bash',cwd=working_dir)
 
-def make_prepsubband(infile,downsamp,lodm,dmstep,numdms,maskfile,base,beam,subband):
+def make_prepsubband(infile,downsamp,lodm,dmstep,numdms,maskfile,base,beam,subband,working_dir):
 	execute("prepsubband -nsub 120 -noscales -nooffsets -downsamp %d -lodm %f\
 			-dmstep %f -numdms %d -zerodm -mask %s -o\
 			 %s_b%ds%d_ZERO %s"\
-			%(downsamp,lodm,dmstep,numdms,maskfile,base,beam,subband,infile))
+			%(downsamp,lodm,dmstep,numdms,maskfile,base,beam,subband,infile), working_dir)
 
 #cwd = os.getcwd()
 general_dir = "/data/gourdji/FRB130628_pipeline/test" #Where everything pipeline related is stored 
@@ -67,7 +67,7 @@ for beam in beams:
 		#infile = fits_dir + "/" + glob("%s/%s.b%ds%d*.fits"%(fits_dir,base,beam,subband))[0]
 		infile = glob("%s/%s.b%ds%d*.fits"%(fits_dir,base,beam,subband))[0]
 		execute("rfifind -time 2.0 -psrfits -noscales -nooffsets -o %s_b%ds%d %s"%(base,beam,subband,infile), working_dir="%s/TEMP"%outdir)
-		maskfile = glob("%s_b%ds%d*_rfifind.mask"%(base,beam,subband))[0]
+		maskfile = glob("%s/TEMP/%s_b%ds%d*_rfifind.mask"%(outdir,base,beam,subband))[0]
 		lodm = 0.
 		if subband == 0:
 			dmstep = 0.50
@@ -77,7 +77,7 @@ for beam in beams:
 			calls = 19
 			calls = range(calls)
 			for call in calls:
-				make_prepsubband(infile,downsamp,lodm,dmstep,numdms,maskfile,base,beam,subband)
+				make_prepsubband(infile,downsamp,lodm,dmstep,numdms,maskfile,base,beam,subband,working_dir="%s/TEMP"%outdir)
 				lodm +=  dsubDM
 			dmstep = 1.00
 			numdms = 50
@@ -86,7 +86,7 @@ for beam in beams:
 			calls = 2
 			calls = range(calls)
 			for call in calls:
-				make_prepsubband(infile,downsamp,lodm,dmstep,numdms,maskfile,base,beam,subband)
+				make_prepsubband(infile,downsamp,lodm,dmstep,numdms,maskfile,base,beam,subband,working_dir="%s/TEMP"%outdir)
 				lodm +=  dsubDM	
 
 		else:
@@ -97,7 +97,7 @@ for beam in beams:
 			calls = 21
 			calls = range(calls)
 			for call in calls:
-				make_prepsubband(infile,downsamp,lodm,dmstep,numdms,maskfile,base,beam,subband)
+				make_prepsubband(infile,downsamp,lodm,dmstep,numdms,maskfile,base,beam,subband,working_dir="%s/TEMP"%outdir)
 				lodm +=  dsubDM
 			dmstep = 0.50
 			numdms = 50
@@ -106,14 +106,14 @@ for beam in beams:
 			calls = 9
 			calls = range(calls)
 			for call in calls:
-				make_prepsubband(infile,downsamp,lodm,dmstep,numdms,maskfile,base,beam,subband)
+				make_prepsubband(infile,downsamp,lodm,dmstep,numdms,maskfile,base,beam,subband,working_dir="%s/TEMP"%outdir)
 				lodm +=  dsubDM	
 			dmstep = 1.00
 			numdms = 50
 			downsamp = 6
 			dsubDM = 50.
 			calls = 1
-			make_prepsubband(infile,downsamp,lodm,dmstep,numdms,maskfile,base,beam,subband)
+			make_prepsubband(infile,downsamp,lodm,dmstep,numdms,maskfile,base,beam,subband,working_dir="%s/TEMP"%outdir)
 
 		execute("ls %s_b%ds%d_ZERO*.dat | xargs -n 1 single_pulse_search.py --noplot -m 70 -t 5.0"%(base,beam,subband), working_dir="%s/TEMP"%outdir)
 		execute("single_pulse_search.py -t 10 %s_b%ds%d_ZERO*singlepulse"%(base,beam,subband), working_dir="%s/TEMP"%outdir)
