@@ -139,7 +139,7 @@ for beam in beams:
 		execute("cp %s_b%ds%d_ZERO_DM470.00.dat %s/obs_data"%(base,beam,subband,outdir))
 		execute("rm -rf %s/TEMP"%outdir)
 		#os.chdir(general_dir)
-		execute(cd general_dir)
+		execute("cd general_dir")
 
 
 #Use this for debugging so can print messages within pulses_extract.py 
