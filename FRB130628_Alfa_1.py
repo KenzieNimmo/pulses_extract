@@ -16,9 +16,9 @@ import numpy as np
 #sys.path.insert(0, "/psr_archive/hessels/hessels/AO-FRB/pipeline_products/pulses_extract")
 #from src import C_Funct
 
-def execute(command):
+def execute(command,working_dir=None):
 	print command
-	subprocess.Popen(command, shell=True, executable='/bin/bash')
+	subprocess.Popen(command, shell=True, executable='/bin/bash',cwd=working_dir)
 
 def make_prepsubband(infile,downsamp,lodm,dmstep,numdms,maskfile,base,beam,subband):
 	execute("prepsubband -nsub 120 -noscales -nooffsets -downsamp %d -lodm %f\
@@ -58,15 +58,15 @@ for beam in beams:
 		execute("mkdir %s_b%ds%d_TEST_proc"%(base,beam,subband))
 		outdir = '%s/%s_b%ds%d_TEST_proc'%(general_dir,base,beam,subband)
 		#os.chdir(outdir)
-		execute("cd %s"%outdir)
+		#execute("cd %s"%outdir)
 		execute("mkdir %s/obs_data"%outdir)
 		execute("mkdir %s/pulses"%outdir)
 		execute("mkdir %s/TEMP"%outdir)
 		#os.chdir("TEMP")
-		execute("cd %s/TEMP"%outdir)
+		#execute("cd %s/TEMP"%outdir)
 		#infile = fits_dir + "/" + glob("%s/%s.b%ds%d*.fits"%(fits_dir,base,beam,subband))[0]
 		infile = glob("%s/%s.b%ds%d*.fits"%(fits_dir,base,beam,subband))[0]
-		execute("rfifind -time 2.0 -psrfits -noscales -nooffsets -o %s_b%ds%d %s"%(base,beam,subband,infile))
+		execute("rfifind -time 2.0 -psrfits -noscales -nooffsets -o %s_b%ds%d %s"%(base,beam,subband,infile), working_dir="%s/TEMP"%outdir)
 		maskfile = glob("%s_b%ds%d*_rfifind.mask"%(base,beam,subband))[0]
 		lodm = 0.
 		if subband == 0:
@@ -115,8 +115,8 @@ for beam in beams:
 			calls = 1
 			make_prepsubband(infile,downsamp,lodm,dmstep,numdms,maskfile,base,beam,subband)
 
-		execute("ls %s_b%ds%d_ZERO*.dat | xargs -n 1 single_pulse_search.py --noplot -m 70 -t 5.0"%(base,beam,subband))
-		execute("single_pulse_search.py -t 10 %s_b%ds%d_ZERO*singlepulse"%(base,beam,subband))
+		execute("ls %s_b%ds%d_ZERO*.dat | xargs -n 1 single_pulse_search.py --noplot -m 70 -t 5.0"%(base,beam,subband), working_dir="%s/TEMP"%outdir)
+		execute("single_pulse_search.py -t 10 %s_b%ds%d_ZERO*singlepulse"%(base,beam,subband), working_dir="%s/TEMP"%outdir)
 		
 		#execute("mv %s_b%ds%d_ZERO* %s_b%ds%d_TEST_proc"%(base,beam,subband,base,beam,subband))
 		#execute("mv %s_b%ds%d_rfifind.* %s_b%ds%d_TEST_proc"%(base,beam,subband,base,beam,subband))
@@ -135,12 +135,12 @@ for beam in beams:
 		 		-store_events -idL %s_b%ds%d_ZERO_DM -store_dir %s/pulses \
 					-plot_pulses -plot_statistics -parameters_id FRB130628_Alfa_s%d > /dev/null"\
 				%(script_dir,base,beam,subband,infile,base,beam,subband,outdir,subband))
-		execute("cp %s_b%ds%d_ZERO_singlepulse.ps %s/obs_data"%(base,beam,subband,outdir))
-		execute("cp %s_b%ds%d_ZERO_DM470.00.dat %s/obs_data"%(base,beam,subband,outdir))
-		execute("cp %s_b%ds%d_ZERO_DM470.00.dat %s/obs_data"%(base,beam,subband,outdir))
+		execute("cp %s/TEMP/%s_b%ds%d_ZERO_singlepulse.ps %s/obs_data"%(outdir,base,beam,subband,outdir))
+		execute("cp %s/TEMP/%s_b%ds%d_ZERO_DM470.00.dat %s/obs_data"%(outdir,base,beam,subband,outdir))
+		execute("cp %s/TEMP/%s_b%ds%d_ZERO_DM470.00.dat %s/obs_data"%(outdir,base,beam,subband,outdir))
 		execute("rm -rf %s/TEMP"%outdir)
 		#os.chdir(general_dir)
-		execute("cd %s"%general_dir)
+		#execute("cd %s"%general_dir)
 
 
 #Use this for debugging so can print messages within pulses_extract.py 
