@@ -19,7 +19,7 @@ import numpy as np
 def execute(command,working_dir=None):
 	print command
 	p = subprocess.Popen(command, shell=True, executable='/bin/bash',cwd=working_dir)
-	p.wait() #careful
+	p.wait() #careful. necessary in order to allow this child process to finish before script continues. look at communicate.
 def make_prepsubband(infile,downsamp,lodm,dmstep,numdms,maskfile,base,beam,subband,working_dir):
 	execute("prepsubband -nsub 120 -noscales -nooffsets -downsamp %d -lodm %f\
 			-dmstep %f -numdms %d -zerodm -mask %s -o\
@@ -134,10 +134,10 @@ for beam in beams:
 		execute("python %s/pulses_extract.py -db_name %s_b%ds%d_TEST_proc.hdf5 -fits %s\
 		 		-store_events -idL %s_b%ds%d_ZERO_DM -store_dir %s/pulses \
 					-plot_pulses -plot_statistics -parameters_id FRB130628_Alfa_s%d > /dev/null"\
-				%(script_dir,base,beam,subband,infile,base,beam,subband,outdir,subband))
+				%(script_dir,base,beam,subband,infile,base,beam,subband,outdir,subband), working_dir="%s/TEMP"%outdir)
 		execute("cp %s/TEMP/%s_b%ds%d_ZERO_singlepulse.ps %s/obs_data"%(outdir,base,beam,subband,outdir))
 		execute("cp %s/TEMP/%s_b%ds%d_ZERO_DM470.00.dat %s/obs_data"%(outdir,base,beam,subband,outdir))
-		execute("cp %s/TEMP/%s_b%ds%d_ZERO_DM470.00.dat %s/obs_data"%(outdir,base,beam,subband,outdir))
+		execute("cp %s/TEMP/%s_b%ds%d_ZERO_DM470.00.inf %s/obs_data"%(outdir,base,beam,subband,outdir))
 		execute("rm -rf %s/TEMP"%outdir)
 		#os.chdir(general_dir)
 		#execute("cd %s"%general_dir)
