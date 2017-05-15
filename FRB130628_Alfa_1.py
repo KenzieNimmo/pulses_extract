@@ -39,7 +39,7 @@ fits_dir = general_dir
 
 ### ONE SUBBAND VERSION ###
 #path = "/data/gourdji/FRB130628_pipeline/test" #come back to this
-base = "4bit-p2030.20160702.FRB130628_1_MinDM50" #TURN INTO SCRIPT ARGUMENT
+base = "4bit-p2030.20160702.FRB130628_1" #TURN INTO SCRIPT ARGUMENT
 beams = range(7)
 subbands = range(2)
 #beams = [0]
@@ -55,15 +55,13 @@ calls = range(calls)
 for beam in beams:
 	for subband in subbands:
 		print "NOW PROCESSING SUBBAND %d of BEAM %d"%(subband,beam)
-		execute("mkdir %s_b%ds%d_TEST_proc"%(base,beam,subband))
-		outdir = '%s/%s_b%ds%d_TEST_proc'%(general_dir,base,beam,subband)
-		#os.chdir(outdir)
-		#execute("cd %s"%outdir)
+		#execute("mkdir %s_b%ds%d_TEST_proc"%(base,beam,subband))
+		#outdir = '%s/%s_b%ds%d_TEST_proc'%(general_dir,base,beam,subband)
+		execute("mkdir %s_b%ds%d_TEST_MinDM50"%(base,beam,subband))
+		outdir = '%s/%s_b%ds%d_TEST_MinDM50'%(general_dir,base,beam,subband)		
 		execute("mkdir %s/obs_data"%outdir)
 		execute("mkdir %s/pulses"%outdir)
 		execute("mkdir %s/TEMP"%outdir)
-		#os.chdir("TEMP")
-		#execute("cd %s/TEMP"%outdir)
 		#infile = fits_dir + "/" + glob("%s/%s.b%ds%d*.fits"%(fits_dir,base,beam,subband))[0]
 		infile = glob("%s/%s.b%ds%d*.fits"%(fits_dir,base,beam,subband))[0]
 		execute("rfifind -time 2.0 -psrfits -noscales -nooffsets -o %s_b%ds%d %s"%(base,beam,subband,infile), working_dir="%s/TEMP"%outdir)
