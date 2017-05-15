@@ -24,7 +24,7 @@ parameters = {
   "FRB130628_Alfa_s0": {
     'DM_low' : 0.,
     'DM_high' : 575.,
-    'DM_search_low' : 370.,
+    'DM_search_low' : 50.,
     'DM_search_high' : 570.,
     'SNR_peak_min' : 5.,
     'SNR_min' : 6.,
@@ -35,7 +35,7 @@ parameters = {
   "FRB130628_Alfa_s1": {
     'DM_low' : 0.,
     'DM_high' : 590.,
-    'DM_search_low' : 370.,
+    'DM_search_low' : 50.,
     'DM_search_high' : 570.,
     'SNR_peak_min' : 5.,
     'SNR_min' : 6.,

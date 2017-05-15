@@ -39,7 +39,7 @@ fits_dir = general_dir
 
 ### ONE SUBBAND VERSION ###
 #path = "/data/gourdji/FRB130628_pipeline/test" #come back to this
-base = "4bit-p2030.20160702.FRB130628_1" #TURN INTO SCRIPT ARGUMENT
+base = "4bit-p2030.20160702.FRB130628_1_MinDM50" #TURN INTO SCRIPT ARGUMENT
 beams = range(7)
 subbands = range(2)
 #beams = [0]
@@ -139,6 +139,8 @@ for beam in beams:
 		execute("cp %s/TEMP/%s_b%ds%d_ZERO_DM470.00.dat %s/obs_data"%(outdir,base,beam,subband,outdir))
 		execute("cp %s/TEMP/%s_b%ds%d_ZERO_DM470.00.inf %s/obs_data"%(outdir,base,beam,subband,outdir))
 		execute("rm -rf %s/TEMP"%outdir)
+		sys.exit() #REMOVE THIS. This is so that only one file is processed.
+
 		#os.chdir(general_dir)
 		#execute("cd %s"%general_dir)
 

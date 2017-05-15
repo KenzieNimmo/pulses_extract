@@ -296,7 +296,7 @@ if __name__ == '__main__':
 
 		if args.view_only_mode:
 			txtfile = path_to_pulses + obs + '_annotated.txt'
-			masterlist_viewer(txtfile, '', view_only_mode=True, multibursts=args.multibursts, multicomponents=args.multicomponents)
+			masterlist_viewer(txtfile, '', view_only_mode=True, multibursts=args.multibursts, multicomponents=args.multicomponents)#, start=args.start) need to implement this
 		else:
 			txtfile = path_to_pulses + obs + '.txt'
 			masterlist_viewer(txtfile, '', start=args.start)
