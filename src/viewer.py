@@ -37,7 +37,7 @@ def select_cands(filename, Master=False, DM_min=None, DM_max=None, Sigma_min=Non
 		return cands.to_csv(new_filename, sep='\t', cols=['Pulse',], header=['Rank',], index_label='#PulseID')
 	else:
 		#default sorting (by pulse ID)
-		return cands.sort_index().to_csv(new_filename, sep='\t', cols=['Pulse',], header=['Rank',], index_label='#PulseID')
+		return cands.sort_index().to_csv(new_filename, sep='\t', columns=['Pulse',], header=['Rank',], index_label='#PulseID')
 
 def next_image(event):
 	print("Hit the enter key to view the next figure.")
