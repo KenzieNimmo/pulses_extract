@@ -301,7 +301,10 @@ def main(fits, database, time, DM, sigma, duration=0.01, pulse_id=4279, top_freq
         
 	rawdata = psrfits.PsrfitsFile(fits)
 	observation = os.path.basename(fits)
-	observation = observation[:observation.find('_subs_')]	
+	if FRB_name == 'FRB121102':
+		observation = observation[:observation.find('_subs_')]
+	if FRB_name == 'FRB130628':
+		observation = os.path.splitext(observation)[0]	
 
 	events = pd.read_hdf(database, 'events')
 
