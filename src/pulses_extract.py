@@ -149,7 +149,7 @@ def pulses_database(args, header, events=None):
   pulses = pulses[pulses.Downfact <= params['Downfact_max']]
   pulses = pulses[(pulses.DM >= params['DM_search_low']) & (pulses.DM <= params['DM_search_high'])]
   
-  RFIexcision(events, pulses, params)
+  if pulses.shape[0] > 0: RFIexcision(events, pulses, params)
   
   pulses.sort_values('Sigma', ascending=False, inplace=True)
   return pulses[pulses.Pulse == -1]
