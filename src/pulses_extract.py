@@ -69,7 +69,7 @@ def main():
     if pulses.shape[0] > 0:
       database_path = os.path.join(args.store_dir,args.db_name)
       params = parameters[args.parameters_id]
-      auto_waterfaller.main(args.fits, database_path, np.array(pulses.Time), np.array(pulses.DM), np.array(pulses.Sigma), \
+      auto_waterfaller.main(args.fits, database_path, np.array(pulses.Time), np.array(pulses.IMJD), np.array(pulses.SMJD), np.array(pulses.DM), np.array(pulses.Sigma), \
                                              np.array(pulses.Duration), top_freq=pulses.top_Freq.iloc[0], \
                                              downsamp=np.clip(np.array(pulses.Downfact) / 5, 1, 1000), FRB_name=params['FRB_name'], directory=args.store_dir, pulse_id=np.array(pulses.index))
   
@@ -91,7 +91,7 @@ def main():
 def events_database(args, header):
   #Create events database
   sp_files = glob.glob(os.path.join(args.folder,'{}*.singlepulse'.format(args.idL)))
-  events = pd.concat(pd.read_csv(f, delim_whitespace=True, dtype=np.float64) for f in sp_files)
+  events = pd.concat(pd.read_csv(f, delim_whitespace=True, dtype=np.float64) for f in sp_files if os.stat(f).st_size > 0)
   events.reset_index(drop=True, inplace=True)
   events.columns = ['DM','Sigma','Time','Sample','Downfact','a','b']
   events = events.ix[:,['DM','Sigma','Time','Sample','Downfact']]
@@ -149,7 +149,7 @@ def pulses_database(args, header, events=None):
   pulses = pulses[pulses.Downfact <= params['Downfact_max']]
   pulses = pulses[(pulses.DM >= params['DM_search_low']) & (pulses.DM <= params['DM_search_high'])]
   
-  RFIexcision(events, pulses, params)
+  if pulses.shape[0] > 0: RFIexcision(events, pulses, params)
   
   pulses.sort_values('Sigma', ascending=False, inplace=True)
   return pulses[pulses.Pulse == -1]

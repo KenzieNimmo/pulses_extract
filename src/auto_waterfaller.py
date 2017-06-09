@@ -290,7 +290,7 @@ def psrchive_plots(archive_name): #assuming: (full name of the archive with path
 		#os.remove('%s_profile.ps'%os.path.join(folder,plot_name))
 		#psrplot -p freq+ -c psd=0 archive.ar
 
-def main(fits, database, time, DM, sigma, duration=0.01, pulse_id=4279, top_freq=0., directory='.',\
+def main(fits, database, time, DM, IMJD, SMJD, sigma, duration=0.01, pulse_id=4279, top_freq=0., directory='.',\
 		  FRB_name='FRB121102', downsamp=1.):
         num_elements = time.size
         if isinstance(DM, float) or isinstance(DM, int): DM = np.zeros(num_elements) + DM
@@ -308,15 +308,8 @@ def main(fits, database, time, DM, sigma, duration=0.01, pulse_id=4279, top_freq
 
 	events = pd.read_hdf(database, 'events')
 
-	#Open header of the fits file
-	with psrfits.pyfits.open(fits, memmap=True) as fn:
-  		header = fn['SUBINT'].header + fn['PRIMARY'].header
-
-	#Start MJD (days) of the beginning of the observation
-	IMJD = header['STT_IMJD'] 
-
 	#Fractional day
-	SMJD = (header['STT_SMJD'] + time) / 86400.
+	SMJD = SMJD / 86400.
 
 	for i, t in enumerate(time):
 		pulse_events = events[events.Pulse == pulse_id[i]]
@@ -334,7 +327,7 @@ def main(fits, database, time, DM, sigma, duration=0.01, pulse_id=4279, top_freq
 				scaleindep=False, width_bins=1, mask=False, maskfn=None,\
 				bandpass_corr=False, ref_freq=None)
 
-		plotter(data, start, plot_duration, t, DM[i], IMJD, SMJD[i], duration[i], top_freq,\
+		plotter(data, start, plot_duration, t, DM[i], IMJD[i], SMJD[i], duration[i], top_freq,\
 			sigma[i], directory, FRB_name, observation, zero_dm_data, zero_dm_start, pulse_events=pulse_events, zoom=False, idx=i, pulse_id=pulse_id[i], downsamp=False)
 
         #Zoomed version
@@ -349,7 +342,7 @@ def main(fits, database, time, DM, sigma, duration=0.01, pulse_id=4279, top_freq
 				nbins=None, nsub=None, subdm = DM, zerodm=False, downsamp=1,\
 				scaleindep=False, width_bins=1, mask=False, maskfn=None,\
 				bandpass_corr=False, ref_freq=None)
-		plotter(data, start, plot_duration, t, DM[i], IMJD, SMJD[i], duration[i], top_freq,\
+		plotter(data, start, plot_duration, t, DM[i], IMJD[i], SMJD[i], duration[i], top_freq,\
 			sigma[i], directory, FRB_name, observation, zero_dm_data, zero_dm_start, pulse_events=pulse_events, zoom=True, idx=i, pulse_id=pulse_id[i], downsamp=False)               
         
         #downsamped version (zoomed)
@@ -361,7 +354,7 @@ def main(fits, database, time, DM, sigma, duration=0.01, pulse_id=4279, top_freq
 				nbins=None, nsub=None, subdm = DM, zerodm=False, downsamp=downsamp[i],\
 				scaleindep=False, width_bins=1, mask=False, maskfn=None,\
 				bandpass_corr=False, ref_freq=None)
-		plotter(data, start, plot_duration, t, DM[i], IMJD, SMJD[i], duration[i], top_freq,\
+		plotter(data, start, plot_duration, t, DM[i], IMJD[i], SMJD[i], duration[i], top_freq,\
 				sigma[i], directory, FRB_name, observation, zero_dm_data, zero_dm_start, pulse_events=pulse_events, zoom=True, idx=i, pulse_id=pulse_id[i],\
 			 	downsamp=downsamp[i])
 		
