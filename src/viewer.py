@@ -95,8 +95,8 @@ def masterlist_viewer(txtfile, path_to_pulses, view_only_mode=False, multicompon
 				comments = comments[bursts_comps]
 
 			root = Tkinter.Tk()
-			#root.bind('<Return>', next_image_quiet)
-			root.bind('<space>', next_image_quiet)
+			root.bind('<Return>', next_image_quiet)
+			#root.bind('<space>', next_image_quiet)
 			#root.bind('<Left>', lambda event: previous_image(event, current_file))
 			for i, cand in enumerate(cands):
 				print 'Viewing pulse %d: '%cand + comments[i]
@@ -140,7 +140,7 @@ def masterlist_viewer(txtfile, path_to_pulses, view_only_mode=False, multicompon
 					path_to_cand = paths[i][0]
 					abs_path = path_to_pulses + path_to_cand
 					root = Tkinter.Tk()
-					root.bind('<space>', next_image)
+					root.bind('<Return>', next_image)
 					for file in os.listdir(abs_path):
 						if not file.endswith('zoomed.png') and not file.endswith('downsamped.png') and file.endswith('.png') :
 							img = Image.open(os.path.join(abs_path, file))
@@ -200,7 +200,7 @@ def viewer(txtfile, path_to_pulses, obs, view_only_mode=False,ranks_to_view=None
 	cands = np.loadtxt(txtfile, usecols=(0,), dtype='int')
 	if view_only_mode:
 		root = Tkinter.Tk()
-		root.bind('<space>', next_image_quiet)
+		root.bind('<Return>', next_image_quiet)
 		for i, cand in enumerate(cands):
 			cand_rank = ranks[i]
 			cand_rank = cand_rank.astype(int)
@@ -225,7 +225,7 @@ def viewer(txtfile, path_to_pulses, obs, view_only_mode=False,ranks_to_view=None
 			path = path_to_pulses + str(cand)
 			root = Tkinter.Tk()
 			#root.geometry("800x500")
-			root.bind('<space>', next_image)
+			root.bind('<Return>', next_image)
 			for file in os.listdir(path):
 				if file.startswith(file_id): #avoid looking at diagnostic plot. 
 					img = Image.open(os.path.join(path, file))
