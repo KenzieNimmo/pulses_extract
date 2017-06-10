@@ -27,9 +27,9 @@ def make_prepsubband(infile,downsamp,lodm,dmstep,numdms,maskfile,base,beam,subba
 			%(downsamp,lodm,dmstep,numdms,maskfile,base,beam,subband,infile), working_dir)
 
 #cwd = os.getcwd()
-general_dir = "/data/gourdji/FRB130628_pipeline/test" #Where everything pipeline related is stored 
+general_dir = "/data/gourdji/FRB130628_pipeline" #Where everything pipeline related is stored 
 script_dir = general_dir + "/pulses_extract/src"
-fits_dir = general_dir
+fits_dir = general_dir + "/subbanded_data"
 ### test variables ###
 #base = "4bit-p2030.20160702.FRB130628_0"
 #beam = 0

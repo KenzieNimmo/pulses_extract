@@ -96,6 +96,7 @@ def masterlist_viewer(txtfile, path_to_pulses, view_only_mode=False, multicompon
 
 			root = Tkinter.Tk()
 			root.bind('<Return>', next_image_quiet)
+			#root.bind('<space>', next_image_quiet)
 			#root.bind('<Left>', lambda event: previous_image(event, current_file))
 			for i, cand in enumerate(cands):
 				print 'Viewing pulse %d: '%cand + comments[i]
@@ -273,8 +274,8 @@ if __name__ == '__main__':
 
 	obs = args.observation
 	if args.FRB == 121102:#This only works for observations run using early version of pipeline
-		file_id = "FRB" 			#where files start with "FRB".In latest version, look at fits arg of pulses_extract. I think "puppi"
-		#file_id = "puppi"
+		#file_id = "FRB" 			#where files start with "FRB".In latest version, look at fits arg of pulses_extract. I think "puppi"
+		file_id = "puppi"
 		obs_path = '/psr_archive/hessels/hessels/AO-FRB/pipeline_products/'
 
 	if args.FRB == 130628:
