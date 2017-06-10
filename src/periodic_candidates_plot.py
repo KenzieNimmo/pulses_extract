@@ -62,10 +62,11 @@ def load_cands(folder='.'):
   if len(cands):
       cands.sort(sifting.cmp_sigma)
 
-      n_cands = 10  #Number of candidates to return
+      n_cands = min((len(cands), 10))  #Number of candidates to return
       dm = np.zeros(n_cands)
       p = np.zeros(n_cands)
       for i, goodcand in enumerate(cands):
+        if 
         dm[i] = goodcand.DM
         p[i] = goodcand.p
         if i == n_cands-1: break
