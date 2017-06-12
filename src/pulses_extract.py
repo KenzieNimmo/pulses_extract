@@ -131,6 +131,8 @@ def pulses_database(args, header, events=None):
   pulses.index.name = 'idx'
   pulses['IMJD'] = header['STT_IMJD']
   pulses['SMJD'] = header['STT_SMJD'] + header['STT_OFFS'] + header['NSUBOFFS'] * header['NSBLK'] * header['TBIN'] + pulses.Time
+  pulses.ix[pulses.SMJD > 86400, 'IMJD'] += 1  #Deal with observations taken over midnight
+  
   pulses['Duration'] = pulses.Downfact * header['TBIN']
   pulses['top_Freq'] = header['OBSFREQ'] + abs(header['OBSBW']) / 2.
   pulses['Pulse'] = -1
@@ -193,8 +195,8 @@ def fits_header(filename):
   with pyfits.open(filename,memmap=True) as fits:
     header = fits['SUBINT'].header + fits['PRIMARY'].header
   return header
-  
-  
+
+
 def pulses_checked(pulses, filename):
   RFI_list = np.genfromtxt(filename, dtype=int).T
 

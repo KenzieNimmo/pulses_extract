@@ -66,7 +66,6 @@ def load_cands(folder='.'):
       dm = np.zeros(n_cands)
       p = np.zeros(n_cands)
       for i, goodcand in enumerate(cands):
-        if 
         dm[i] = goodcand.DM
         p[i] = goodcand.p
         if i == n_cands-1: break
