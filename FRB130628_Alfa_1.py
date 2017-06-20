@@ -113,7 +113,7 @@ for beam in beams:
 			calls = 1
 			make_prepsubband(infile,downsamp,lodm,dmstep,numdms,maskfile,base,beam,subband,working_dir="%s/TEMP"%outdir)
 
-		execute("ls %s_b%ds%d_ZERO*.dat | xargs -n 1 single_pulse_search.py --noplot -m 70 -t 5.0"%(base,beam,subband), working_dir="%s/TEMP"%outdir)
+		execute("ls %s_b%ds%d_ZERO*.dat | xargs -n 1 single_pulse_search.py --noplot -m 70 -t 5.0 -b"%(base,beam,subband), working_dir="%s/TEMP"%outdir)
 		execute("single_pulse_search.py -t 10 %s_b%ds%d_ZERO*singlepulse"%(base,beam,subband), working_dir="%s/TEMP"%outdir)
 		
 		#execute("mv %s_b%ds%d_ZERO* %s_b%ds%d_TEST_proc"%(base,beam,subband,base,beam,subband))
