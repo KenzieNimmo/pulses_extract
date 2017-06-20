@@ -21,12 +21,12 @@ date
 
 #Setting variables
 SUB_DIR="/psr_archive/hessels/hessels/AO-FRB/subbanded_data"
-GENERAL_OUT_DIR="/data/michilli/FRB121102/pipeline_products"
+GENERAL_OUT_DIR="/data/FRB121102/pipeline_products"
 RAW_DIR="/psr_archive/hessels/hessels/AO-FRB/raw_data"
 #PAR_FILE="/psr_archive/hessels/hessels/AO-FRB/pipeline_products/0531+33.par"
 RANKING_BU="/psr_archive/hessels/hessels/AO-FRB/pipeline_products/pulses_rank_BU"
 
-SCRIPT_DIR="$( cd -P "$( dirname "$0" )" && pwd )"
+SCRIPT_DIR="$( cd -P "$( dirname "$0" )" && pwd )/src"
 OBS_ID="$1"
 OUT_DIR="$GENERAL_OUT_DIR/$OBS_ID"
 DB_FILE="$OBS_ID.hdf5"

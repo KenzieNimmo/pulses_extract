@@ -58,7 +58,9 @@ def dspsr(fits_file, puls=None, par_file=False, profile_bins=4096, parallel=Fals
     if not SMJD:
       print "Either a valid pulse pandas instance or seconds from beginning of day (SMJD) required. Exiting"
       return 1
-    
+  
+  if SMJD > 86400: SMJD = SMJD - 86400  #Deal with observations taken over midnight
+  
   #Read par_file
   if not par_file:
     obs_id = os.path.splitext(os.path.basename(fits_file))[0]
