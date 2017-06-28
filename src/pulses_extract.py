@@ -26,7 +26,7 @@ def main():
     parser.add_argument('-folder', help="Path of the folder containig the .singlepulse files.", default='.')
     parser.add_argument('-store_events', help="Store events in a HDF5 database.", action='store_true')
     parser.add_argument('-events_dt', help="Duration in sec within two events are related to the same pulse.", default=20e-3,
-                        type=int)
+                        type=float)
     parser.add_argument('-events_dDM', help="Number of DM steps within two events are related to the same pulse.", 
                         default=5, type=float)
     parser.add_argument('-DM_step', help="Value of the DM step between timeseries.", 

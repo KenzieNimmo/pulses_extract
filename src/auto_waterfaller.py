@@ -372,31 +372,29 @@ if __name__ == '__main__':
 	#DM, sigma, time, downfact = np.loadtxt(sys.argv[2], usecols=(0,1,2,4), unpack=True) #argv[2] = .singlepulse
 	#downsamp = np.zeros(len(downfact)) + 1. #just a place holder so my code runs upon testing.	
 	#main(sys.argv[1],time, DM, sigma, downsamp = downsamp) #arg1 = fitsfile
-	singlepulse_file = 'puppi_57614_C0531+33_0803_subs_0001_TOPO_DM561.00.singlepulse'
-	DM, sigma, time, downfact = np.loadtxt(singlepulse_file, usecols=(0,1,2,4), unpack=True)
-	time = time[17:18]
-	sigma = sigma[17:18]
-	downfact = downfact[17:18]
-	DM = DM[17:18]
-	database = 'puppi_57614_C0531+33_0803.hdf5'
-	downsamp = np.zeros(len(downfact)) + 1.
-	main('puppi_57614_C0531+33_0803_subs_0001.fits', database, time, DM, sigma, downsamp = downsamp)
+	#singlepulse_file = 'puppi_57614_C0531+33_0803_subs_0001_TOPO_DM561.00.singlepulse'
+	#DM, sigma, time, downfact = np.loadtxt(singlepulse_file, usecols=(0,1,2,4), unpack=True)
+	#time = time[17:18]
+	#sigma = sigma[17:18]
+	#downfact = downfact[17:18]
+	#DM = DM[17:18]
+	#database = 'puppi_57614_C0531+33_0803.hdf5'
+	#downsamp = np.zeros(len(downfact)) + 1.
+	#main('puppi_57614_C0531+33_0803_subs_0001.fits', database, time, DM, sigma, downsamp = downsamp)
 
 	#database = '/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/output/puppi_57614_C0531+33_0803/pulses/puppi_57614_C0531+33_0803.hdf5'#'/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/TEST/SinglePulses.hdf5'#'/psr_temp/hessels/AO-FRB/P3054/FRB_pipeline/output/puppi_57614_C0531+33_0803/OLD/SinglePulses.hdf5'
 	#database = '/psr_archive/hessels/hessels/AO-FRB/pipeline_products/20170112_pulses_archive.hdf5'
-	#database = '/Users/Kelly/UvA/Masters\ Project/arecibo_pipeline/20170112_pulses_archive.hdf5'
-	#pulses = pd.read_hdf(database,'pulses')
-	#dm = np.array(pulses.DM)
-	#SNR = np.array(pulses.Sigma)
-	#time = np.array(pulses.Time)
-	#duration = np.array(pulses.Duration)
-	#figtitle = "FRB121102"
-	#figname = "FRB121101_statistics.png"
-	#master_statistics(dm, SNR, duration, figtitle, figname)
-	#database = '/psr_archive/hessels/hessels/AO-FRB/pipeline_products/puppi_57644_C0531+33_0021/pulses/puppi_57644_C0531+33_0021.hdf5'
-	#pulse_ids = [5553,5568,5663,5684,5839,5999,5064,3203, 2461, 4664, 4461,5267]
-	#for pulse_id in pulse_ids:
-	#	dm_snr(database, pulse_id)
+	database = '/data/FRB121102/pipeline_products/FRB121102_statistics/Pulses_ALL.hdf5'
+	pulses = pd.read_hdf(database,'pulses')
+	pulses = pulses[pulses.Pulse == 0]
+	dm = np.array(pulses.DM)
+	SNR = np.array(pulses.Sigma)
+	time = np.array(pulses.Time)
+	duration = np.array(pulses.Duration)
+	figtitle = "FRB121102"
+	figname = "FRB121102_statistics.png"
+	master_statistics(dm, SNR, duration, figtitle, figname)
+
 
 
 

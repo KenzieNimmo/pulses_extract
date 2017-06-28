@@ -21,19 +21,20 @@ def execute(command,working_dir=None):
 	p = subprocess.Popen(command, shell=True, executable='/bin/bash',cwd=working_dir)
 	p.wait() #careful. necessary in order to allow this child process to finish before script continues. look at communicate.
 def make_prepsubband(infile,downsamp,lodm,dmstep,numdms,maskfile,base,beam,subband,working_dir):
-	execute("prepsubband -nsub 120 -noscales -nooffsets -downsamp %d -lodm %f\
+	execute("prepsubband -nsub 120 -noscales -nooffsets -noweights -nobary -downsamp %d -lodm %f\
 			-dmstep %f -numdms %d -zerodm -mask %s -o\
 			 %s_b%ds%d_ZERO %s"\
 			%(downsamp,lodm,dmstep,numdms,maskfile,base,beam,subband,infile), working_dir)
 
-#cwd = os.getcwd()
-general_dir = "/data/gourdji/FRB130628_pipeline" #Where everything pipeline related is stored 
+
+general_dir = "/data/gourdji/FRB130628_pipeline"#remove test later #Where everything pipeline related is stored 
 script_dir = general_dir + "/pulses_extract/src"
 fits_dir = general_dir + "/subbanded_data"
-### test variables ###
+###test variables ###
 #base = "4bit-p2030.20160702.FRB130628_0"
 #beam = 0
 #subband = 0
+#cwd = os.getcwd()
 #infile = cwd + "/" + glob("%s.b%ds%d*.fits"%(base,beam,subband))[0]
 ########################
 
@@ -42,8 +43,6 @@ fits_dir = general_dir + "/subbanded_data"
 base = "4bit-p2030.20160702.FRB130628_1" #TURN INTO SCRIPT ARGUMENT
 beams = range(7)
 subbands = range(2)
-#beams = [0]
-#subbands = [1]
 dmstep = 1.00
 numdms = 96
 downsamp = 3
@@ -57,14 +56,14 @@ for beam in beams:
 		print "NOW PROCESSING SUBBAND %d of BEAM %d"%(subband,beam)
 		#execute("mkdir %s_b%ds%d_TEST_proc"%(base,beam,subband))
 		#outdir = '%s/%s_b%ds%d_TEST_proc'%(general_dir,base,beam,subband)
-		execute("mkdir %s_b%ds%d_TEST_MinDM50"%(base,beam,subband))
-		outdir = '%s/%s_b%ds%d_TEST_MinDM50'%(general_dir,base,beam,subband)		
+		execute("mkdir %s_b%ds%d"%(base,beam,subband))
+		outdir = '%s/%s_b%ds%d'%(general_dir,base,beam,subband)		
 		execute("mkdir %s/obs_data"%outdir)
 		execute("mkdir %s/pulses"%outdir)
 		execute("mkdir %s/TEMP"%outdir)
 		#infile = fits_dir + "/" + glob("%s/%s.b%ds%d*.fits"%(fits_dir,base,beam,subband))[0]
 		infile = glob("%s/%s.b%ds%d*.fits"%(fits_dir,base,beam,subband))[0]
-		execute("rfifind -time 2.0 -psrfits -noscales -nooffsets -o %s_b%ds%d %s"%(base,beam,subband,infile), working_dir="%s/TEMP"%outdir)
+		execute("rfifind -time 2.0 -psrfits -noscales -nooffsets -noweights -o %s_b%ds%d %s"%(base,beam,subband,infile), working_dir="%s/TEMP"%outdir)
 		maskfile = glob("%s/TEMP/%s_b%ds%d*_rfifind.mask"%(outdir,base,beam,subband))[0]
 		lodm = 0.
 		if subband == 0:
@@ -113,7 +112,7 @@ for beam in beams:
 			calls = 1
 			make_prepsubband(infile,downsamp,lodm,dmstep,numdms,maskfile,base,beam,subband,working_dir="%s/TEMP"%outdir)
 
-		execute("ls %s_b%ds%d_ZERO*.dat | xargs -n 1 single_pulse_search.py --noplot -m 70 -t 5.0"%(base,beam,subband), working_dir="%s/TEMP"%outdir)
+		execute("ls %s_b%ds%d_ZERO*.dat | xargs -n 1 single_pulse_search.py --noplot -m 150 -t 5.0 -b"%(base,beam,subband), working_dir="%s/TEMP"%outdir)
 		execute("single_pulse_search.py -t 10 %s_b%ds%d_ZERO*singlepulse"%(base,beam,subband), working_dir="%s/TEMP"%outdir)
 		
 		#execute("mv %s_b%ds%d_ZERO* %s_b%ds%d_TEST_proc"%(base,beam,subband,base,beam,subband))
@@ -212,56 +211,7 @@ pulses.index = pulses.Pulse #let the Pulse val be the new index (makes sense sin
 
   #events = events[events.Pulse >= 0]
 """
- ###combined subbands version###
  
-"""
-#base = argv[1] #base name of fits file, up until beam number "b".
-#base = argv[1] #up until channel "s".
-base = "4bit-p2030.20160702.FRB130628_0"
-beam = 0
-
-#combine subbands into single file
-#execute("combine_mocks -o %s_b%d %s.b%ds%d*000.fits %s.b%ds1*000.fits"\ #* stands for 0 or more of the preceding character (not a wildcard)
-		#%(base,beam,subband,base,beam,subband,base,beam,subband))
-#RFI find
-#rfifind -time 2.0 -psrfits -noscales -nooffsets -o p2030.20160702.FRB130628_0_b0_0001 4bit-p2030.20160702.FRB130628_0_b0_0001.fits
-# Create a Dedispersion plan. Only needs to be run once; can be applied to all obs.
-#with open("%s_b%d_DDplan.txt"%(base, beam), "w+") as output:
-#	subprocess.call("DDplan.py -d 600 -f 1375.43 -b 322.73 -n 960 -t 0.00006548\
-#	 -s 120 -r 0.5 -o %s_b%d_DDplan %s_b%d_*.fits"%(base,beam,subband,base,beam,subband), shell=True, stdout=output)
-#unsure about -r option. ask Jason.
-
-dmstep = 0.50
-numdms = 96
-downsamp = 3
-lodm = 0.
-dsubDM = 48.
-calls = 13
-calls = range(calls)
-
-for call in calls:
-	execute("prepsubband -nsub 120 -noscales -nooffsets -downsamp %d -lodm %f\
-			-dmstep %f -numdms %d -zerodm -mask *.mask -o %s_b%d_ZERO %s_b%d*.fits"\
-			%(downsamp,lodm,dmstep,numdms,base,beam,subband,base,beam,subband))
-	lodm +=  dsubDM
-
-execute("mkdir %s_b%d_proc"%(base,beam,subband))
-execute("mv %s_b%d_ZERO* %s_b%d_proc"%(base,beam,subband,base,beam,subband))
-
-#one subband version
-base = "4bit-p2030.20160702.FRB130628_0"
-beam = 0
-
-for call in calls:
-	execute("prepsubband -nsub 120 -noscales -nooffsets -downsamp %d -lodm %f\
-			-dmstep %f -numdms %d -zerodm -mask 4bit-p2030.20160702.FRB130628_0.b0s%dg0_rfifind.mask -o\
-			 %s_b%ds%d_ZERO 4bit-p2030.20160702.FRB130628_0.b0s%dg0.00000.fits"\
-			%(downsamp,lodm,dmstep,numdms,base,beam,subband))
-	lodm +=  dsubDM
-
-execute("mkdir %s_b%ds%d_TEST_proc"%(base,beam,subband))
-execute("mv %s_b%ds%d_ZERO* %s_b%ds%d_TEST_proc"%(base,beam,subband,base,beam,subband))
-"""
 
 
 
