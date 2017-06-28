@@ -15,33 +15,40 @@ from extract_psrfits_subints import extract_subints_from_observation
 from obs_parameters import parameters
 
 
-def main():
-  def parser():
-    # Command-line options
-    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-                                    description="The program groupes events from single_pulse_search.py in pulses.")
-    parser.add_argument('-db_name', help="Filename of the HDF5 database.", default='SinglePulses.hdf5')
-    parser.add_argument('-fits', help="Filename of .fits file.", default='*.fits')
-    parser.add_argument('-idL', help="Basename of .singlepulse files.", default='*')
-    parser.add_argument('-folder', help="Path of the folder containig the .singlepulse files.", default='.')
-    parser.add_argument('-store_events', help="Store events in a HDF5 database.", action='store_true')
-    parser.add_argument('-events_dt', help="Duration in sec within two events are related to the same pulse.", default=20e-3,
-                        type=float)
-    parser.add_argument('-events_dDM', help="Number of DM steps within two events are related to the same pulse.", 
-                        default=5, type=float)
-    parser.add_argument('-DM_step', help="Value of the DM step between timeseries.", 
-                        default=1., type=float)
-    parser.add_argument('-events_database', help="Load events from the database.", action='store_true')
-    parser.add_argument('-pulses_database', help="Load pulses from the database.", action='store_true')
-    parser.add_argument('-parameters_id', help="Parameters to search the observation defined in obs_parameters.", default='Default')
-    parser.add_argument('-store_dir', help="Path of the folder to store the output.", default='.')
-    parser.add_argument('-plot_pulses', help="Save plots of detected pulses.", action='store_true')
-    parser.add_argument('-extract_raw', help="Extract raw data specified in this path around detected pulses.", default='')
-    parser.add_argument('-pulses_checked', help="Path of a text file containig a list of pulse identifiers to label as RFI.", default='')
-    parser.add_argument('-plot_statistics', help="Produce plots with statistics of the pulses.", action='store_true')
-    return parser.parse_args()
-  args = parser()
+def parser():
+  # Command-line options
+  parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+                                  description="The program groupes events from single_pulse_search.py in pulses.")
+  parser.add_argument('-db_name', help="Filename of the HDF5 database.", default='SinglePulses.hdf5')
+  parser.add_argument('-fits', help="Filename of .fits file.", default='*.fits')
+  parser.add_argument('-idL', help="Basename of .singlepulse files.", default='*')
+  parser.add_argument('-folder', help="Path of the folder containig the .singlepulse files.", default='.')
+  parser.add_argument('-store_events', help="Store events in a HDF5 database.", action='store_true')
+  parser.add_argument('-events_dt', help="Duration in sec within two events are related to the same pulse.", default=20e-3,
+                      type=float)
+  parser.add_argument('-events_dDM', help="Number of DM steps within two events are related to the same pulse.", 
+                      default=5, type=float)
+  parser.add_argument('-DM_step', help="Value of the DM step between timeseries.", 
+                      default=1., type=float)
+  parser.add_argument('-events_database', help="Load events from the database.", action='store_true')
+  parser.add_argument('-pulses_database', help="Load pulses from the database.", action='store_true')
+  parser.add_argument('-parameters_id', help="Parameters to search the observation defined in obs_parameters.", default='Default')
+  parser.add_argument('-store_dir', help="Path of the folder to store the output.", default='.')
+  parser.add_argument('-plot_pulses', help="Save plots of detected pulses.", action='store_true')
+  parser.add_argument('-extract_raw', help="Extract raw data specified in this path around detected pulses.", default='')
+  parser.add_argument('-pulses_checked', help="Path of a text file containig a list of pulse identifiers to label as RFI.", default='')
+  parser.add_argument('-plot_statistics', help="Produce plots with statistics of the pulses.", action='store_true')
+  parser.add_argument('-beam_num', help="Number ID of the beam.", type=int, default=False)
+  parser.add_argument('-group_num', help="Number ID of the group of beams.", type=int, default=False)
+  parser.add_argument('-beam_comparison', help="Path of databases to merge and compare.", default=False)
+  return parser.parse_args()
   
+  
+
+def main(args):
+  if args.beam_comparison: 
+    beam_comparison(hdf5_in=args.beam_comparison, hdf5_out=args.db_name)
+    exit()
   if args.pulses_database: 
     try: pulses = pd.read_hdf(os.path.join(args.store_dir,args.db_name),'pulses')
     except KeyError:
@@ -73,8 +80,8 @@ def main():
     if pulses.shape[0] > 0:
       database_path = os.path.join(args.store_dir,args.db_name)
       params = parameters[args.parameters_id]
-      auto_waterfaller.main(args.fits, database_path, np.array(pulses.Time), np.array(pulses.IMJD), np.array(pulses.SMJD), np.array(pulses.DM), np.array(pulses.Sigma), \
-                                             np.array(pulses.Duration), top_freq=pulses.top_Freq.iloc[0], \
+      auto_waterfaller.main(args.fits, database_path, np.array(pulses.Time), np.array(pulses.DM), np.array(pulses.IMJD), np.array(pulses.SMJD), np.array(pulses.Sigma), \
+                                             duration=np.array(pulses.Duration), top_freq=pulses.top_Freq.iloc[0], \
                                              downsamp=np.clip(np.array(pulses.Downfact) / 5, 1, 1000), FRB_name=params['FRB_name'], directory=args.store_dir, pulse_id=np.array(pulses.index))
   
   if args.extract_raw: 
@@ -149,6 +156,8 @@ def pulses_database(args, header, events=None):
   pulses['SMJD'] = header['STT_SMJD'] + header['STT_OFFS'] + header['NSUBOFFS'] * header['NSBLK'] * header['TBIN'] + pulses.Time
   pulses.ix[pulses.SMJD > 86400, 'IMJD'] += 1  #Deal with observations taken over midnight
   
+  if args.beam_num: pulses['Beam'] = args.beam_num
+  if args.group_num: pulses['Group'] = args.beam_num
   pulses['Duration'] = pulses.Downfact * header['TBIN']
   pulses['top_Freq'] = header['OBSFREQ'] + abs(header['OBSBW']) / 2.
   pulses['Pulse'] = -1
@@ -231,5 +240,60 @@ def pulses_checked(pulses, filename):
   return
 
 
+def beam_comparison(hdf5_in='*.hdf5', hdf5_out='SinglePulses.hdf5'):
+  #Merge the databases
+  pulses = pd.DataFrame()
+  events = pd.DataFrame()
+  db_list = glob.glob(hdf5_in)
+  for f in sp_files:
+    try: p = pd.read_hdf(f, 'pulses')
+    except KeyError: continue
+    e = pd.read_hdf(f, 'events')
+    e = e[e.Pulse.isin(p.index)]
+    pulses = pd.concat(pulses, p)
+    events = pd.concat(events, e)
+  try:
+    group_order = 10**np.ceil(np.log10(pulses.Group.max()))
+    pulses.index *= group_order
+    pulses.index += pulses.Group
+    events.Pulse *= group_order
+    events.Pulse += pulses.Group
+  except AttributeError: pass
+  beam_order = 10**np.ceil(np.log10(pulses.Beam.max()))
+  pulses.index *= beam_order
+  pulses.index += pulses.Beam
+  events.Pulse *= beam_order
+  events.Pulse += pulses.Beam
+  
+  #Compare the beams
+  conditions_A = '(Time > @tmin) & (Time < @tmax)'
+  if 'Group' in pulses.columns: conditions_B = '(SAP == @sap) & (BEAM != @beam) & (BEAM != @inc) & (DM > @DMmin) & (DM < @DMmax) & (Sigma >= @SNRmin)'
+  else: conditions_B = '(BEAM != @beam) & (BEAM != @inc) & (DM > @DMmin) & (DM < @DMmax) & (Sigma >= @SNRmin)'
+    
+  def comparison(puls, inc):
+    if 'Group' in puls.columns: sap = int(puls.Group)
+    beam = int(puls.Beam)
+    tmin = float(puls.Time - 2. * puls.Duration)
+    tmax = float(puls.Time + 2. * puls.Duration)
+    DMmin = float(puls.DM - .5)
+    DMmax = float(puls.DM + .5)
+    SNRmin = puls.Sigma / 2.
+    if events.query(conditions_A).query(conditions_B).groupby('BEAM').count().shape[0] > 4: return 1
+    else: return 0
+  
+  print "{} pulses present before beam comparison".format(pulses.shape[0])
+  values = pulses.apply(lambda x: comparison(x, inc), axis=1)
+  pulses = pulses.loc[values.index[values == 0]]
+  events = events[events.Pulse.isin(pulses.index)]
+  print "{} pulses present after beam comparison".format(pulses.shape[0])
+  
+  pulses.to_hdf(hdf5_out, 'pulses')
+  events.to_hdf(hdf5_out, 'events')
+  return
+
+
+
+
 if __name__ == '__main__':
-  main()
+  args = parser()
+  main(args)
