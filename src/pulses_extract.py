@@ -94,6 +94,7 @@ def main():
 
 def events_database(args, header):
   #Create events database
+  params = parameters[args.parameters_id]
   sp_files = glob.glob(os.path.join(args.folder,'{}*.singlepulse'.format(args.idL)))
   events = pd.concat(pd.read_csv(f, delim_whitespace=True, dtype=np.float64) for f in sp_files if os.stat(f).st_size > 0)
   events.reset_index(drop=True, inplace=True)
