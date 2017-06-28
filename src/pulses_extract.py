@@ -40,11 +40,15 @@ def parser():
   parser.add_argument('-plot_statistics', help="Produce plots with statistics of the pulses.", action='store_true')
   parser.add_argument('-beam_num', help="Number ID of the beam.", type=int, default=False)
   parser.add_argument('-group_num', help="Number ID of the group of beams.", type=int, default=False)
+  parser.add_argument('-beam_comparison', help="Path of databases to merge and compare.", default=False)
   return parser.parse_args()
   
   
 
 def main(args):
+  if args.beam_comparison: 
+    beam_comparison(hdf5_in=args.beam_comparison, hdf5_out=args.db_name)
+    exit()
   if args.pulses_database: 
     try: pulses = pd.read_hdf(os.path.join(args.store_dir,args.db_name),'pulses')
     except KeyError:
@@ -275,10 +279,16 @@ def beam_comparison(hdf5_in='*.hdf5', hdf5_out='SinglePulses.hdf5'):
     SNRmin = puls.Sigma / 2.
     if events.query(conditions_A).query(conditions_B).groupby('BEAM').count().shape[0] > 4: return 1
     else: return 0
-
+  
+  print "{} pulses present before beam comparison".format(pulses.shape[0])
   values = pulses.apply(lambda x: comparison(x, inc), axis=1)
   pulses = pulses.loc[values.index[values == 0]]
-  return pulses
+  events = events[events.Pulse.isin(pulses.index)]
+  print "{} pulses present after beam comparison".format(pulses.shape[0])
+  
+  pulses.to_hdf(hdf5_out, 'pulses')
+  events.to_hdf(hdf5_out, 'events')
+  return
 
 
 
