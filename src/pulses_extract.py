@@ -42,7 +42,11 @@ def main():
     return parser.parse_args()
   args = parser()
   
-  if args.pulses_database: pulses = pd.read_hdf(os.path.join(args.store_dir,args.db_name),'pulses')
+  if args.pulses_database: 
+    try: pulses = pd.read_hdf(os.path.join(args.store_dir,args.db_name),'pulses')
+    except KeyError:
+      print "Database does not contain pulses!"
+      return
   else: 
     header = fits_header(args.fits)
     pulses = pulses_database(args, header)
@@ -98,6 +102,17 @@ def events_database(args, header):
   events.index.name = 'idx'
   events['Pulse'] = 0
   events.Pulse = events.Pulse.astype(np.int32)
+
+  #Correct Downfact value including downsample of prepsubband
+  try:
+    dv = params['down_values']
+    df = events.Downfact * 0
+    df[events.DM < min(dv)] = 1
+    for i in sorted(dv):
+      df[events.DM >= i] = dv[i]
+    events.Downfact *= df
+  except KeyError: pass
+  
   events.Downfact = events.Downfact.astype(np.int16)
   events.Sample = events.Sample.astype(np.int32)
   events.sort_values(['DM','Time'],inplace=True)
@@ -151,7 +166,11 @@ def pulses_database(args, header, events=None):
   pulses = pulses[pulses.Downfact <= params['Downfact_max']]
   pulses = pulses[(pulses.DM >= params['DM_search_low']) & (pulses.DM <= params['DM_search_high'])]
   
-  if pulses.shape[0] > 0: RFIexcision(events, pulses, params)
+  n_pulses = pulses.shape[0]
+  print "{} pulses detected".format(n_pulses)
+  if n_pulses > 0: 
+    RFIexcision(events, pulses, params)
+    print "{} pulses classified as astrophysical".format(pulses.shape[0])
   
   pulses.sort_values('Sigma', ascending=False, inplace=True)
   return pulses[pulses.Pulse == -1]

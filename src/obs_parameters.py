@@ -8,6 +8,7 @@ parameters = {
     'SNR_min' : 6.,            #Minumum SNR value
     'Downfact_max' : 100,      #Maximum Downfact value
     'FRB_name' : "FRB",
+    'down_values' : {50: 1, 150: 2}     #Correct downsample by prepsubband. All DMs above the key value are multiplied by the item value
     },
   
   "FRB121102_Puppi": {
