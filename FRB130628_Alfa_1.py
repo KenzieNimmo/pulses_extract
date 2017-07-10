@@ -3,7 +3,8 @@
 #	
 #	Kelly Gourdji 2017
 #
-#	Must be run in same dir as pulses_extract
+#	Must be run in specific pointing's directory.
+#   pulses_extract must be cloned to that directory.
 #####################################
 
 import os
@@ -28,8 +29,9 @@ def make_prepsubband(infile,downsamp,lodm,dmstep,numdms,maskfile,base,beam,subba
 
 
 general_dir = "/data/gourdji/FRB130628_pipeline"#remove test later #Where everything pipeline related is stored 
-script_dir = general_dir + "/pulses_extract/src"
-fits_dir = general_dir + "/subbanded_data"
+script_dir = os.getcwd() + "/pulses_extract/src"
+#fits_dir = general_dir + "/subbanded_data" #maybe just change to New_data dir
+fits_dir = '/psr_archive/hessels/hessels/AO-FRB/P3055/New_data'
 ###test variables ###
 #base = "4bit-p2030.20160702.FRB130628_0"
 #beam = 0
@@ -39,8 +41,9 @@ fits_dir = general_dir + "/subbanded_data"
 ########################
 
 ### ONE SUBBAND VERSION ###
-#path = "/data/gourdji/FRB130628_pipeline/test" #come back to this
-base = "4bit-p2030.20160702.FRB130628_1" #TURN INTO SCRIPT ARGUMENT
+base_path = os.getcwd()
+base = os.path.basename(base_path)#"4bit-p2030.20160702.FRB130628_1" #TURN INTO SCRIPT ARGUMENT
+#pointing = int(base[-1])
 beams = range(7)
 subbands = range(2)
 dmstep = 1.00
@@ -57,7 +60,7 @@ for beam in beams:
 		#execute("mkdir %s_b%ds%d_TEST_proc"%(base,beam,subband))
 		#outdir = '%s/%s_b%ds%d_TEST_proc'%(general_dir,base,beam,subband)
 		execute("mkdir %s_b%ds%d"%(base,beam,subband))
-		outdir = '%s/%s_b%ds%d'%(general_dir,base,beam,subband)		
+		outdir = '%s/%s_b%ds%d'%(base_path,base,beam,subband)		
 		execute("mkdir %s/obs_data"%outdir)
 		execute("mkdir %s/pulses"%outdir)
 		execute("mkdir %s/TEMP"%outdir)
@@ -76,6 +79,7 @@ for beam in beams:
 			for call in calls:
 				make_prepsubband(infile,downsamp,lodm,dmstep,numdms,maskfile,base,beam,subband,working_dir="%s/TEMP"%outdir)
 				lodm +=  dsubDM
+			execute("ls %s_b%ds%d_ZERO*.dat | xargs -n 1 single_pulse_search.py --noplot -m 100 -t 5.0 -b"%(base,beam,subband), working_dir="%s/TEMP"%outdir)
 			dmstep = 1.00
 			numdms = 50
 			downsamp = 3
@@ -84,7 +88,10 @@ for beam in beams:
 			calls = range(calls)
 			for call in calls:
 				make_prepsubband(infile,downsamp,lodm,dmstep,numdms,maskfile,base,beam,subband,working_dir="%s/TEMP"%outdir)
-				lodm +=  dsubDM	
+				lodm +=  dsubDM
+			execute("ls %s_b%ds%d_ZERO_DM47[5-9]*.dat | xargs -n 1 single_pulse_search.py --noplot -m 70 -t 5.0 -b"%(base,beam,subband), working_dir="%s/TEMP"%outdir)
+			execute("ls %s_b%ds%d_ZERO_DM4[8-9][0-9]*.dat | xargs -n 1 single_pulse_search.py --noplot -m 70 -t 5.0 -b"%(base,beam,subband), working_dir="%s/TEMP"%outdir)
+			execute("ls %s_b%ds%d_ZERO_DM5[0-9][0-9]*.dat | xargs -n 1 single_pulse_search.py --noplot -m 70 -t 5.0 -b"%(base,beam,subband), working_dir="%s/TEMP"%outdir)
 
 		else:
 			dmstep = 0.30
@@ -96,6 +103,7 @@ for beam in beams:
 			for call in calls:
 				make_prepsubband(infile,downsamp,lodm,dmstep,numdms,maskfile,base,beam,subband,working_dir="%s/TEMP"%outdir)
 				lodm +=  dsubDM
+			execute("ls %s_b%ds%d_ZERO*.dat | xargs -n 1 single_pulse_search.py --noplot -m 100 -t 5.0 -b"%(base,beam,subband), working_dir="%s/TEMP"%outdir)
 			dmstep = 0.50
 			numdms = 50
 			downsamp = 3
@@ -104,15 +112,20 @@ for beam in beams:
 			calls = range(calls)
 			for call in calls:
 				make_prepsubband(infile,downsamp,lodm,dmstep,numdms,maskfile,base,beam,subband,working_dir="%s/TEMP"%outdir)
-				lodm +=  dsubDM	
+				lodm +=  dsubDM
+			execute("ls %s_b%ds%d_ZERO_DM31[5-9]*.dat | xargs -n 1 single_pulse_search.py --noplot -m 70 -t 5.0 -b"%(base,beam,subband), working_dir="%s/TEMP"%outdir)	
+			execute("ls %s_b%ds%d_ZERO_DM3[2-9][0-9]*.dat | xargs -n 1 single_pulse_search.py --noplot -m 70 -t 5.0 -b"%(base,beam,subband), working_dir="%s/TEMP"%outdir)	
+			execute("ls %s_b%ds%d_ZERO_DM4[0-9][0-9]*.dat | xargs -n 1 single_pulse_search.py --noplot -m 70 -t 5.0 -b"%(base,beam,subband), working_dir="%s/TEMP"%outdir)	
+			execute("ls %s_b%ds%d_ZERO_DM5[0-3][0-9]*.dat | xargs -n 1 single_pulse_search.py --noplot -m 70 -t 5.0 -b"%(base,beam,subband), working_dir="%s/TEMP"%outdir)	
 			dmstep = 1.00
 			numdms = 50
 			downsamp = 6
 			dsubDM = 50.
 			calls = 1
 			make_prepsubband(infile,downsamp,lodm,dmstep,numdms,maskfile,base,beam,subband,working_dir="%s/TEMP"%outdir)
+			execute("ls %s_b%ds%d_ZERO_DM5[4-8][0-9].dat | xargs -n 1 single_pulse_search.py --noplot -m 30 -t 5.0 -b"%(base,beam,subband), working_dir="%s/TEMP"%outdir)
 
-		execute("ls %s_b%ds%d_ZERO*.dat | xargs -n 1 single_pulse_search.py --noplot -m 150 -t 5.0 -b"%(base,beam,subband), working_dir="%s/TEMP"%outdir)
+		#execute("ls %s_b%ds%d_ZERO*.dat | xargs -n 1 single_pulse_search.py --noplot -m 150 -t 5.0 -b"%(base,beam,subband), working_dir="%s/TEMP"%outdir)
 		execute("single_pulse_search.py -t 10 %s_b%ds%d_ZERO*singlepulse"%(base,beam,subband), working_dir="%s/TEMP"%outdir)
 		
 		#execute("mv %s_b%ds%d_ZERO* %s_b%ds%d_TEST_proc"%(base,beam,subband,base,beam,subband))
@@ -127,16 +140,22 @@ for beam in beams:
 
 
 ##### STEP 2: ONCE SINGLEPULSE FILES ARE CREATED FOR EACH DM #####
-#PUT BACK INDENTS (2) (should be inside subband loop)
 		execute("python %s/pulses_extract.py -db_name %s_b%ds%d_TEST_proc.hdf5 -fits %s\
-		 		-store_events -idL %s_b%ds%d_ZERO_DM -store_dir %s/pulses \
-					-plot_pulses -plot_statistics -parameters_id FRB130628_Alfa_s%d > /dev/null"\
-				%(script_dir,base,beam,subband,infile,base,beam,subband,outdir,subband), working_dir="%s/TEMP"%outdir)
+		 		-store_events -idL %s_b%ds%d_ZERO_DM -store_dir %s \
+					-beam_num %d -group_num %d -plot_statistics -parameters_id FRB130628_Alfa_s%d > /dev/null"\
+				%(script_dir,base,beam,subband,infile,base,beam,subband,outdir,beam,subband,subband), working_dir="%s/TEMP"%outdir)
 		execute("cp %s/TEMP/%s_b%ds%d_ZERO_singlepulse.ps %s/obs_data"%(outdir,base,beam,subband,outdir))
 		execute("cp %s/TEMP/%s_b%ds%d_ZERO_DM470.00.dat %s/obs_data"%(outdir,base,beam,subband,outdir))
 		execute("cp %s/TEMP/%s_b%ds%d_ZERO_DM470.00.inf %s/obs_data"%(outdir,base,beam,subband,outdir))
+		execute("cp %s/pulses/%s_b%ds%d_TEST_proc.hdf5 %s "%(outdir,base,beam,subband,base_path))
 		execute("rm -rf %s/TEMP"%outdir)
-		sys.exit() #REMOVE THIS. This is so that only one file is processed.
+		#sys.exit() #REMOVE THIS. This is so that only one file is processed.
+
+execute("mkdir pulses")
+execute("python %s/pulses_extract.py -beam_comparison %s > /dev/null"%(script_dir,base_path))
+execute("python %s/pulses_extract.py -fits %s/%s -pulses_database -store_dir %s/pulses\
+   -plot_pulses -plot_statistics -parameters_id FRB130628_Alfa_s0\
+    > /dev/null"%(script_dir,fits_dir,base)) #doesn't matter which subband param ID to use.
 
 		#os.chdir(general_dir)
 		#execute("cd %s"%general_dir)

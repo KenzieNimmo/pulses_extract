@@ -24,6 +24,7 @@ from matplotlib import ticker
 from math import ceil
 import subprocess
 from PIL import Image
+from glob import glob
 
 def plotter(data, start, plot_duration, t, DM, IMJD, SMJD, duration, top_freq, sigma, 
 			directory, FRB_name, observation, zero_dm_data, zero_dm_start, pulse_id, pulse_events, zoom=True, idx='', downsamp=True):
@@ -291,7 +292,7 @@ def psrchive_plots(archive_name): #assuming: (full name of the archive with path
 		#psrplot -p freq+ -c psd=0 archive.ar
 
 def main(fits, database, time, DM, IMJD, SMJD, sigma, duration=0.01, pulse_id=4279, top_freq=0., directory='.',\
-		  FRB_name='FRB121102', downsamp=1.):
+		  FRB_name='FRB121102', downsamp=1., beam=0, group=0):
         num_elements = time.size
         if isinstance(DM, float) or isinstance(DM, int): DM = np.zeros(num_elements) + DM
         if isinstance(sigma, float) or isinstance(sigma, int): sigma = np.zeros(num_elements) + sigma
@@ -299,12 +300,10 @@ def main(fits, database, time, DM, IMJD, SMJD, sigma, duration=0.01, pulse_id=42
         if isinstance(pulse_id, float) or isinstance(pulse_id, int): pulse_id = np.zeros(num_elements) + pulse_id
         if isinstance(downsamp, float) or isinstance(downsamp, int): downsamp = np.zeros(num_elements) + downsamp
         
-	rawdata = psrfits.PsrfitsFile(fits)
-	observation = os.path.basename(fits)
 	if FRB_name == 'FRB121102':
-		observation = observation[:observation.find('_subs_')]
-	if FRB_name == 'FRB130628':
-		observation = os.path.splitext(observation)[0]	
+		rawdata = psrfits.PsrfitsFile(fits)
+		observation = os.path.basename(fits)
+		observation = observation[:observation.find('_subs_')]	
 
 	events = pd.read_hdf(database, 'events')
 
@@ -312,8 +311,12 @@ def main(fits, database, time, DM, IMJD, SMJD, sigma, duration=0.01, pulse_id=42
 	SMJD = SMJD / 86400.
 
 	for i, t in enumerate(time):
+		if FRB_name == 'FRB130628':
+			fits = glob("%s.b%ds%d*.fits"%(fits,beam[i],group[i]))[0]
+			rawdata = psrfits.PsrfitsFile(fits)
+			observation = os.path.basename(fits)
+			observation = os.path.splitext(observation)[0]
 		pulse_events = events[events.Pulse == pulse_id[i]]
-		#pulse_events = events[events.Pulse == 4279] #remove this later
 		start_time = t - 0.05
 		plot_duration = 0.1
         #zero-DM filering version

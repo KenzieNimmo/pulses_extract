@@ -39,7 +39,7 @@ def parser():
   parser.add_argument('-pulses_checked', help="Path of a text file containig a list of pulse identifiers to label as RFI.", default='')
   parser.add_argument('-plot_statistics', help="Produce plots with statistics of the pulses.", action='store_true')
   parser.add_argument('-beam_num', help="Number ID of the beam.", type=int, default=False)
-  parser.add_argument('-group_num', help="Number ID of the group of beams.", type=int, default=False)
+  parser.add_argument('-group_num', help="Number ID of the group of beams (i.e. subband).", type=int, default=False)
   parser.add_argument('-beam_comparison', help="Path of databases to merge and compare.", default=False)
   return parser.parse_args()
   
@@ -80,7 +80,13 @@ def main(args):
     if pulses.shape[0] > 0:
       database_path = os.path.join(args.store_dir,args.db_name)
       params = parameters[args.parameters_id]
-      auto_waterfaller.main(args.fits, database_path, np.array(pulses.Time), np.array(pulses.DM), np.array(pulses.IMJD), np.array(pulses.SMJD), np.array(pulses.Sigma), \
+      if (args.parameters_id == "FRB130628_Alfa_s0") or (args.parameters_id == "FRB130628_Alfa_s1"):
+        auto_waterfaller.main(args.fits, database_path, np.array(pulses.Time), np.array(pulses.DM), np.array(pulses.IMJD), np.array(pulses.SMJD), np.array(pulses.Sigma), \
+                                             duration=np.array(pulses.Duration), top_freq=pulses.top_Freq.iloc[0], \
+                                             downsamp=np.clip(np.array(pulses.Downfact) / 5, 1, 1000), FRB_name=params['FRB_name'], directory=args.store_dir, \
+                                             pulse_id=np.array(pulses.index), beam=np.array(pulses.Beam), group=np.array(pulses.Group))
+      else:  
+        auto_waterfaller.main(args.fits, database_path, np.array(pulses.Time), np.array(pulses.DM), np.array(pulses.IMJD), np.array(pulses.SMJD), np.array(pulses.Sigma), \
                                              duration=np.array(pulses.Duration), top_freq=pulses.top_Freq.iloc[0], \
                                              downsamp=np.clip(np.array(pulses.Downfact) / 5, 1, 1000), FRB_name=params['FRB_name'], directory=args.store_dir, pulse_id=np.array(pulses.index))
   
@@ -245,7 +251,7 @@ def beam_comparison(hdf5_in='*.hdf5', hdf5_out='SinglePulses.hdf5'):
   pulses = pd.DataFrame()
   events = pd.DataFrame()
   db_list = glob.glob(hdf5_in)
-  for f in sp_files:
+  for f in db_list:
     try: p = pd.read_hdf(f, 'pulses')
     except KeyError: continue
     e = pd.read_hdf(f, 'events')
