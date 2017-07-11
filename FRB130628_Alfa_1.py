@@ -147,7 +147,7 @@ for beam in beams:
 		execute("cp %s/TEMP/%s_b%ds%d_ZERO_singlepulse.ps %s/obs_data"%(outdir,base,beam,subband,outdir))
 		execute("cp %s/TEMP/%s_b%ds%d_ZERO_DM470.00.dat %s/obs_data"%(outdir,base,beam,subband,outdir))
 		execute("cp %s/TEMP/%s_b%ds%d_ZERO_DM470.00.inf %s/obs_data"%(outdir,base,beam,subband,outdir))
-		execute("cp %s/pulses/%s_b%ds%d_TEST_proc.hdf5 %s "%(outdir,base,beam,subband,base_path))
+		execute("cp %s/%s_b%ds%d_TEST_proc.hdf5 %s "%(outdir,base,beam,subband,base_path))
 		execute("rm -rf %s/TEMP"%outdir)
 		#sys.exit() #REMOVE THIS. This is so that only one file is processed.
 
