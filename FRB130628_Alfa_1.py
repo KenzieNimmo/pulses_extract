@@ -3,8 +3,10 @@
 #	
 #	Kelly Gourdji 2017
 #
-#	Must be run in specific pointing's directory.
-#   pulses_extract must be cloned to that directory.
+#	Must be run in specific pointing's directory
+#   labeled e.g. 4bit-p2030.20160702.FRB130628_0
+#   pulses_extract must be git cloned to this directory.
+#   Must create a subbanded_data subdirectory
 #####################################
 
 import os
@@ -30,8 +32,8 @@ def make_prepsubband(infile,downsamp,lodm,dmstep,numdms,maskfile,base,beam,subba
 
 general_dir = "/data/gourdji/FRB130628_pipeline"#remove test later #Where everything pipeline related is stored 
 script_dir = os.getcwd() + "/pulses_extract/src"
-#fits_dir = general_dir + "/subbanded_data" #maybe just change to New_data dir
-fits_dir = '/psr_archive/hessels/hessels/AO-FRB/P3055/New_data'
+fits_dir = os.getcwd() + "/subbanded_data"
+
 ###test variables ###
 #base = "4bit-p2030.20160702.FRB130628_0"
 #beam = 0
@@ -64,8 +66,8 @@ for beam in beams:
 		execute("mkdir %s/obs_data"%outdir)
 		execute("mkdir %s/pulses"%outdir)
 		execute("mkdir %s/TEMP"%outdir)
-		#infile = fits_dir + "/" + glob("%s/%s.b%ds%d*.fits"%(fits_dir,base,beam,subband))[0]
-		infile = glob("%s/%s.b%ds%d*.fits"%(fits_dir,base,beam,subband))[0]
+		#infile = glob("%s/%s.b%ds%d*.fits"%(fits_dir,base,beam,subband))[0]
+		infile = glob("%s/*b%ds%d*.fits"%(fits_dir,base,beam,subband))[0]
 		execute("rfifind -time 2.0 -psrfits -noscales -nooffsets -noweights -o %s_b%ds%d %s"%(base,beam,subband,infile), working_dir="%s/TEMP"%outdir)
 		maskfile = glob("%s/TEMP/%s_b%ds%d*_rfifind.mask"%(outdir,base,beam,subband))[0]
 		lodm = 0.
