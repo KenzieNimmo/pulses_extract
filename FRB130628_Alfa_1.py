@@ -6,7 +6,8 @@
 #	Must be run in specific pointing's directory
 #   labeled e.g. 4bit-p2030.20160702.FRB130628_0
 #   pulses_extract must be git cloned to this directory.
-#   Must create a subbanded_data subdirectory
+#		python setup.py build_ext --inplace
+#   Must create a subbanded_data subdirectory with soft links to fits files
 #####################################
 
 import os
@@ -44,7 +45,7 @@ fits_dir = os.getcwd() + "/subbanded_data"
 
 ### ONE SUBBAND VERSION ###
 base_path = os.getcwd()
-base = os.path.basename(base_path)#"4bit-p2030.20160702.FRB130628_1" #TURN INTO SCRIPT ARGUMENT
+base = os.path.basename(base_path)#"4bit-p2030.20160702.FRB130628_1"
 #pointing = int(base[-1])
 beams = range(7)
 subbands = range(2)
