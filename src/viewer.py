@@ -271,7 +271,7 @@ if __name__ == '__main__':
 	if args.FRB == 121102:		#"FRB" file_id only works for observations run using early version of pipeline
 		#file_id = "FRB" 		#where files start with "FRB".In latest version, use "puppi"
 		file_id = "puppi"
-		obs_path = '/psr_archive/hessels/hessels/AO-FRB/pipeline_products/'
+		obs_path = '/data/FRB121102/pipeline_products/'
 
 	if args.FRB == 130628:
 		file_id = "4"
