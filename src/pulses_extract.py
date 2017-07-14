@@ -139,7 +139,7 @@ def events_database(args, header):
   C_Funct.Get_Group(events.DM.values, events.Sigma.values, events.Time.values, events.Pulse.values, 
                     args.events_dDM, args.events_dt, args.DM_step)
 
-  events = events[events.Pulse >= 0]
+  #events = events[events.Pulse >= 0]
 
   if args.store_events:
     store = pd.HDFStore(os.path.join(args.store_dir,args.db_name), 'w')
@@ -191,9 +191,7 @@ def pulses_database(args, header, events=None):
     print "{} pulses classified as astrophysical".format(pulses.shape[0])
   print pulses.Pulse
   pulses.sort_values('Sigma', ascending=False, inplace=True)
-  #print pulses[pulses.Pulse == -1]
-  return pulses[pulses.Pulse == -1]
-  
+  return pulses
 
 def RFIexcision(events, pulses, params):
   events = events[events.Pulse.isin(pulses.index)]
@@ -201,22 +199,24 @@ def RFIexcision(events, pulses, params):
   gb = events.groupby('Pulse')
   pulses.sort_index(inplace=True)
   
+  RFI_code = 9
+  
   #Remove flat SNR pulses. Minimum ratio to have weakest pulses with SNR = 8
-  pulses.Pulse[pulses.Sigma / gb.Sigma.min() <= params['SNR_peak_min'] / params['SNR_min']] += 1
+  pulses.Pulse[pulses.Sigma / gb.Sigma.min() <= params['SNR_peak_min'] / params['SNR_min']] = RFI_code
   
   #Remove flat duration pulses. Minimum ratio to have weakest pulses with SNR = 8 (from Eq.6.21 of Pulsar Handbook)
-  pulses.Pulse[gb.Downfact.max() / pulses.Downfact < (params['SNR_peak_min'] / params['SNR_min'])**2] += 1
+  pulses.Pulse[gb.Downfact.max() / pulses.Downfact < (params['SNR_peak_min'] / params['SNR_min'])**2] = RFI_code
   
   #Remove pulses peaking near the DM edges
   DM_frac = (params['DM_high'] - params['DM_low']) * 0.2  #Remove 5% of DM range from each edge
-  pulses.Pulse[(pulses.DM < params['DM_low']+DM_frac) | (pulses.DM > params['DM_high']-DM_frac)] += 1
+  pulses.Pulse[(pulses.DM < params['DM_low']+DM_frac) | (pulses.DM > params['DM_high']-DM_frac)] = RFI_code
   
   #Remove pulses intersecting half the maximum SNR different than 2 or 4 times
   def crosses(sig):
     diff = sig - (sig.max() + sig.min()) / 2.
     count = np.count_nonzero(np.diff(np.sign(diff)))
     return (count != 2) & (count != 4) & (count != 6) & (count != 8)
-  pulses.Pulse += gb.apply(lambda x: crosses(x.Sigma)).astype(np.int8)
+  pulses.Pulse += gb.apply(lambda x: crosses(x.Sigma)).astype(np.int8) * RFI_code
   
   #Remove weaker pulses within a temporal window
   def simultaneous(p):                            
@@ -224,7 +224,7 @@ def RFIexcision(events, pulses, params):
     if puls.shape[0] == 1: return 0
     if p.name == puls.index[0]: return 0
     else: return 1
-  pulses.Pulse += pulses.apply(lambda x: simultaneous(x), axis=1)
+  pulses.Pulse += pulses.apply(lambda x: simultaneous(x), axis=1) * RFI_code
   
   return
 
@@ -290,7 +290,7 @@ def beam_comparison(hdf5_in='*.hdf5', hdf5_out='SinglePulses.hdf5'):
     DMmin = float(puls.DM - .5)
     DMmax = float(puls.DM + .5)
     SNRmin = puls.Sigma / 2.
-    if events.query(conditions_A).query(conditions_B).groupby('BEAM').count().shape[0] > 4: return 1
+    if events.query(conditions_A).query(conditions_B).groupby('BEAM').count().shape[0] > 4: return 8
     else: return 0
   
   print "{} pulses present before beam comparison".format(pulses.shape[0])

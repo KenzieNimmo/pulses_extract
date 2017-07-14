@@ -11,13 +11,8 @@ import Tkinter
 import argparse
 import glob
 
-#DM_min = 530
-#DM_max = 570
-#Sigma_min = 10
-#duration_max = 8 #duration is in seconds in hd file
-#Need to add these to command line options for select cands
 def select_cands(filename, Master=False, DM_min=None, DM_max=None, Sigma_min=None,duration_max=None, sort=None):
-	cands = pd.read_hdf(filename, 'pulses')
+	cands = pd.read_hdf(filename, 'pulses') #Haven't fully implemented these capabilities yet
 	if DM_min:
 		cands = cands[cands.DM > DM_min]
 	if DM_max:
@@ -26,7 +21,7 @@ def select_cands(filename, Master=False, DM_min=None, DM_max=None, Sigma_min=Non
 		cands = cands[cands.Sigma > Sigma_min]
 	if duration_max:
 		cands = cands[cands.Duration < duration_max]
-
+	cands = cands[cands.Pulse == -1]
 	new_filename = os.path.splitext(filename)[0] + '_pulses_unranked.txt'
 	if Master:
 		new_filename = os.path.splitext(filename)[0] + '.txt'
@@ -273,10 +268,10 @@ if __name__ == '__main__':
 	args = parser()
 
 	obs = args.observation
-	if args.FRB == 121102:#This only works for observations run using early version of pipeline
-		#file_id = "FRB" 			#where files start with "FRB".In latest version, look at fits arg of pulses_extract. I think "puppi"
+	if args.FRB == 121102:		#"FRB" file_id only works for observations run using early version of pipeline
+		#file_id = "FRB" 		#where files start with "FRB".In latest version, use "puppi"
 		file_id = "puppi"
-		obs_path = '/psr_archive/hessels/hessels/AO-FRB/pipeline_products/'
+		obs_path = '/data/FRB121102/pipeline_products/'
 
 	if args.FRB == 130628:
 		file_id = "4"
@@ -317,4 +312,5 @@ if __name__ == '__main__':
 		txtfile = path_to_pulses + obs + '_pulses_unranked.txt'
 		viewer(txtfile, path_to_pulses, obs)
 
-
+### Useful rsync command to only download relevant files in the observation's /pulses dir when transfering this dir over
+#rsync -r --progress --include='*/' --include='*.png' --include='*.txt' --exclude='*'
