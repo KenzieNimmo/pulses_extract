@@ -156,7 +156,7 @@ for beam in beams:
 
 execute("mkdir pulses")
 execute("python %s/pulses_extract.py -beam_comparison %s > /dev/null"%(script_dir,base_path))
-execute("python %s/pulses_extract.py -fits %s/%s -pulses_database -store_dir %s/pulses\
+execute("python %s/pulses_extract.py -fits %s -pulses_database -store_dir %s/pulses\
    -plot_pulses -plot_statistics -parameters_id FRB130628_Alfa_s0\
     > /dev/null"%(script_dir,fits_dir,base)) #doesn't matter which subband param ID to use.
 
