@@ -17,8 +17,6 @@ import sys
 import time
 import pandas as pd
 import numpy as np
-#sys.path.insert(0, "/psr_archive/hessels/hessels/AO-FRB/pipeline_products/pulses_extract")
-#from src import C_Funct
 
 def execute(command,working_dir=None):
 	print command
@@ -60,8 +58,6 @@ calls = range(calls)
 for beam in beams:
 	for subband in subbands:
 		print "NOW PROCESSING SUBBAND %d of BEAM %d"%(subband,beam)
-		#execute("mkdir %s_b%ds%d_TEST_proc"%(base,beam,subband))
-		#outdir = '%s/%s_b%ds%d_TEST_proc'%(general_dir,base,beam,subband)
 		execute("mkdir %s_b%ds%d"%(base,beam,subband))
 		outdir = '%s/%s_b%ds%d'%(base_path,base,beam,subband)		
 		execute("mkdir %s/obs_data"%outdir)
@@ -143,14 +139,14 @@ for beam in beams:
 
 
 ##### STEP 2: ONCE SINGLEPULSE FILES ARE CREATED FOR EACH DM #####
-		execute("python %s/pulses_extract.py -db_name %s_b%ds%d_TEST_proc.hdf5 -fits %s\
+		execute("python %s/pulses_extract.py -db_name %s_b%ds%d_proc.hdf5 -fits %s\
 		 		-store_events -idL %s_b%ds%d_ZERO_DM -store_dir %s \
 					-beam_num %d -group_num %d -plot_statistics -parameters_id FRB130628_Alfa_s%d > /dev/null"\
 				%(script_dir,base,beam,subband,infile,base,beam,subband,outdir,beam,subband,subband), working_dir="%s/TEMP"%outdir)
 		execute("cp %s/TEMP/%s_b%ds%d_ZERO_singlepulse.ps %s/obs_data"%(outdir,base,beam,subband,outdir))
 		execute("cp %s/TEMP/%s_b%ds%d_ZERO_DM470.00.dat %s/obs_data"%(outdir,base,beam,subband,outdir))
 		execute("cp %s/TEMP/%s_b%ds%d_ZERO_DM470.00.inf %s/obs_data"%(outdir,base,beam,subband,outdir))
-		execute("cp %s/%s_b%ds%d_TEST_proc.hdf5 %s "%(outdir,base,beam,subband,base_path))
+		execute("cp %s/%s_b%ds%d_proc.hdf5 %s "%(outdir,base,beam,subband,base_path))
 		#execute("rm -rf %s/TEMP"%outdir)
 		#sys.exit() #REMOVE THIS. This is so that only one file is processed.
 
@@ -159,10 +155,6 @@ execute("python %s/pulses_extract.py -beam_comparison %s > /dev/null"%(script_di
 execute("python %s/pulses_extract.py -fits %s -pulses_database -store_dir %s/pulses\
    -plot_pulses -plot_statistics -parameters_id FRB130628_Alfa_s0\
     > /dev/null"%(script_dir,fits_dir,base)) #doesn't matter which subband param ID to use.
-
-		#os.chdir(general_dir)
-		#execute("cd %s"%general_dir)
-
 
 #Use this for debugging so can print messages within pulses_extract.py 
 #remove > dev/null since otherwise won't print output on command line
