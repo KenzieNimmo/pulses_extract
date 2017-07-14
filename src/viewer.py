@@ -12,7 +12,7 @@ import argparse
 import glob
 
 def select_cands(filename, Master=False, DM_min=None, DM_max=None, Sigma_min=None,duration_max=None, sort=None):
-	cands = pd.read_hdf(filename, 'pulses')
+	cands = pd.read_hdf(filename, 'pulses') #Haven't fully implemented these capabilities yet
 	if DM_min:
 		cands = cands[cands.DM > DM_min]
 	if DM_max:
@@ -21,7 +21,7 @@ def select_cands(filename, Master=False, DM_min=None, DM_max=None, Sigma_min=Non
 		cands = cands[cands.Sigma > Sigma_min]
 	if duration_max:
 		cands = cands[cands.Duration < duration_max]
-
+	cands = cands[cands.Pulse == -1]
 	new_filename = os.path.splitext(filename)[0] + '_pulses_unranked.txt'
 	if Master:
 		new_filename = os.path.splitext(filename)[0] + '.txt'
