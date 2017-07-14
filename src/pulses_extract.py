@@ -57,6 +57,7 @@ def main(args):
   else: 
     header = fits_header(args.fits)
     pulses = pulses_database(args, header)
+    print pulses
     store = pd.HDFStore(os.path.join(args.store_dir,args.db_name), 'a')
     store.append('pulses',pulses)
     #store.append('pulses_bu',pulses) #Create a back up table in the database
@@ -184,11 +185,13 @@ def pulses_database(args, header, events=None):
   
   n_pulses = pulses.shape[0]
   print "{} pulses detected".format(n_pulses)
+  print pulses.Pulse
   if n_pulses > 0: 
     RFIexcision(events, pulses, params)
     print "{} pulses classified as astrophysical".format(pulses.shape[0])
-  
+  print pulses.Pulse
   pulses.sort_values('Sigma', ascending=False, inplace=True)
+  #print pulses[pulses.Pulse == -1]
   return pulses[pulses.Pulse == -1]
   
 
@@ -253,7 +256,7 @@ def beam_comparison(hdf5_in='*.hdf5', hdf5_out='SinglePulses.hdf5'):
   db_list = glob.glob(hdf5_in)
   for f in db_list:
     try: p = pd.read_hdf(f, 'pulses')
-    except KeyError: continue
+    except (KeyError, IOError): continue
     e = pd.read_hdf(f, 'events')
     e = e[e.Pulse.isin(p.index)]
     pulses = pd.concat(pulses, p)
@@ -265,12 +268,15 @@ def beam_comparison(hdf5_in='*.hdf5', hdf5_out='SinglePulses.hdf5'):
     events.Pulse *= group_order
     events.Pulse += pulses.Group
   except AttributeError: pass
-  beam_order = 10**np.ceil(np.log10(pulses.Beam.max()))
-  pulses.index *= beam_order
-  pulses.index += pulses.Beam
-  events.Pulse *= beam_order
-  events.Pulse += pulses.Beam
-  
+  try:
+    beam_order = 10**np.ceil(np.log10(pulses.Beam.max()))
+    pulses.index *= beam_order
+    pulses.index += pulses.Beam
+    events.Pulse *= beam_order
+    events.Pulse += pulses.Beam
+  except AttributeError:
+    print "No candidates found in any beam/subband pair"
+    sys.exit()
   #Compare the beams
   conditions_A = '(Time > @tmin) & (Time < @tmax)'
   if 'Group' in pulses.columns: conditions_B = '(SAP == @sap) & (BEAM != @beam) & (BEAM != @inc) & (DM > @DMmin) & (DM < @DMmax) & (Sigma >= @SNRmin)'
