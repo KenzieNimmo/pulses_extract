@@ -312,7 +312,7 @@ def main(fits, database, time, DM, IMJD, SMJD, sigma, duration=0.01, pulse_id=42
 
 	for i, t in enumerate(time):
 		if FRB_name == 'FRB130628':
-			fits = glob("%s.b%ds%d*.fits"%(fits,beam[i],group[i]))[0]
+			fits = glob("%s/*b%ds%d*.fits"%(fits,beam[i],group[i]))[0]
 			rawdata = psrfits.PsrfitsFile(fits)
 			observation = os.path.basename(fits)
 			observation = os.path.splitext(observation)[0]
