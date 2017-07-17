@@ -178,29 +178,28 @@ def pulses_database(args, header, events=None):
   pulses['Obs_ID'] = os.path.splitext(args.db_name)[0]
 
   params = parameters[args.parameters_id]
-  pulses.Pulse[pulses.N_events > 5] == -1
-  pulses.Pulse[pulses.Sigma >= params['SNR_peak_min']] == -1
-  pulses.Pulse[pulses.Downfact <= params['Downfact_max']] == -1
-  pulses.Pulse[(pulses.DM >= params['DM_search_low']) & (pulses.DM <= params['DM_search_high'])] == -1
+  print "%d grouped events"%(pulses[pulses.Pulse == -1].shape[0])
+  pulses.Pulse[(pulses.N_events > 5) & (pulses.Sigma >= params['SNR_peak_min'])\
+                & (pulses.Downfact <= params['Downfact_max'])\
+                & (pulses.Downfact <= params['Downfact_max'])\
+                & (pulses.DM >= params['DM_search_low'])\
+                & (pulses.DM <= params['DM_search_high'])] = -1
 
   n_pulses = pulses[pulses.Pulse == -1].shape[0] #1st order pulses
   print "{} pulses detected".format(n_pulses)
-  print pulses.Pulse
   if n_pulses > 0: 
     RFIexcision(events, pulses, params)
-    print "{} pulses classified as astrophysical".format(pulses.shape[0])
+    print "{} pulses classified as astrophysical".format(pulses[pulses.Pulse == -1].shape[0])
   print pulses.Pulse
   pulses.sort_values(['Pulse','Sigma'], ascending=False, inplace=True) 
   return pulses #2nd (final order)
 
 def RFIexcision(events, pulses, params):
-  RFI_code = 9
-  pulses_to_check = pulses[pulses.Pulse == -1]
-  events = events[events.Pulse.isin(pulses_to_check.index)]
+  RFI_code = 10
+  events = events[events.Pulse.isin(pulses.index)]
   events.sort_values(by='DM',inplace=True)
   gb = events.groupby('Pulse')
   pulses.sort_index(inplace=True)
-  
   
   
   #Remove flat SNR pulses. Minimum ratio to have weakest pulses with SNR = 8
@@ -212,7 +211,7 @@ def RFIexcision(events, pulses, params):
   #Remove pulses peaking near the DM edges
   DM_frac = (params['DM_high'] - params['DM_low']) * 0.2  #Remove 5% of DM range from each edge
   pulses.Pulse[(pulses.DM < params['DM_low']+DM_frac) | (pulses.DM > params['DM_high']-DM_frac) & (pulses.Pulse == -1)] = RFI_code
-  
+  #print pulses[pulses.Pulse==RFI_code].shape[0]
   #Remove pulses intersecting half the maximum SNR different than 2 or 4 times
   def crosses(sig):
     diff = sig - (sig.max() + sig.min()) / 2.
