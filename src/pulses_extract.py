@@ -51,7 +51,7 @@ def main(args):
     exit()
   if args.pulses_database: 
     try: pulses = pd.read_hdf(os.path.join(args.store_dir,args.db_name),'pulses')
-    except KeyError:
+    except (KeyError, IOError):
       print "Database does not contain pulses!"
       return
   else: 
