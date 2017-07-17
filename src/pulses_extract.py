@@ -178,7 +178,7 @@ def pulses_database(args, header, events=None):
   pulses['Obs_ID'] = os.path.splitext(args.db_name)[0]
 
   params = parameters[args.parameters_id]
-  print "%d grouped events"%(pulses[pulses.Pulse == -1].shape[0])
+  print "%d grouped events"%(pulses.shape[0])
   pulses.Pulse[(pulses.N_events > 5) & (pulses.Sigma >= params['SNR_peak_min'])\
                 & (pulses.Downfact <= params['Downfact_max'])\
                 & (pulses.Downfact <= params['Downfact_max'])\
