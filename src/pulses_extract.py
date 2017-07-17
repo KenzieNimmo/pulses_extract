@@ -216,15 +216,15 @@ def RFIexcision(events, pulses, params):
     diff = sig - (sig.max() + sig.min()) / 2.
     count = np.count_nonzero(np.diff(np.sign(diff)))
     return (count != 2) & (count != 4) & (count != 6) & (count != 8)
-  pulses.Pulse += gb.apply(lambda x: crosses(x.Sigma)).astype(np.int8) * RFI_code
+  pulses.Pulse[gb.apply(lambda x: crosses(x.Sigma))] = RFI_code
   
   #Remove weaker pulses within a temporal window
   def simultaneous(p):                            
     puls = pulses.Pulse[np.abs(pulses.Time-p.Time) < 0.02]
-    if puls.shape[0] == 1: return 0
-    if p.name == puls.index[0]: return 0
-    else: return 1
-  pulses.Pulse += pulses.apply(lambda x: simultaneous(x), axis=1) * RFI_code
+    if puls.shape[0] == 1: return False
+    if p.name == puls.index[0]: return False
+    else: return True
+  pulses.Pulse[pulses.apply(lambda x: simultaneous(x), axis=1)] = RFI_code
   
   return
 
