@@ -178,8 +178,8 @@ def pulses_database(args, header, events=None):
   pulses['Obs_ID'] = os.path.splitext(args.db_name)[0]
 
   params = parameters[args.parameters_id]
-  print "%d grouped events"%(pulses.shape[0])
   pulses = pulses[pulses.N_events > 5]
+  print "%d grouped events"%(pulses.shape[0])
 
   n_pulses = pulses.shape[0] #zeroth order pulses
   print "{} pulses detected".format(n_pulses)
