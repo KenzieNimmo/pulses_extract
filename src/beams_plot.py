@@ -46,7 +46,12 @@ def make_plot(subband):
 		ax[i].set_xlabel('Time (s)')
 		ax[i].set_ylabel(r'DM (pc cm$^{-3}$)')
 		#ax[i].legend(fontsize=8)
-		ax[i].set_title('BEAM %d: %d pulse candidates'%(i,len(pulse_cands)), fontsize=12)
+		try:
+			num_cands = len(pulse_cands)
+		except UnboundLocalError:
+			num_cands = 0
+
+		ax[i].set_title('BEAM %d: %d pulse candidates'%(i,num_cands), fontsize=12)
 	base_path = os.getcwd()
 	base = os.path.basename(base_path)
 	fig.delaxes(ax[7])
