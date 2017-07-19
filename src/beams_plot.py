@@ -45,7 +45,7 @@ def make_plot(subband):
 		ax[i].set_ylim([-1, 575])
 		ax[i].set_xlabel('Time (s)')
 		ax[i].set_ylabel(r'DM (pc cm$^{-3}$)')
-		ax[i].axhline(470,c='y',ls='--',lw=2) #DM of FRB
+		ax[i].axhline(470,c='c',lw=2) #DM of FRB
 		#ax[i].legend(fontsize=8)
 		ax[i].set_title('BEAM %d: %d pulse candidates'%(i,len(pulse_cands)), fontsize=12)
 	base_path = os.getcwd()
@@ -60,7 +60,7 @@ def make_plot(subband):
 	#small_marker = plt.Line2D((0,1),(0,0),marker='o', ls='None', markersize = 10, mec='blue', mfc='none')
 	#medium_marker = plt.Line2D((0,1),(0,0), marker='o', markersize = 40, ls='None', mec='blue', mfc='none')
 	#large_marker = plt.Line2D((0,1),(0,0), marker='o', markersize = 200, ls='None', mec='blue', mfc='none')
-	DM_line = plt.Line2D((0,1),(0,0), ls='--', lw=2,color='y')
+	DM_line = plt.Line2D((0,1),(0,0), lw=2,color='c')
 	#ax[6].scatter(300,400,s=10, marker='o', facecolors='none', edgecolors='none', label="10 <= S/N < 15")
 	#ax[6].scatter(310,400,s=40, marker='o', facecolors='none', edgecolors='none')
 	#ax[6].scatter(320,400,s=200, marker='o', facecolors='none', edgecolors='none')
