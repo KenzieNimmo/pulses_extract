@@ -22,8 +22,8 @@ def make_plot(subband):
 		events = pd.read_hdf(file, 'events')
 		#Events = events[(events.Sigma > 10)]# & (events.Sigma < 26)]
 		marker_size = 5
+		ax[i].axhline(470,c='c',lw=1) #DM of FRB
 		ax[i].scatter(events.Time, events.DM, s=marker_size, marker='o', facecolors='none', edgecolors ='k', alpha =0.2, label='Events')
-
 		try:
 			pulses = pd.read_hdf(file, 'pulses')
 			#all grouped pulses
@@ -45,7 +45,6 @@ def make_plot(subband):
 		ax[i].set_ylim([-1, 575])
 		ax[i].set_xlabel('Time (s)')
 		ax[i].set_ylabel(r'DM (pc cm$^{-3}$)')
-		ax[i].axhline(470,c='c',lw=2) #DM of FRB
 		#ax[i].legend(fontsize=8)
 		ax[i].set_title('BEAM %d: %d pulse candidates'%(i,len(pulse_cands)), fontsize=12)
 	base_path = os.getcwd()
