@@ -154,7 +154,7 @@ execute("mkdir pulses")
 execute("python %s/pulses_extract.py -beam_comparison %s"%(script_dir,base_path))
 execute("python %s/pulses_extract.py -fits %s -pulses_database -store_dir %s/pulses\
    -plot_pulses -plot_statistics -parameters_id FRB130628_Alfa_s0"%(script_dir,fits_dir,base)) #doesn't matter which subband param ID to use.
-
+execute("python %s/beams_plot.py > /dev/null"%script_dir)
 #Use this for debugging so can print messages within pulses_extract.py 
 #remove > dev/null since otherwise won't print output on command line
 #process = subprocess.Popen("python %s/pulses_extract.py -db_name %s_b%ds%d_SinglePulses.hdf5 -fits %s\
