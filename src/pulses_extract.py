@@ -179,7 +179,7 @@ def pulses_database(args, header, events=None):
 
   params = parameters[args.parameters_id]
   pulses = pulses[pulses.N_events > 5]
-  print "%d grouped events"%(pulses.shape[0])
+  #print "%d grouped events"%(pulses.shape[0])
 
   n_pulses = pulses.shape[0] #zeroth order pulses
   print "{} pulses detected".format(n_pulses)
