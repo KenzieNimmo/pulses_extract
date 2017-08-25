@@ -31,6 +31,7 @@ parameters = {
     'SNR_min' : 5.,
     'Downfact_max' : 100,
     'FRB_name' : "FRB130628",
+    'down_values' : 0: 2, 475: 3}
   },
 
   "FRB130628_Alfa_s1": {
@@ -42,5 +43,6 @@ parameters = {
     'SNR_min' : 5.,
     'Downfact_max' : 100,
     'FRB_name' : "FRB130628",
+    'down_values' : {0: 2, 315: 3, 540: 6}
   } 
 }
