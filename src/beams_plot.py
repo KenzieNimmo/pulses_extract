@@ -21,11 +21,13 @@ def make_plot(subband):
 	for i,file in enumerate(databases):
 		events = pd.read_hdf(file, 'events')
 		#Events = events[(events.Sigma > 10)]# & (events.Sigma < 26)]
+		events = events[events.Sigma>=6]
 		marker_size = 5
 		ax[i].axhline(470,c='c',lw=1) #DM of FRB
 		ax[i].scatter(events.Time, events.DM, s=marker_size, marker='o', facecolors='none', edgecolors ='k', alpha =0.2, label='Events')
 		try:
 			pulses = pd.read_hdf(file, 'pulses')
+			pulses = pulses[pulses.Sigma>=6]
 			#all grouped pulses
 			marker_size = get_markers(pulses)
 			ax[i].scatter(pulses.Time, pulses.DM, s=marker_size, marker='o', facecolors='none', edgecolors ='r', label='All pulses')
