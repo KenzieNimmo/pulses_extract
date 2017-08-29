@@ -23,14 +23,15 @@ def parser():
   parser.add_argument('-zap', help="Plot to manually zap bins out.", action='store_true')
   parser.add_argument('-ncols', help="Number of columns in the general plot.", default=1, type=int)
   parser.add_argument('-nrows', help="Number of rows in the general plot.", default=1, type=int)
-  parser.add_argument('-t_scrunch', help="Time scrunch archives by this factor.", default=1., type=int)
-  parser.add_argument('-f_scrunch', help="Frequency scrunch archives by this factor.", default=1., type=int)
+  parser.add_argument('-t_scrunch', help="Time scrunch archives by this factor.", default=1, type=int)
+  parser.add_argument('-f_scrunch', help="Frequency scrunch archives by this factor.", default=1, type=int)
   parser.add_argument('-time_window', help="Time window around the burst in ms.", default=20., type=float)
   parser.add_argument('-f_min', help="Minimum frequency to plot in GHz.", default=None, type=float)
   parser.add_argument('-f_max', help="Maximum frequency to plot in GHz.", default=None, type=float)
   parser.add_argument('-cmap', help="Colormap to use in the plots. Other useful: RdGy_r", default='Greys')
   parser.add_argument('-log_scale', help="Logaritmic color scale.", action='store_true')
   parser.add_argument('-pol', help="Plot polarisation information.", action='store_true')
+  parser.add_argument('-plot_DM_curves', help="Plot curves of DM sweeps.", action='store_true')
   return parser.parse_args()
 
 
@@ -88,11 +89,12 @@ def main():
     
     #Plot the archive
     idx += skip
-
-    if (idx > 0) and (idx == args.nrows * args.ncols / 2):
-      plot_DM_curves(extent, plot_grid[idx], fig, fmin=args.f_min, fmax=args.f_max, width=args.time_window)
-      skip += 1
-      idx += 1
+    
+    if args.plot_DM_curves:
+      if (idx > 0) and (idx == args.nrows * args.ncols / 2):
+        plot_DM_curves(extent, plot_grid[idx], fig, fmin=args.f_min, fmax=args.f_max, width=args.time_window)
+        skip += 1
+        idx += 1
     
     plot(DS, spectrum, ts, extent, plot_grid[idx], fig, ncols=args.ncols, nrows=args.nrows,\
          index=idx, width=width, fmin=args.f_min, fmax=args.f_max, cmap=args.cmap, log_scale=args.log_scale, components=components,\
@@ -175,7 +177,7 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
     components = (components / t_scrunch).astype(int)
     if width:
       center = np.ceil(width / 2. / res_t)
-      t0 = int(peak - center)
+      t0 = np.clip(int(peak - center), 0, np.inf)
       t1 = int(peak + center)
       components_ms -= peak_ms
       components -= int(peak - center)
@@ -260,8 +262,8 @@ def load_DS(archive_name, zap=False, t_scrunch=False, f_scrunch=False):
   
   if pol_info: load_archive.convert_state('Stokes')
 
-  if t_scrunch: load_archive.bscrunch_to_nbin(t_scrunch)
-  if f_scrunch: load_archive.fscrunch_to_nchan(f_scrunch)
+  if t_scrunch > 1: load_archive.bscrunch(t_scrunch)
+  if f_scrunch > 1: load_archive.fscrunch(f_scrunch)
   load_archive.remove_baseline()
 
   w = load_archive.get_weights()
