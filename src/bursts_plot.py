@@ -253,7 +253,12 @@ def load_DS(archive_name, zap=False, t_scrunch=False, f_scrunch=False):
   #Load archive
   load_archive = psrchive.Archive_load(archive_name)
   load_archive.tscrunch()
-  load_archive.convert_state('Stokes')
+  
+  if load_archive.get_npol() > 1:
+    pol_info = True
+  else: pol_info = False
+  
+  if pol_inf: load_archive.convert_state('Stokes')
 
   if t_scrunch: load_archive.bscrunch_to_nbin(t_scrunch)
   if f_scrunch: load_archive.fscrunch_to_nchan(f_scrunch)
@@ -262,14 +267,11 @@ def load_DS(archive_name, zap=False, t_scrunch=False, f_scrunch=False):
   w = load_archive.get_weights()
   archive = load_archive.get_data().squeeze()
   
-  if len(archive.shape) == 3:
+  if pol_info:
     archive = np.multiply(w, np.rollaxis(archive,2))
     archive = np.rollaxis(np.rollaxis(archive, 1, 0), 2, 1)
   else: 
     archive = (w*archive.T).T
-
-  if len(archive.shape) != 3: pol_info = False
-  else: pol_info = True
 
   #Zap archive
   for i in range(4): zap_ar(archive_name, archive[i])
