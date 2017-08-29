@@ -52,7 +52,7 @@ def main(args):
     exit()
   if args.pulses_database: 
     try: pulses = pd.read_hdf(os.path.join(args.store_dir,args.db_name),'pulses')
-    except KeyError:
+    except (KeyError, IOError):
       print "Database does not contain pulses!"
       return
   else: 
@@ -168,7 +168,7 @@ def pulses_database(args, header, events=None):
   if args.group_num: pulses['Group'] = args.beam_num
   pulses['Duration'] = pulses.Downfact * header['TBIN']
   pulses['top_Freq'] = header['OBSFREQ'] + abs(header['OBSBW']) / 2.
-  pulses['Pulse'] = -1
+  pulses['Pulse'] = -1 
   pulses.Pulse = pulses.Pulse.astype(np.int8)
   pulses['dDM'] = (gb.DM.max() - gb.DM.min()) / 2.
   pulses.dDM=pulses.dDM.astype(np.float32)
@@ -180,27 +180,30 @@ def pulses_database(args, header, events=None):
 
   params = parameters[args.parameters_id]
   pulses = pulses[pulses.N_events > 5]
-  pulses = pulses[pulses.Sigma >= params['SNR_peak_min']]
-  pulses = pulses[pulses.Downfact <= params['Downfact_max']]
-  pulses = pulses[(pulses.DM >= params['DM_search_low']) & (pulses.DM <= params['DM_search_high'])]
-  
-  n_pulses = pulses.shape[0]
+  #print "%d grouped events"%(pulses.shape[0])
+
+  n_pulses = pulses.shape[0] #zeroth order pulses
   print "{} pulses detected".format(n_pulses)
-  print pulses.Pulse
-  if n_pulses > 0 and args.no_RFI: 
-    RFIexcision(events, pulses, params)
-    print "{} pulses classified as astrophysical".format(pulses.shape[0])
-  print pulses.Pulse
-  pulses.sort_values('Sigma', ascending=False, inplace=True)
-  return pulses
+  
+  if n_pulses > 0 and args.no_RFI:
+    RFIexcision(events, pulses, params) #1st order
+    #set search parameter space
+    pulses.Pulse[pulses.Sigma <= params['SNR_peak_min']] = 9
+    pulses.Pulse[pulses.Downfact >= params['Downfact_max']] = 9
+    pulses.Pulse[pulses.DM <= params['DM_search_low']] = 9
+    pulses.Pulse[pulses.DM >= params['DM_search_high']] = 9
+    print "{} pulses classified as astrophysical".format(pulses[pulses.Pulse == -1].shape[0])
+  #print pulses.Pulse
+  pulses.sort_values(['Pulse','Sigma'], ascending=False, inplace=True) 
+  return pulses #2nd (final) order
 
 def RFIexcision(events, pulses, params):
+  RFI_code = 9
   events = events[events.Pulse.isin(pulses.index)]
   events.sort_values(by='DM',inplace=True)
   gb = events.groupby('Pulse')
   pulses.sort_index(inplace=True)
   
-  RFI_code = 9
   
   #Remove flat SNR pulses. Minimum ratio to have weakest pulses with SNR = 8
   pulses.Pulse[pulses.Sigma / gb.Sigma.min() <= params['SNR_peak_min'] / params['SNR_min']] = RFI_code
@@ -211,7 +214,7 @@ def RFIexcision(events, pulses, params):
   #Remove pulses peaking near the DM edges
   DM_frac = (params['DM_high'] - params['DM_low']) * 0.2  #Remove 5% of DM range from each edge
   pulses.Pulse[(pulses.DM < params['DM_low']+DM_frac) | (pulses.DM > params['DM_high']-DM_frac)] = RFI_code
-  
+  #print pulses[pulses.Pulse==RFI_code].shape[0]
   #Remove pulses intersecting half the maximum SNR different than 2 or 4 times
   def crosses(sig):
     diff = sig - (sig.max() + sig.min()) / 2.
