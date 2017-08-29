@@ -254,17 +254,26 @@ def load_DS(archive_name, zap=False, t_scrunch=False, f_scrunch=False):
   load_archive = psrchive.Archive_load(archive_name)
   load_archive.tscrunch()
   load_archive.convert_state('Stokes')
+
+  if t_scrunch: load_archive.bscrunch_to_nbin(t_scrunch)
+  if f_scrunch: load_archive.fscrunch_to_nchan(f_scrunch)
   load_archive.remove_baseline()
+
+  w = load_archive.get_weights()
   archive = load_archive.get_data().squeeze()
+  
+  if len(archive.shape) == 3:
+    archive = np.multiply(w, np.rollaxis(archive,2))
+    archive = np.rollaxis(np.rollaxis(archive, 1, 0), 2, 1)
+  else: 
+    archive = (w*archive.T).T
+
   if len(archive.shape) != 3: pol_info = False
   else: pol_info = True
 
   #Zap archive
   for i in range(4): zap_ar(archive_name, archive[i])
 
-  if t_scrunch: archive = np.sum(np.reshape(archive, (archive.shape[0], archive.shape[1], archive.shape[2] / t_scrunch, t_scrunch)), axis=3)
-  if f_scrunch: archive = np.sum(np.reshape(archive, (archive.shape[0], archive.shape[1]  / f_scrunch, f_scrunch, archive.shape[2])), axis=2)
-  
   #Load dynamic spectrum
   if pol_info: DS = archive[0]
   else: DS = archive
@@ -304,6 +313,7 @@ def zap_ar(archive_name, DS):
     DS[chan[0], chan[1]:chan[2]] = med
   DS -= med
   DS /= DS.max()
+  
   return
   
   

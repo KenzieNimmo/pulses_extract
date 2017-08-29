@@ -7,7 +7,7 @@ import pandas as pd
 pd.options.mode.chained_assignment = None
 import numpy as np
 from scipy import special
-import pyfits
+from astropy.io import fits as pyfits
 
 import C_Funct
 import auto_waterfaller
@@ -41,6 +41,7 @@ def parser():
   parser.add_argument('-beam_num', help="Number ID of the beam.", type=int, default=False)
   parser.add_argument('-group_num', help="Number ID of the group of beams (i.e. subband).", type=int, default=False)
   parser.add_argument('-beam_comparison', help="Path of databases to merge and compare.", default=False)
+  parser.add_argument('-no_RFI', help="Do not select RFI instances.", action='store_false')
   return parser.parse_args()
   
   
@@ -186,7 +187,7 @@ def pulses_database(args, header, events=None):
   n_pulses = pulses.shape[0]
   print "{} pulses detected".format(n_pulses)
   print pulses.Pulse
-  if n_pulses > 0: 
+  if n_pulses > 0 and args.no_RFI: 
     RFIexcision(events, pulses, params)
     print "{} pulses classified as astrophysical".format(pulses.shape[0])
   print pulses.Pulse
@@ -258,7 +259,7 @@ def beam_comparison(hdf5_in='*.hdf5', hdf5_out='SinglePulses.hdf5'):
     try: p = pd.read_hdf(f, 'pulses')
     except (KeyError, IOError): continue
     e = pd.read_hdf(f, 'events')
-    e = e[e.Pulse.isin(p.index)]
+    #e = e[e.Pulse.isin(p.index)]
     pulses = pd.concat(pulses, p)
     events = pd.concat(events, e)
   try:
@@ -283,6 +284,7 @@ def beam_comparison(hdf5_in='*.hdf5', hdf5_out='SinglePulses.hdf5'):
   else: conditions_B = '(BEAM != @beam) & (BEAM != @inc) & (DM > @DMmin) & (DM < @DMmax) & (Sigma >= @SNRmin)'
     
   def comparison(puls, inc):
+    if pulse.Pulse >= 2: return False
     if 'Group' in puls.columns: sap = int(puls.Group)
     beam = int(puls.Beam)
     tmin = float(puls.Time - 2. * puls.Duration)
@@ -290,14 +292,10 @@ def beam_comparison(hdf5_in='*.hdf5', hdf5_out='SinglePulses.hdf5'):
     DMmin = float(puls.DM - .5)
     DMmax = float(puls.DM + .5)
     SNRmin = puls.Sigma / 2.
-    if events.query(conditions_A).query(conditions_B).groupby('BEAM').count().shape[0] > 4: return 8
-    else: return 0
+    if events.query(conditions_A).query(conditions_B).groupby('BEAM').count().shape[0] > 4: return True
+    else: return False
   
-  print "{} pulses present before beam comparison".format(pulses.shape[0])
-  values = pulses.apply(lambda x: comparison(x, inc), axis=1)
-  pulses = pulses.loc[values.index[values == 0]]
-  events = events[events.Pulse.isin(pulses.index)]
-  print "{} pulses present after beam comparison".format(pulses.shape[0])
+  pulses.Pulse[pulses.apply(lambda x: comparison(x, inc), axis=1)] = 8
   
   pulses.to_hdf(hdf5_out, 'pulses')
   events.to_hdf(hdf5_out, 'events')
