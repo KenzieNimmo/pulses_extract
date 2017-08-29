@@ -25,7 +25,7 @@ def parser():
   parser.add_argument('-nrows', help="Number of rows in the general plot.", default=1, type=int)
   parser.add_argument('-t_scrunch', help="Time scrunch archives by this factor.", default=1., type=int)
   parser.add_argument('-f_scrunch', help="Frequency scrunch archives by this factor.", default=1., type=int)
-  parser.add_argument('-time_window', help="Time window around the burst in ms.", default=False, type=float)
+  parser.add_argument('-time_window', help="Time window around the burst in ms.", default=20., type=float)
   parser.add_argument('-f_min', help="Minimum frequency to plot in GHz.", default=None, type=float)
   parser.add_argument('-f_max', help="Maximum frequency to plot in GHz.", default=None, type=float)
   parser.add_argument('-cmap', help="Colormap to use in the plots. Other useful: RdGy_r", default='Greys')
