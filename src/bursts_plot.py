@@ -8,6 +8,7 @@ import matplotlib.gridspec as gridspec
 import numpy as np
 import psrchive
 import scipy.ndimage
+from matplotlib.ticker import MultipleLocator
 
 mpl.rc('font',size=20)
 mpl.rc('lines', linewidth=2)
@@ -54,7 +55,7 @@ def main():
   #Loop on each archive
   skip = 0
   for idx, archive_name in enumerate(ar_list):
-    i = idx
+    i = idx + 1
     #Skip plots in the first row
     if idx / args.ncols == 0:
       plots_to_skip = args.nrows * args.ncols - len(ar_list) - 1
@@ -177,7 +178,7 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
     components = (components / t_scrunch).astype(int)
     if width:
       center = np.ceil(width / 2. / res_t)
-      t0 = np.clip(int(peak - center), 0, np.inf)
+      t0 = int(np.clip(peak - center, 0, np.inf))
       t1 = int(peak + center)
       components_ms -= peak_ms
       components -= int(peak - center)
@@ -212,6 +213,7 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
   else: ax1.tick_params(axis='y', labelleft='off')
   if (index < ncols * (nrows - 1)) and width: ax1.tick_params(axis='x', labelbottom='off')
   else: ax1.set_xlabel("Time ({})".format(units[1]))
+  ax1.yaxis.set_major_locator(MultipleLocator(.2))
   
   #Pulse profile
   x = np.linspace(extent[0], extent[1], ts.shape[1])
@@ -276,7 +278,9 @@ def load_DS(archive_name, zap=False, t_scrunch=False, f_scrunch=False):
     archive = (w*archive.T).T
 
   #Zap archive
-  for i in range(4): zap_ar(archive_name, archive[i])
+  if pol_info: 
+    for i in range(4): zap_ar(archive_name, archive[i])
+  else: zap_ar(archive_name, archive)
 
   #Load dynamic spectrum
   if pol_info: DS = archive[0]
