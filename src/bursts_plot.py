@@ -258,7 +258,7 @@ def load_DS(archive_name, zap=False, t_scrunch=False, f_scrunch=False):
     pol_info = True
   else: pol_info = False
   
-  if pol_inf: load_archive.convert_state('Stokes')
+  if pol_info: load_archive.convert_state('Stokes')
 
   if t_scrunch: load_archive.bscrunch_to_nbin(t_scrunch)
   if f_scrunch: load_archive.fscrunch_to_nchan(f_scrunch)
