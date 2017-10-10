@@ -33,6 +33,7 @@ def parser():
   parser.add_argument('-log_scale', help="Logaritmic color scale.", action='store_true')
   parser.add_argument('-pol', help="Plot polarisation information.", action='store_true')
   parser.add_argument('-plot_DM_curves', help="Plot curves of DM sweeps.", action='store_true')
+  parser.add_argument('-DM', help="DM value to de-disperse the bursts.", default=False, type=float)
   return parser.parse_args()
 
 
@@ -41,7 +42,7 @@ def main():
   #Define general variables
   args = parser()
   plot_grid = gridspec.GridSpec(args.nrows, args.ncols)  #Grid of burst plots
-  fig = plt.figure(figsize=(4*8.27, 4*11.69))  #A4
+  fig = plt.figure(figsize=(4*8.27, 4*11.69))  #A4  #plt.figure(figsize=(7,8))  #paper
   
   #Zapping mode
   if args.zap:
@@ -76,7 +77,7 @@ def main():
       width = args.time_window
 
     #Load archive
-    DS, spectrum, ts, extent = load_DS(archive_name, t_scrunch=t_scrunch, f_scrunch=f_scrunch)
+    DS, spectrum, ts, extent = load_DS(archive_name, t_scrunch=t_scrunch, f_scrunch=f_scrunch, DM=args.DM)
     components = burst_components(archive_name)
     if args.zap: extent = None
     
@@ -104,7 +105,7 @@ def main():
   
   #General plot settings
   #fig.tight_layout()
-  fig.subplots_adjust(hspace=0.1, wspace=0.05)
+  fig.subplots_adjust(hspace=0.1, wspace=0.05, left=0.1,right=.9,bottom=.05,top=.95)
   if args.show: plt.show()
   if args.save_fig: fig.savefig(args.o, papertype = 'a4', orientation = 'portrait', format = 'png')
   return
@@ -253,10 +254,15 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
   return 
 
 
-def load_DS(archive_name, zap=False, t_scrunch=False, f_scrunch=False):
+def load_DS(archive_name, zap=False, t_scrunch=False, f_scrunch=False, DM=False):
   #Load archive
   load_archive = psrchive.Archive_load(archive_name)
   load_archive.tscrunch()
+  if DM:
+    load_archive.dededisperse()
+    load_archive.update()
+    load_archive.set_dispersion_measure(DM)
+    load_archive.dedisperse()
   
   if load_archive.get_npol() > 1:
     pol_info = True
