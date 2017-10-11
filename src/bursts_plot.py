@@ -27,12 +27,13 @@ def parser():
   parser.add_argument('-t_scrunch', help="Time scrunch archives by this factor.", default=1, type=int)
   parser.add_argument('-f_scrunch', help="Frequency scrunch archives by this factor.", default=1, type=int)
   parser.add_argument('-time_window', help="Time window around the burst in ms.", default=20., type=float)
-  parser.add_argument('-f_min', help="Minimum frequency to plot in GHz.", default=None, type=float)
-  parser.add_argument('-f_max', help="Maximum frequency to plot in GHz.", default=None, type=float)
+  parser.add_argument('-f_min', help="Minimum frequency to plot in GHz (Arecibo L-band: 1.15).", default=None, type=float)
+  parser.add_argument('-f_max', help="Maximum frequency to plot in GHz (Arecibo L-band: 1.73.", default=None, type=float)
   parser.add_argument('-cmap', help="Colormap to use in the plots. Other useful: RdGy_r", default='Greys')
   parser.add_argument('-log_scale', help="Logaritmic color scale.", action='store_true')
   parser.add_argument('-pol', help="Plot polarisation information.", action='store_true')
   parser.add_argument('-plot_DM_curves', help="Plot curves of DM sweeps.", action='store_true')
+  parser.add_argument('-DM', help="DM value to de-disperse the bursts.", default=False, type=float)
   return parser.parse_args()
 
 
@@ -41,7 +42,7 @@ def main():
   #Define general variables
   args = parser()
   plot_grid = gridspec.GridSpec(args.nrows, args.ncols)  #Grid of burst plots
-  fig = plt.figure(figsize=(4*8.27, 4*11.69))  #A4
+  fig = plt.figure(figsize=(4*8.27, 4*11.69))  #A4  #plt.figure(figsize=(7,8))  #paper
   
   #Zapping mode
   if args.zap:
@@ -66,7 +67,7 @@ def main():
       t_scrunch = 16 * args.t_scrunch
       f_scrunch = 4 * args.f_scrunch
       pol = False
-      DM_curve = (-2.5, 0., +10000)
+      DM_curve = (-2.5, -0.2, 2.2)
       width = 2 * args.time_window
     else: 
       t_scrunch = args.t_scrunch
@@ -76,7 +77,7 @@ def main():
       width = args.time_window
 
     #Load archive
-    DS, spectrum, ts, extent = load_DS(archive_name, t_scrunch=t_scrunch, f_scrunch=f_scrunch)
+    DS, spectrum, ts, extent = load_DS(archive_name, t_scrunch=t_scrunch, f_scrunch=f_scrunch, DM=args.DM)
     components = burst_components(archive_name)
     if args.zap: extent = None
     
@@ -104,7 +105,7 @@ def main():
   
   #General plot settings
   #fig.tight_layout()
-  fig.subplots_adjust(hspace=0.1, wspace=0.05)
+  fig.subplots_adjust(hspace=0.1, wspace=0.05, left=0.1,right=.9,bottom=.05,top=.95)
   if args.show: plt.show()
   if args.save_fig: fig.savefig(args.o, papertype = 'a4', orientation = 'portrait', format = 'png')
   return
@@ -253,14 +254,22 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
   return 
 
 
-def load_DS(archive_name, zap=False, t_scrunch=False, f_scrunch=False):
+def load_DS(archive_name, zap=False, t_scrunch=False, f_scrunch=False, DM=False):
   #Load archive
   load_archive = psrchive.Archive_load(archive_name)
   load_archive.tscrunch()
+  if DM:
+    load_archive.dededisperse()
+    load_archive.update()
+    load_archive.set_dispersion_measure(DM)
+    load_archive.dedisperse()
   
   if load_archive.get_npol() > 1:
     pol_info = True
   else: pol_info = False
+
+  for ch in load_zap_list(archive_name):
+    load_archive.get_first_Integration().set_weight(ch,0)
   
   if pol_info: load_archive.convert_state('Stokes')
 
@@ -276,11 +285,6 @@ def load_DS(archive_name, zap=False, t_scrunch=False, f_scrunch=False):
     archive = np.rollaxis(np.rollaxis(archive, 1, 0), 2, 1)
   else: 
     archive = (w*archive.T).T
-
-  #Zap archive
-  if pol_info: 
-    for i in range(4): zap_ar(archive_name, archive[i])
-  else: zap_ar(archive_name, archive)
 
   #Load dynamic spectrum
   if pol_info: DS = archive[0]
@@ -311,7 +315,13 @@ def load_DS(archive_name, zap=False, t_scrunch=False, f_scrunch=False):
     
   return DS, spectrum, ts, extent
    
-   
+
+def von_mises(x, mu, k, A):
+  #To open .m files from paas
+  #mu, k and A are the three parameters in the file
+  vm = np.exp(k*np.cos((x/x.size-mu)*2.*np.pi))/2./np.pi/np.i0(k)
+  return vm / vm.max() * A
+ 
    
 def zap_ar(archive_name, DS):
   zap_list = load_zap_list(archive_name)
@@ -372,6 +382,10 @@ def burst_components(archive_name):
   
   return np.array(components)
 
+
+
+
+
   
   
 def load_zap_list(archive_name):
@@ -383,325 +397,347 @@ def load_zap_list(archive_name):
   
   if os.path.basename(archive_name).startswith('puppi_57649_C0531+33_0106_413'):
     zap_list = [\
-[99,  2700, 3700],
-[103, 1700, 2700],
-[275, None, None],
-[276, None, None],
-[323, None, None],
-[324, None, None],
-[334, None, None],
-[0, None, None]
+99,
+103,
+275,
+276,
+323,
+324,
+334,
+0,
+100,
+
 ]
     
   elif os.path.basename(archive_name).startswith('puppi_57644_C0531+33_0021_2461'):
     zap_list = [\
-[0, None, None],
-[286, None, None],
-[310, None, None],
-[311, None, None],
-[320,765, 1500],
-[321, 0, 1500],
-[332, None, None],
-[341, None, None],
-[342, None, None],
-[353, None, None],
-[323, None, None],
-[324, None, None],
-[343, None, None],
-[344, None, None],
-[287, None, None],
-[510, None, None]
+0,
+286, 
+310,
+311,
+320,
+321,
+332,
+341,
+342,
+353,
+323,
+324,
+343,
+344,
+287,
+510,
+146,
 ]
 
   elif os.path.basename(archive_name).startswith('puppi_57638_C0531+33_1218_280'):
     zap_list = [\
-[102, 3750, None],
-[170, None, None],
-[180, None, None],
-[275, None, None],
-[276, None, None],
-[286, None, None],
-[310, 3750, None],
-[311, 3750, None],
-[320, 700, 1000],
-[332, None, None],
-[334, None, None],
-[335, None, None],
-[341, None, None],
-[342, None, None],
-[353, None, None],
-[410, 2500, None],
-[431, 2500, None],
-[0, None, None]
+102,
+170,
+180,
+275,
+276,
+286,
+310,
+311,
+320,
+332,
+334,
+335,
+341,
+342,
+353,
+410,
+431,
+0,
+323,
 ]
 
   elif os.path.basename(archive_name).startswith('puppi_57648_C0531+33_0048_821'):
     zap_list = [\
-[0  , None, None],
-[1  , None, None],
-[2  , None, None],
-[3  , None, None],
-[4  , None, None],
-[5  , None, None],
-[6  , None, None],
-[7  , None, None],
-[8  , None, None],
-[9  , None, None],
-[10 , None, None],
-[11 , None, None],
-[12 , None, None],
-[13 , None, None],
-[14 , None, None],
-[15 , None, None],
-[16 , None, None],
-[17 , None, None],
-[18 , None, None],
-[19 , None, None],
-[20 , None, None],
-[27 , None, None],
-[28 , None, None],
-[29 , None, None],
-[102, None, 2000],
-[168, None, None],
-[169, None, None],
-[170, None, None],
-[171, None, None],
-[172, None, None],
-[180, None, None],
-[168, None, None],
-[168, None, None],
-[275, None, None],
-[276, None, None],
-[286, None, None],
-[287, None, None],
-[323, None, None],
-[324, None, None],
-[332, None, None],
-[334, None, None],
-[341, None, None],
-[342, None, None],
-[100, 1300, 2300],
-[410, None, None]
+0  ,
+1  ,
+2  ,
+3  ,
+4  ,
+5  ,
+6  ,
+7  ,
+8  ,
+9  ,
+10 ,
+11 ,
+12 ,
+13 ,
+14 ,
+15 ,
+16 ,
+17 ,
+18 ,
+19 ,
+20 ,
+27 ,
+28 ,
+29 ,
+102,
+168,
+169,
+170,
+171,
+172,
+180,
+168,
+168,
+275,
+276,
+286,
+287,
+323,
+324,
+332,
+334,
+341,
+342,
+100,
+410,
+107,
+320,
 ]
   
   elif os.path.basename(archive_name).startswith('puppi_57640_C0531+33_1274_1421'):
     zap_list = [\
-[100, None, 1000],
-[275, None, None],
-[276, None, None],
-[310, None, None],
-[311, None, None],
-[320, None, None],
-[321, None, None],
-[334, None, None],
-[335, None, None],
-[343, None, 3000],
-[344, None, 3000],
-[353, None, None],
-[0, None, None]
+100,
+275,
+276,
+310,
+311,
+320,
+321,
+334,
+335,
+343,
+344,
+353,
+0,
+161, 
 ]
   
   elif os.path.basename(archive_name).startswith('puppi_57641_C0531+33_1312_185'):
     zap_list = [\
-[178, None, None],
-[275, None, None],
-[276, None, None],
-[286, None, None],
-[287, None, None],
-[311, 1000, 1750],
-[320, 800, 1350],
-[321, 800, 1200],
-[334, None, None],
-[335, None, None],
-[343, 0, 1000],
-[344, 0, 1000],
-[0, None, None]
+178,
+275,
+276,
+286,
+287,
+311,
+320,
+321,
+334,
+335,
+343,
+344,
+0,
 ]
 
   elif os.path.basename(archive_name).startswith('puppi_57641_C0531+33_1312_521'):
     zap_list = [\
-[102, None, 1500],
-[103, None, None],
-[236, None, None],
-[237, None, None],
-[275, None, None],
-[276, None, None],
-[310, None, 1000],
-[311, None, 1000],
-[334, None, None],
-[335, None, None],
-[343, None, None],
-[344, None, 2000],
-[353, None, None],
-[0, None, None]
+102,
+103,
+236,
+237,
+275,
+276,
+310,
+311,
+334,
+335,
+343,
+344,
+353,
+0,
+161, 
 ]
 
   elif os.path.basename(archive_name).startswith('puppi_57642_C0531+33_1322_1965'):
     zap_list = [\
-[0, None, None],
-[99, 3700, None],
-[103, None, 500],
-[113, None, None],
-[114, None, None],
-[115, None, None],
-[116, None, None],
-[159, None, None],
-[170, None, None],
-[171, None, None],
-[180, None, None],
-[275, None, None],
-[276, None, None],
-[286, None, None],
-[287, None, None],
-[311, 1250, 1700],
-[323, None, None],
-[324, None, None],
-[327, None, None],
-[332, None, None],
-[334, None, None],
-[335, None, None],
-[341, None, None],
-[342, None, None],
-[353, None, None]
+0,
+99,
+103,
+113,
+114,
+115,
+116,
+159,
+170,
+171,
+180,
+275,
+276,
+286,
+287,
+311,
+323,
+324,
+327,
+332,
+334,
+335,
+341,
+342,
+353,
+338,
 ]
 
   elif os.path.basename(archive_name).startswith('puppi_57648_C0531+33_0048_378'):
     zap_list = [\
-[0, None, None],
-[28 , None, None],
-[83 , None, None],
-[123, None, None],
-[124, None, None],
-[125, None, None],
-[152, None, None],
-[170, None, None],
-[171, None, None],
-[180, None, None],
-[207, None, None],
-[208, None, None],
-[235, None, None],
-[236, None, None],
-[237, None, None],
-[275, None, None],
-[276, None, None],
-[277, None, None],
-[286, None, None],
-[332, None, None],
-[333, None, None],
-[334, None, None],
-[335, None, None],
-[341, None, None],
-[342, None, None],
-[323, None, None],
-[343, None, None],
-[113, None, None],
-[324, None, None]
+0, 
+28 ,
+83 ,
+123,
+124,
+125,
+152,
+170,
+171,
+180,
+207,
+208,
+235,
+236,
+237,
+275,
+276,
+277,
+286,
+332,
+333,
+334,
+335,
+341,
+342,
+323,
+343,
+113,
+324,
+327,
+56,
+285,
+291,
+292,
 ]
 
   elif os.path.basename(archive_name).startswith('puppi_57642_C0531+33_1322_7699'):
     zap_list = [\
-[0, None, None],
-[170, None, None],
-[171, None, None],
-[180, None, None],
-[275, None, None],
-[276, None, None],
-[286, None, None],
-[287, None, None],
-[320, None, None],
-[323, None, None],
-[324, None, None],
-[334, None, None],
-[335, None, None],
-[342, 3500, None],
-[343, 3200, None],
-[406, 3600, None],
-[406, 3000, None],
-[407, 2600, None],
-[408, 2100, None],
-[409, 1700, None],
-[410, 1200, None],
-[411, 800, None],
-[412, None, None],
-[417, 3200, None],
-[418, 2800, None],
-[419, 2500, None],
-[420, 1800, None],
-[421, 1200, None],
-[494, None, None],
-[495, None, None],
-[496, None, None],
-[509, None, None],
-[510, None, None],
-[511, None, None],
-[115, None, None],
-[422, 800, None]
+0, 
+170,
+171,
+180,
+275,
+276,
+286,
+287,
+320,
+323,
+324,
+334,
+335,
+342,
+343,
+406,
+406,
+407,
+408,
+409,
+410,
+411,
+412,
+413,
+417,
+418,
+419,
+420,
+421,
+493,
+494,
+495,
+496,
+497,
+509,
+510,
+511,
+115,
+422,
+423,
+424,
+100,
+279,
 ]
 
   elif os.path.basename(archive_name).startswith('puppi_57646_C0531+33_0085_2476'):
     zap_list = [\
-[0, None, None],
-[320, None, None],
-[343, None, None],
-[344, None, None],
-[320, None, None],
-[343, None, None],
-[344, None, None],
-[428, None, None]
+0,
+320,
+343,
+344,
+320,
+343,
+344,
+428,
 ]
 
   elif os.path.basename(archive_name).startswith('puppi_57646_C0531+33_0085_4275'):
     zap_list = [\
-[0, None, None],
-[275, None, None],
-[310, None, None],
-[311, None, None],
-[311, None, 600],
-[343, 3200, 3600],
-[344, 3000, 3400],
-[353, None, None],
-[320, None, None],
-[321, None, 500]
+0, 
+275,
+310,
+311,
+311,
+343,
+344,
+353,
+320,
+321,
+286,
 ]
 
   elif os.path.basename(archive_name).startswith('puppi_57638_C0531+33_1218_2797'):
     zap_list = [\
-[0, None, None],
-[27, 2400, 3000],
-[99, 2000, 3100],
-[100, 1850, 2900] ,
-[159, 100, 300],
-[168, 2000, 3200],
-[169, 2000, 3200],
-[201, 1200, 3000],
-[202, 1200, 3000],
-[275, None, None],
-[276, None, None],
-[286, None, None],
-[310, None, 3000],
-[311, None, 3500],
-[320, None, None],
-[321, None, None],
-[323, None, None],
-[324, None, None],
-[334, None, None],
-[343, None, None],
-[344, 1500, 3000],
-[353, None, None]
+0,
+27,
+99, 
+100,
+159,
+168,
+169,
+201,
+202,
+275,
+276,
+286,
+310,
+311,
+320,
+321,
+323,
+324,
+334,
+343,
+344,
+353,
 ]
     
   elif os.path.basename(archive_name).startswith('puppi_57364_C0531+33_4998_129.02'):
     zap_list = [\
-[335, None, None],
-[334, None, None],
-[333, None, None],
-[323, None, None],
-[286, None, None],
-[275, None, None],
-[188, None, None],
-[324, None, None],
-[276, None, None],
-[278, None, None]
+335,
+334,
+333,
+323,
+286,
+275,
+188,
+324,
+276,
+278,
 ]
 
   else:
