@@ -36,10 +36,9 @@ def main(args):
   period_B = []
   out_B = []
   for i,p in enumerate(period_A):
-    profile = calculate_profile(p, args.bin_num, Time_Cband)
-    if profile.max() > Time_Cband.size / 2:
-      period_B.append(p)
-      out_B.append(profile)
+    a,b = TOAs(Time_Cband, min_period=p-p/args.step_res, max_period=p+p/args.step_res, bin_res=args.bin_num, step_res=args.step_res/10)
+    [period_B.append(n) for n in a]
+    [out_B.append(n) for n in b]
 
   plot(period_B, out_B)
   
@@ -79,7 +78,7 @@ def TOAs(Time, min_period=0., max_period=1e2, bin_res=1., step_res=1e5):
 def plot(period, out):
   if len(period) == 0: 
     print "No periodicity detected."
-    exit()
+    return
 
   max_list = np.array([max(n) for n in out])
   if len(period) > 10: 
