@@ -313,7 +313,7 @@ def load_DS(archive_name, zap=False, t_scrunch=False, f_scrunch=False, DM=False)
   if f_scrunch > 1: load_archive.fscrunch(f_scrunch)
   load_archive.remove_baseline()
 
-  w = load_archive.get_weights()
+  w = load_archive.get_weights().squeeze()
   archive = load_archive.get_data().squeeze()
   
   if pol_info:
@@ -332,20 +332,33 @@ def load_DS(archive_name, zap=False, t_scrunch=False, f_scrunch=False, DM=False)
   #Load timeseries
   I = np.sum(DS, axis=0)
   if pol_info:
+    err_ds = archive.copy()
+    idx = np.where(w==0)[0]
+    err_ds[:,idx,:] = np.nan
+    mean = np.nanmedian(np.reshape(err_ds, [err_ds.shape[0], err_ds.shape[1]*err_ds.shape[2]]), axis=1)
+    err_ds -= mean[:, np.newaxis, np.newaxis]
+    for i,n in enumerate(err_ds):
+      if np.abs(n.min()) > n.max():
+        err_ds[i] *= -1
+    err_I = err_ds[0].copy()
+    std = np.nanstd(err_I)
+    for i,n in enumerate(err_ds):
+      if np.abs(n.min()) > n.max():
+        err_ds[i, err_I > 3*std] = np.nan
+    err_ds = np.nanstd(np.reshape(err_ds, [err_ds.shape[0], err_ds.shape[1]*err_ds.shape[2]]), axis=1)
+
+    I = np.sum(archive[0], axis=0)
+    err_I = err_ds[0] * np.sqrt(archive.shape[1])
     Q = np.sum(archive[1], axis=0)
-    if np.abs(Q.min()) < Q.max(): Q *= -1
-    err_Q = Q[Q < Q.std()].std()
-    #err_Q = Q.std()
+    err_Q = err_ds[1] * np.sqrt(archive.shape[1])
     U = np.sum(archive[2], axis=0)
-    if np.abs(U.min()) < U.max(): U *= -1
-    err_U = U[U < U.std()].std()
-    #err_U = U.std()
+    err_U = err_ds[2] * np.sqrt(archive.shape[1])
     L = np.sqrt(U**2 + Q**2)
     #err_L = np.sqrt((err_Q*Q.T)**2 + (err_U*U.T)**2).T / L
     L -= np.median(L)
     V = np.sum(archive[3], axis=0)
     PA = np.arctan2(Q, U) / 2.
-    PA[L < 5*np.std(L[L<np.std(L)])] = np.nan
+    PA[I < 3*err_I] = np.nan
     err_PA = np.sqrt((err_Q*U)**2+(err_U*Q)**2)/2./(Q**2+U**2)
   else: L = V = PA = np.zeros_like(I)
   ts = np.vstack((I, L, V, PA, err_PA))
