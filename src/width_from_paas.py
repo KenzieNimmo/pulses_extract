@@ -1,7 +1,6 @@
 import numpy as np
 from glob import glob
-
-period = 41.94304  #ms
+import psrchive
 
 def von_mises(x, p):
   #To open .m files from paas
@@ -28,13 +27,20 @@ def curve(x, m_name):
       y += von_mises_approx(x, mi)
   return y
 
+def get_period(ar):
+  std = ar[:-1] + 'std'
+  load_archive = psrchive.Archive_load(std)  
+  return (load_archive.end_time() - load_archive.start_time()).in_seconds() * 1000  #ms
+
+
 x = np.linspace(0,1,1e6)
 
-ar_list = glob('puppi_*.m')
+ar_list = glob('*_puppi_*.m')
 for ar in ar_list:
   y = curve(x, ar)
   HM = x[y >= y.max()/2.]
+  period = get_period(ar)
   FWHM = (HM.max() - HM.min()) * period
-  print "{:.30}: w = {:.3f}".format(ar, FWHM)
+  print "{:.30}: w = {:.3f} ms".format(ar, FWHM)
 
 
