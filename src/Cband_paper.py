@@ -21,22 +21,22 @@ mm_to_in = 0.0393701
 
 
 ar_pars = {
+  '01_puppi_57747_C0531+33_0558_5':    [1672,1866],
   '02_puppi_57747_C0531+33_0558_1183': [2030,2190],
   '03_puppi_57747_C0531+33_0558_1202': [2195,2258],
+  '04_puppi_57747_C0531+33_0558_25437':[1490,1600],
+  '05_puppi_57747_C0531+33_0558_3683': [1550,1760],
   '06_puppi_57747_C0531+33_0558_3687': [1383,1424],
   '07_puppi_57747_C0531+33_0558_3688': [1760,1886],
   '08_puppi_57747_C0531+33_0558_3689': [2112,2400],
-  '01_puppi_57747_C0531+33_0558_5':    [1672,1866],
-  '15_puppi_57748_C0531+33_0594_1269': [1750,1917],
+  '09_puppi_57747_C0531+33_0558_3690': [1750,1975],
+  '10_puppi_57747_C0531+33_0558_12568':[970,1090],
+  '11_puppi_57748_C0531+33_0594_2':    [1970,2100],
   '12_puppi_57748_C0531+33_0594_48':   [1200,1292],
   '13_puppi_57748_C0531+33_0594_49':   [2060,2238],
   '14_puppi_57748_C0531+33_0594_50':   [1790,1840],
+  '15_puppi_57748_C0531+33_0594_1269': [1750,1917],
   '16_puppi_57772_C0531+33_0007_2695': [870,1050],
-
-  'pulse_81845749.calibP': [680,730],
-  'pulse_82398320.calibP': [225,270],
-  'pulse_81822537.calibP': [680,730],
-  'pulse_82398320.calibP.RM': [225,270],
 }
 
 
@@ -96,7 +96,7 @@ def load_UQ_freq(ar_name, RM=False):
     lim = ar_pars[path.splitext(path.basename(ar_name))[0]]
     ds = np.sum(ds[:, :, lim[0]:lim[1]], axis=2)
     err_ds *= np.sqrt(lim[1] - lim[0])
-    ds[:, ds[0] < 3 * err_ds[0]] = np.nan
+    #ds[:, ds[0] < 3 * err_ds[0]] = np.nan
     return ds[0], ds[1], ds[2], err_ds[0], err_ds[1], err_ds[2]
 
 def load_UQ_time(ar_name, RM=False):
@@ -145,7 +145,7 @@ def cos(x, *p):
 
 def sin(x, *p):
     if len(p) == 3:
-      ph0, RM, exp = p                                    
+      ph0, RM, exp = p
     elif len(p) == 2:
       exp = 2.
       ph0, RM = p
@@ -153,7 +153,7 @@ def sin(x, *p):
 
 def RM_fit(x, *p):
     if len(p) == 3:
-      ph0, RM, exp = p                                    
+      ph0, RM, exp = p
     elif len(p) == 2:
       exp = 2.
       ph0, RM = p
@@ -162,7 +162,7 @@ def RM_fit(x, *p):
 
 
 def multiple_plots():
-  ar_list = glob('/data/FRB121102/analyses/C-band/*_puppi_*.DM2')
+  ar_list = glob('*_puppi_57772*.DM2')
   ar_list = [val for val in ar_list if path.splitext(path.basename(val))[0] in ar_pars.keys()]
 
   for i,ar in enumerate(ar_list):
@@ -247,26 +247,33 @@ def multiple_plots():
 
 def fit(idx):
   def RM_fit_global(x, *p):
-    exp = 2.
+    #exp = 2.
     #ph0, RM = np.reshape(p, [2,-1])  #PA+RM
-    ph0 = np.array([p[0]],np.newaxis); RM = np.array(p[1:])  #RM
-    y = np.exp(1j*(RM[:,np.newaxis]*cc.c.value**2/(x*1e6)**exp *2 + ph0[:,np.newaxis]))
+    #exp = np.array(p[:10]); ph0 = np.array([p[10]],np.newaxis); RM = np.array(p[11:])  #RM + exp
+    #ph0 = np.array([p[0]],np.newaxis); RM = np.array(p[1:])  #RM
+    y = np.exp(1j*(RM[:,np.newaxis]*cc.c.value**2/(x*1e6)**exp[:,np.newaxis] *2 + ph0[:,np.newaxis]))
     y = np.dstack([y.real, y.imag])
     return y.flatten()[idx]
   return RM_fit_global
 
 def fit2(idx):
-  #None
   def RM_fit_global(x, *p):
+    #None
     exp = 2.
-    ph0, RM = p
-    y = np.exp(1j*(RM*cc.c.value**2/(x*1e6)**exp *2 + ph0))
+    ph0, RM1, RM2, RM3 = p
+    #exp
+    #ph0, RM1, RM2, exp = p
+    #exp = np.array(p[3:])
+    #exp = np.array([exp1,]*6+[exp2,]*4) 
+    RM = np.array([RM1,]*10+[RM2,]*5+[RM3,])
+    y = np.exp(1j*(RM[:,np.newaxis]*cc.c.value**2/(x*1e6)**exp *2 + ph0))
     y = np.dstack([y.real, y.imag])
-    return y.flatten()[idx]
+    if len(idx) > 0: return y.flatten()[idx]
+    else: return y.flatten()
   return RM_fit_global
 
 def global_fit():
-  ar_list = glob('*_puppi_5774*.DM2')
+  ar_list = glob('*_puppi_577*.DM2')
   ar_list = [val for val in ar_list if path.splitext(path.basename(val))[0] in ar_pars.keys()]
   fig, (ax1, ax2) = plt.subplots(2, sharey=True, sharex=True, figsize=[183*mm_to_in,183/3.*mm_to_in])
 
@@ -291,11 +298,13 @@ def global_fit():
   yerr = yerr[idx]
 
   #p0 = [0.]*n_ar + [102500.]*n_ar  #PA+RM
-  #p0 = [1.92] + [103500.]*n_ar  #RM
-  p0 = [1.92, 102500.]  #None
-  par, pcov = curve_fit(fit2(idx), x, y, p0=p0, sigma=yerr)#, maxfev=10000)
+  #p0 = [1.92] + [102000]*n_ar  #RM
+  #p0 = [2.]*10 + [1.92] + [102700]*6 + [102500]*4  #RM + exp
+  p0 = [2.076, 102702., 102515., 103027.]  #None
+  #p0 = [1.9, 102700., 102500., 2e3]  #exp
+  par, pcov = curve_fit(fit2(idx), x, y, p0=p0, sigma=yerr)#, bounds=[[1.5,102500.,102500.,1.9],[2.5,103000.,103000.,2.1]])#, maxfev=10000)
   err_par = np.sqrt(np.diag(pcov))
-  model = fit(idx)(xQU, *par)
+  model = fit2(idx)(x, *par)
   chi2 = np.sum(((model-y)/yerr)**2)
   red_chi2 = np.mean(((model-y)/yerr)**2)
 
@@ -310,14 +319,36 @@ def global_fit():
   #print "PA: {:.2f} +- {:.2f}".format(np.rad2deg(np.mod(par[0], np.pi)), np.rad2deg(err_par[0])) 
   #print "RM:\n", np.array_str(np.vstack([par[1:],err_par[1:]]).T, precision=0, suppress_small=True)
 
+  #RM + exp
+  #print "exp: {:.6f} +- {:.6f}".format(par[0], err_par[0]) 
+  #print "PA: {:.2f} +- {:.2f}".format(np.rad2deg(np.mod(par[1], np.pi)), np.rad2deg(err_par[1])) 
+  #print "RM:\n", np.array_str(np.vstack([par[2:],err_par[2:]]).T, precision=0, suppress_small=True)
+
   #None
   print "PA: {:.2f} +- {:.2f}".format(np.rad2deg(np.mod(par[0], np.pi)), np.rad2deg(err_par[0])) 
-  print "RM: {:.0f} +- {:.0f}".format(par[1], err_par[1])
+  print "RM1: {:.0f} +- {:.0f}".format(par[1], err_par[1])
+  print "RM2: {:.0f} +- {:.0f}".format(par[2], err_par[2])
+  print "RM3: {:.0f} +- {:.0f}".format(par[3], err_par[3])
 
+  #exp
+  #print "PA: {:.2f} +- {:.2f}".format(np.rad2deg(np.mod(par[0], np.pi)), np.rad2deg(err_par[0])) 
+  #print "RM1: {:.0f} +- {:.0f}".format(par[1], err_par[1])
+  #print "RM2: {:.0f} +- {:.0f}".format(par[2], err_par[2])
+  #print "exp: {:.5f} +- {:.5f}".format(par[3], err_par[3])
 
   print "chi2red:", red_chi2
 
 
+  """
+  x_f = np.linspace(xQU.min(), xQU.max(), 1e4)
+  ph0 = par[0]
+  RM = par[2]
+  y_f = np.exp(1j*(RM*cc.c.value**2/(x_f*1e6)**2. *2 + ph0))
+  Q = y_f.real
+  U = y_f.imag
+  ax1.plot(x_f, Q, 'k-')
+  ax2.plot(x_f, U, 'k-')
+  """
 
   """
 
