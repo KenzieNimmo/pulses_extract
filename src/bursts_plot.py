@@ -9,6 +9,7 @@ import numpy as np
 import psrchive
 import scipy.ndimage
 from matplotlib.ticker import MultipleLocator
+import astropy.constants as cc
 
 mpl.rcParams['font.size'] = 7
 mpl.rcParams['font.family'] = 'sans-serif'
@@ -51,7 +52,7 @@ def main():
   #Define general variables
   args = parser()
   plot_grid = gridspec.GridSpec(args.nrows, args.ncols, wspace=0.1)  #Grid of burst plots
-  fig = plt.figure(figsize=[183*mm_to_in,183/2.*mm_to_in])  #Nature  
+  fig = plt.figure(figsize=[120*mm_to_in,120*mm_to_in])  #Nature  
   
   #Zapping mode
   if args.zap:
@@ -62,7 +63,7 @@ def main():
   if len(args.archives_list) == 1: ar_list = glob(args.archives_list[0])
   else: ar_list = args.archives_list
 
-  labels = [0,6,13]  
+  labels = [0,6,13,'GBT-1','GBT-2']  
   #Loop on each archive
   skip = 0
   for idx, archive_name in enumerate(ar_list):
@@ -116,7 +117,7 @@ def main():
   
   #General plot settings
   #fig.tight_layout()
-  fig.subplots_adjust(hspace=0.1, wspace=0.05, left=0.07,right=.99,bottom=.1,top=.98)
+  fig.subplots_adjust(hspace=0.1, wspace=0.05, left=0.1,right=.98,bottom=.1,top=.98)
   #fig.subplots_adjust(hspace=0.1, wspace=0.05, left=0.07,right=.99,bottom=.05,top=.99)
   if args.show: plt.show()
   if args.save_fig: fig.savefig(args.o, format = 'pdf', dpi=300)
@@ -234,8 +235,8 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
   else: ax1.tick_params(axis='y', labelleft='off')
   if (index < ncols * (nrows - 1)) and width: ax1.tick_params(axis='x', labelbottom='off')
   else: ax1.set_xlabel("Time ({})".format(units[1]))
-  ax1.yaxis.set_major_locator(MultipleLocator(.2))
-  ax1.xaxis.set_major_locator(MultipleLocator(.2))
+  ax1.yaxis.set_major_locator(MultipleLocator(.4))
+  ax1.xaxis.set_major_locator(MultipleLocator(.5))
  
   #Pulse profile
   x = np.linspace(extent[0], extent[1], ts.shape[1])
@@ -272,15 +273,17 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
 
   if plot_PA:
     PA = ts[3]
-    PA -= np.nanmean(PA)
+    #PA -= np.nanmean(PA)
     err_PA = ts[4]
     ax4.errorbar(x, np.rad2deg(PA), yerr=np.rad2deg(err_PA), fmt='None', ecolor='k', capsize=0, zorder=1)
-    ax4.axhline(0, color='grey', zorder=0)
+    ax4.axhline(np.rad2deg(np.nanmedian(PA)), color='grey', zorder=0)
     ax4.tick_params(axis='x', which='both', top='on', bottom='on', labelbottom='off')
-    ax4.set_ylim([-45,45])
-    if index % ncols == 0: ax4.set_ylabel('$\Delta$PA (deg)')
+    #ax4.set_ylim([np.rad2deg(np.nanmean(PA)) - 25, np.rad2deg(np.nanmean(PA)) + 25])
+    if index % ncols == 0: ax4.set_ylabel('PA (deg)')
     else: ax4.tick_params(axis='y', labelleft='off')
-    ax4.yaxis.set_major_locator(MultipleLocator(45))
+    ax4.yaxis.set_major_locator(MultipleLocator(15))
+
+    ax4.set_ylim([40,90])
 
   fig.add_subplot(ax1)
   fig.add_subplot(ax2)
@@ -299,6 +302,10 @@ def load_DS(archive_name, zap=False, t_scrunch=False, f_scrunch=False, DM=False)
     load_archive.set_dispersion_measure(DM)
     load_archive.dedisperse()
   else: load_archive.dedisperse()
+
+  #load_archive.fscrunch(2)
+  if archive_name.startswith('BL'): load_archive.fscrunch(32)
+  #load_archive.bscrunch(2)
   
   if load_archive.get_npol() > 1:
     pol_info = True
@@ -315,6 +322,23 @@ def load_DS(archive_name, zap=False, t_scrunch=False, f_scrunch=False, DM=False)
 
   w = load_archive.get_weights().squeeze()
   archive = load_archive.get_data().squeeze()
+
+
+  if pol_info:
+    def RM_model(x, *p):
+      exp = 2.
+      ph0_deg, RM = p
+      ph0_rad = np.deg2rad(ph0_deg)
+      y = np.exp(2j*(RM*cc.c.value**2/(x*1e6)**exp + ph0_rad))
+      return y
+
+    #Reference PA to infinity
+    Q = archive[1, :, :]
+    U = archive[2, :, :]
+    QU = Q+1.j*U
+    QU /= RM_model(np.array([load_archive.get_centre_frequency()]), 0, load_archive.get_rotation_measure())[0]
+    archive[1, :, :] = QU.real
+    archive[2, :, :] = QU.imag
   
   if pol_info:
     archive = np.multiply(w, np.rollaxis(archive,2))
@@ -357,8 +381,8 @@ def load_DS(archive_name, zap=False, t_scrunch=False, f_scrunch=False, DM=False)
     #err_L = np.sqrt((err_Q*Q.T)**2 + (err_U*U.T)**2).T / L
     L -= np.median(L)
     V = np.sum(archive[3], axis=0)
-    PA = np.arctan2(Q, U) / 2.
-    PA[I < 3*err_I] = np.nan
+    PA = np.arctan2(U, Q) / 2.
+    PA[I < 5*err_I] = np.nan
     err_PA = np.sqrt((err_Q*U)**2+(err_U*Q)**2)/2./(Q**2+U**2)
   else: L = V = PA = np.zeros_like(I)
   ts = np.vstack((I, L, V, PA, err_PA))

@@ -35,7 +35,7 @@ def get_period(ar):
 
 x = np.linspace(0,1,1e6)
 
-ar_list = glob('*_puppi_*.m')
+ar_list = glob('*.m')
 for ar in ar_list:
   y = curve(x, ar)
   HM = x[y >= y.max()/2.]
