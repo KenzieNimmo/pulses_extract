@@ -64,16 +64,11 @@ ar_pars = {
 }
 
 
-def load_ar(ar, RM=None, use_psrchive_baseline=False, fscrunch=None):
+def load_ar(ar, use_psrchive_baseline=False):
   load_archive = psrchive.Archive_load(ar)
-  if RM is not None:
-    I = load_archive.get_Integration(0)
-    load_archive.set_rotation_measure(RM / I.get_doppler_factor()**2)
-    load_archive.defaraday()
   load_archive.tscrunch()
   load_archive.convert_state('Stokes')
   load_archive.dedisperse()
-  if fscrunch is not None: load_archive.fscrunch(fscrunch)
   if use_psrchive_baseline: load_archive.remove_baseline()
   ds = ma.asarray(load_archive.get_data().squeeze())
   w = load_archive.get_weights().flatten()
@@ -81,13 +76,6 @@ def load_ar(ar, RM=None, use_psrchive_baseline=False, fscrunch=None):
   ds = np.multiply(ds, w[np.newaxis,:,np.newaxis])
   ds[:,idx,:] = ma.masked
   if load_archive.get_bandwidth() < 0: ds = ds[:,::-1,:]  #Inverted band
-  if RM is not None:
-    Q = ds[1, :, :]
-    U = ds[2, :, :]
-    QU = Q+1.j*U
-    QU /= RM_model(np.array([load_archive.get_centre_frequency()]), 0, RM)[0]
-    ds[1, :, :] = QU.real
-    ds[2, :, :] = QU.imag
   lim = ar_pars[path.basename(ar).split('.')[0]]
   err_ds = ds.copy()
   err_ds[lim[0] - ds.shape[-1] / 20 : lim[1] + ds.shape[-1] / 20] = ma.masked
@@ -98,8 +86,8 @@ def load_ar(ar, RM=None, use_psrchive_baseline=False, fscrunch=None):
   return ds, err_ds
 
 
-def load_Q_U(ar, RM=None, use_psrchive_baseline=True, rms_level=None, fscrunch=None):
-  ds, err_ds = load_ar(ar, RM=RM, fscrunch=fscrunch)
+def load_Q_U(ar, use_psrchive_baseline=True, rms_level=None):
+  ds, err_ds = load_ar(ar)
   lim = ar_pars[path.basename(ar).split('.')[0]]
   ds = ds[:, :, lim[0]:lim[1]].sum(axis=2)
   err_ds *= np.sqrt(lim[1] - lim[0])
@@ -133,7 +121,7 @@ def get_complex(arrA, arrB):
 def RM_model(x, *p):
   exp = 2.
   ph0, RM = p
-  y = np.exp(2j*(RM*cc.c.value**2/(x*1e6)**exp + ph0))
+  y = np.exp(2j*RM_model_approx(x, *p))
   return y
 
 
@@ -149,8 +137,6 @@ def get_fscrunch(fscrunch, arr, s_arr=None):
     scrunch = np.reshape(arr, [-1, fscrunch]).mean(axis=1)
     return scrunch
   else:
-    s_arr = ma.array(s_arr)
-    s_arr[arr.mask] = ma.masked
     mean, err = get_weighted_average(arr, s_arr, scrunch=fscrunch)
     return mean, err
 
@@ -161,7 +147,7 @@ def get_weighted_average(arr, s_arr, scrunch=None):
     w = np.reshape(w, [-1, fscrunch])
     arr = np.reshape(arr, [-1, fscrunch])
   mean = np.sum(w * arr, axis=-1) / np.sum(w, axis=-1)
-  err = np.sum(w * (arr - mean), axis=-1) / np.sum(w, axis=-1)
+  err = np.sum(w * (arr - mean)**2, axis=-1) / np.sum(w, axis=-1)
   return mean, err
 
 
@@ -170,14 +156,15 @@ def wrap_ang(ang):
 
 
 def RM_model_approx(x, *p):
-  return (p[1] * cc.c.value**2 / (x*1e6)**2 + p[0]) # * 2  #MULTIPLIED?
+  return p[1] * cc.c.value**2 / (x*1e6)**2 + p[0]
 
 
-def get_RM_PA(ar, fscrunch=None, rms_level=None):
+def get_RM_PA(ar, fscrunch=None, rms_level=None, plot_diagnostic=False):
   #Load quantities
   I, Q, U, err_I, err_Q, err_U = load_Q_U(ar)
   QU = get_complex(Q, U)
   err_QU = get_complex(err_Q, err_U)
+  err_QU = np.absolute(err_QU) / np.sqrt(2.)
   x = load_freq(ar)
 
   #Brute-force RM
@@ -187,11 +174,12 @@ def get_RM_PA(ar, fscrunch=None, rms_level=None):
   for i,RM in enumerate(RM_steps):
     fit_goodness[i] = get_fit_goodness(RM, x, QU)
 
-  #Diagnostic plot
-  plt.plot(RM_steps, fit_goodness, 'k.')
-  plt.xlabel('RM (rad/m2)')
-  plt.ylabel('Fit goodness')
-  plt.show()
+  if plot_diagnostic:
+    #Diagnostic plot
+    plt.plot(RM_steps, fit_goodness, 'k.')
+    plt.xlabel('RM (rad/m2)')
+    plt.ylabel('Fit goodness')
+    plt.show()
 
   #Refined RM
   best_RM = fit_goodness.argmin()
@@ -208,7 +196,7 @@ def get_RM_PA(ar, fscrunch=None, rms_level=None):
   p = [PA, RM]
   QU_model = RM_model(x, *p)
   defar = QU / QU_model
-  err_defar = err_QU / QU_model
+  err_defar = err_QU
   if fscrunch is not None:
     #Scrunch in frequency
     defar, err_defar = get_fscrunch(fscrunch, defar, err_defar)
@@ -225,55 +213,88 @@ def get_RM_PA(ar, fscrunch=None, rms_level=None):
     I = I[idx]
     err_I = err_I[idx]
     QU = QU[idx]
+    err_QU = err_QU[idx]
   
   #Estimate deviations and errors
   PA_f = wrap_ang(np.angle(defar) / 2.)  #Wrap on -pi/2,pi/2
-  err_PA_f = 0.5 / np.absolute(defar)**2 * np.sqrt(err_defar.real**2 * defar.imag**2 + err_defar.imag**2 * defar.real**2)
+  err_PA_f = err_defar / 2. / np.absolute(defar)
   p0 = [0., 0.]  #PA, RM
   par, pcov = curve_fit(RM_model_approx, x, PA_f, p0=p0, sigma=err_PA_f)
   err_par = np.sqrt(np.diag(pcov))
   model = RM_model_approx(x, *par)
   red_chi2 = np.mean(((model - PA_f) / err_PA_f)**2)
-
-  #Diagnostic plot
   print 'red_chi2 = {:.2f}'.format(red_chi2)
-  x_p = np.linspace(x.min(), x.max(), 1e4)
-  plt.errorbar(x, np.rad2deg(PA_f), yerr=np.rad2deg(err_PA_f), fmt='ro')
-  plt.plot(x_p, np.rad2deg(RM_model_approx(x_p, *par)), 'k-')
-  plt.xlabel('Frequency (MHz)')
-  plt.ylabel('PA (deg)')
-  plt.show()
+
+  if plot_diagnostic:
+    #Diagnostic plot
+    x_p = np.linspace(x.min(), x.max(), 1e4)
+    plt.errorbar(x, np.rad2deg(PA_f), yerr=np.rad2deg(err_PA_f), fmt='ro')
+    plt.plot(x_p, np.rad2deg(RM_model_approx(x_p, *par)), 'k-')
+    plt.xlabel('Frequency (MHz)')
+    plt.ylabel('PA (deg)')
+    plt.show()
+
+  RM += par[1]
+  err_RM = err_par[1]
+  PA += par[0]
+  err_PA = err_par[0]
 
   #Polarization fracion
   LI, err_LI = get_pol_fract(PA, RM, x, QU, err_QU, I, err_I, ar)
   print "Pol. fraction = {:.2f} +- {:.2f}".format(LI, err_LI)
+  return RM, err_RM, np.rad2deg(PA), np.rad2deg(err_PA)
 
-  return RM+par[1], err_par[1], np.rad2deg(PA+par[0]), np.rad2deg(err_par[0])
+
+def get_pol_fract_OLD(PA, RM, x, QU, err_QU, I, err_I, ar):
+  p = [PA, RM]
+  QU_model = RM_model(x, *p)
+  defar = QU / QU_model
+  err_defar = err_QU / QU_model
+
+  load_archive = psrchive.Archive_load(ar)
+  chan_width = abs(load_archive.get_bandwidth() / load_archive.get_nchan())
+  pol_f = np.sinc(RM * cc.c.value**2 * (chan_width*1e6) / (x * 1e6)**3)
+  defar /= pol_f
+  err_defar /= pol_f
+
+  LI_f =  np.absolute(defar) / I
+  err_LI_f = np.sqrt((err_defar.real * defar.real / I / np.absolute(defar))**2 + (err_defar.imag * defar.imag / I / np.absolute(defar))**2 + (err_I * np.absolute(defar) / I**2)**2)
+
+  LI, err_LI = get_weighted_average(LI_f, err_LI_f)
+  return LI, err_LI
 
 
 def get_pol_fract(PA, RM, x, QU, err_QU, I, err_I, ar):
   p = [PA, RM]
   QU_model = RM_model(x, *p)
   defar = QU / QU_model
-  I_t, err_I_t = get_weighted_average(I, err_I)
+  err_defar = err_QU
+  #I_t, err_I_t = get_weighted_average(I, err_I)
+  I_t = I.sum()
+  err_I_t = np.sqrt(np.sum(err_I**2))
 
   load_archive = psrchive.Archive_load(ar)
   chan_width = abs(load_archive.get_bandwidth() / load_archive.get_nchan())
   pol_f = np.sinc(RM * cc.c.value**2 * (chan_width*1e6) / (x * 1e6)**3)
+  defar /= pol_f
+  err_defar /= pol_f
 
-  P, err_P = get_weighted_average(QU / pol_f, err_QU)
-  LI = np.absolute(P) / I
-  err_LI = np.sqrt((err_P.real * P.real / I / np.absolute(P))**2 + (err_P.imag * P.imag / I / np.absolute(P))**2 + (err_I * np.absolute(P) / I**2)**2)
+  #P, err_P = get_weighted_average(defar, err_defar)
+  P = defar.sum()
+  err_P = np.sqrt(np.sum(err_defar**2))
+  LI = np.absolute(P) / I_t
+  #err_LI = np.sqrt((err_P.real * P.real / I_t / np.absolute(P))**2 + (err_P.imag * P.imag / I_t / np.absolute(P))**2 + (err_I_t * np.absolute(P) / I_t**2)**2)
+  err_LI = np.sqrt((err_P / I_t)**2 + (err_I_t * np.absolute(P) / I_t**2)**2)
   return LI, err_LI
 
 
 def main():
-  ar_list = glob('*_puppi_*.DM2.clean')
+  ar_list = glob('*.clean')
   ar_list = [val for val in ar_list if path.basename(val).split('.')[0] in ar_pars.keys()]
 
   for i,ar in enumerate(ar_list):
     print '\nFitting for', ar
-    RM, err_RM, PA, err_PA = get_RM_PA(ar, rms_level=3)
+    RM, err_RM, PA, err_PA = get_RM_PA(ar, rms_level=5, fscrunch=8)
     print "RM = {:.0f}+-{:.0f}, PA = {:.3f}+-{:.3f}".format(RM, err_RM, PA, err_PA)
 
   return
