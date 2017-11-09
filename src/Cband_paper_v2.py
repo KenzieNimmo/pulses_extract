@@ -144,10 +144,13 @@ def get_fscrunch(fscrunch, arr, s_arr=None):
 def get_weighted_average(arr, s_arr, scrunch=None):
   w = s_arr**-2
   if scrunch is not None:
-    w = np.reshape(w, [-1, fscrunch])
-    arr = np.reshape(arr, [-1, fscrunch])
-  mean = np.sum(w * arr, axis=-1) / np.sum(w, axis=-1)
-  err = np.sum(w * (arr - mean)**2, axis=-1) / np.sum(w, axis=-1)
+    w = np.reshape(w, [-1, scrunch])
+    arr = np.reshape(arr, [-1, scrunch])
+    mean = np.sum(w * arr, axis=-1) / np.sum(w, axis=-1)
+    err = np.sum(w * (arr - mean[:, np.newaxis])**2, axis=-1) / np.sum(w, axis=-1)
+  else:
+    mean = np.sum(w * arr) / np.sum(w)
+    err = np.sum(w * (arr - mean)**2) / np.sum(w)
   return mean, err
 
 
@@ -294,7 +297,7 @@ def main():
 
   for i,ar in enumerate(ar_list):
     print '\nFitting for', ar
-    RM, err_RM, PA, err_PA = get_RM_PA(ar, rms_level=5, fscrunch=8)
+    RM, err_RM, PA, err_PA = get_RM_PA(ar, rms_level=3)#, rms_level=5, fscrunch=16)
     print "RM = {:.0f}+-{:.0f}, PA = {:.3f}+-{:.3f}".format(RM, err_RM, PA, err_PA)
 
   return

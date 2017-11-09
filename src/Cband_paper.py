@@ -1138,24 +1138,33 @@ def DM_RM_all():
   sorter = np.argsort(PSR_list)
   idx = sorter[np.searchsorted(PSR_list, magnetars, sorter=sorter)]
   for i in idx:
-    ax.plot(DM_RM[0,i], np.abs(DM_RM[1,i]), 'ro', zorder=10)
+    ax.plot(DM_RM[0,i], np.abs(DM_RM[1,i]), 'ro', zorder=10, markeredgewidth=0.0)
 
-  
-  ax.plot([57,227], 1.1927**2*np.array([102677.45,102677.45]), 'g-', lw=3)
+  ax.plot([57,227], 1.1927**2*np.array([102677.45,102677.45]), 'g-', lw=3, markeredgewidth=0.0)
 
-  ax.annotate('J1746-2849', xy=(1456-100,10104), ha='right', va='top')
-  ax.annotate('J1746-2856', xy=(1168-100,13253), ha='right', va='bottom')
-  ax.annotate('J1745-2900', xy=(1778-300,66080), ha='right', va='center')
+  ax.annotate('PSR J1746-2849', xy=(1456-100,10104), ha='right', va='top')
+  ax.annotate('PSR J1746-2856', xy=(1168-100,13253), ha='right', va='bottom')
+  ax.annotate('PSR J1745-2900', xy=(1778-300,66080), ha='right', va='center')
   ax.annotate('FRB 121102', xy=(115,1.1927**2*102677.45-30000), ha='center', va='top')
+
+  ax.plot(623.3,186.1, '<g', markersize=10, markeredgecolor='w')
+  ax.plot(1105.6,1.5, '<g', markersize=10, markeredgecolor='w')
+  ax.plot(266.5,12, '<g', markersize=10, markeredgecolor='w')
+  ax.plot(776.2,36, '<g', markersize=10, markeredgecolor='w')
+
+  ax.annotate('FRB 110523', xy=(623.3,186.1*1.5), ha='center', va='bottom', bbox=dict(boxstyle="square, pad=0.1", fc='w', ec='none'))
+  ax.annotate('FRB 150215', xy=(1105.6,1.5*1.5), ha='center', va='bottom', bbox=dict(boxstyle="square, pad=0.1", fc='w', ec='none'))
+  ax.annotate('FRB 150807', xy=(266.5,12*1.5), ha='center', va='bottom', bbox=dict(boxstyle="square, pad=0.1", fc='w', ec='none'))
+  ax.annotate('FRB 150418', xy=(776.2,36*1.5), ha='center', va='bottom', bbox=dict(boxstyle="square, pad=0.1", fc='w', ec='none'))
 
   ax.set_xscale("log", nonposx='clip')
   ax.set_yscale("log", nonposx='clip')
-  ax.set_xlim([2,2400])
+  ax.set_xlim([2, 2210])
   ax.set_ylim([1,4e5])
   ax.set_xlabel('DM (pc$\,$cm$^{-3}$)')
 
-  ax.set_ylabel('RM (rad$\,$m$^{-2}$)')
-  fig.subplots_adjust(left=0.15,right=.98,bottom=.15,top=.98)
+  ax.set_ylabel('$|$RM$|$ (rad$\,$m$^{-2}$)')
+  fig.subplots_adjust(left=0.12,right=.99,bottom=.1,top=.99)
   plt.savefig('DM_RM_all.pdf', format='pdf', dpi=300)
   plt.show()
   return
@@ -1388,12 +1397,12 @@ def IQUV_plot():
 
 
 if __name__ == '__main__':
-  multiple_plots() 
+  #multiple_plots() 
   #RMevolution()
   #LI_plot()
   #Faraday_spectrum()
   #LI_RM()
-  #DM_RM_all()
+  DM_RM_all()
   #PA_f()
   #fill_table()
   #IQUV_plot()
