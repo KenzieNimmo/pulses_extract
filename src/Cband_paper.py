@@ -13,6 +13,8 @@ from matplotlib.colors import hsv_to_rgb
 import matplotlib.cm as cm
 import matplotlib.gridspec as gridspec
 from matplotlib.backends.backend_pdf import PdfPages
+from subprocess import Popen, PIPE, STDOUT
+import pandas as pd
 
 mpl.rcParams['font.size'] = 7
 mpl.rcParams['font.family'] = 'sans-serif'
@@ -340,10 +342,10 @@ def multidim_model(x, *p):
 
     x[x==0] = np.nan
     #RM = np.array([RM1,]*10+[RM2,]*5+[RM3,])
-    #RM = np.array([RM1,]*10+[RM2,]*5+[RM3,]+[RM4,]*2)
+    RM = np.array([RM1,]*10+[RM2,]*5+[RM3,]+[RM4,]*2)
     ph0_rad = np.deg2rad(ph0_deg)
-    #y = np.exp(2j*(RM[:,np.newaxis]*cc.c.value**2/(x*1e6)**exp + ph0_rad))
-    y = np.exp(2j*(RM*cc.c.value**2/(x*1e6)**exp + ph0_rad))
+    y = np.exp(2j*(RM[:,np.newaxis]*cc.c.value**2/(x*1e6)**exp + ph0_rad))
+    #y = np.exp(2j*(RM*cc.c.value**2/(x*1e6)**exp + ph0_rad))
     y = np.dstack([y.real, y.imag]).flatten()
     return y[~np.isnan(y)]
 
@@ -351,8 +353,8 @@ def global_fit():
   #ar_list = glob('BL/*.4p')
   #ar_list = ['BL/11D_323sec.calib.4p', 'BL/11H_597sec.calib.4p']
   #ar_list = glob('*_puppi_*.DM2')
-  #ar_list = glob('*_puppi_*.DM2.clean') + ['BL/11D_323sec.calib.4p.clean.f8', 'BL/11H_597sec.calib.4p.clean.f8']
-  ar_list = glob('*.calib.4p.clean.f8')
+  ar_list = glob('*_puppi_*.DM2.clean') + ['BL/11D_323sec.calib.4p.clean.f8', 'BL/11H_597sec.calib.4p.clean.f8']
+  #ar_list = glob('*.calib.4p.clean.f8')
   ar_list = [val for val in ar_list if path.basename(val).split('.')[0] in ar_pars.keys()]
 
   x_size = load_freq(ar_list[-1])
@@ -378,10 +380,10 @@ def global_fit():
   yerr = yerr[idx]
   x = np.where(~np.isnan(QU[:,:,0]), x, 0)
 
-  #p0 = [60., 102702., 102515., 103027., 93500.]
+  p0 = [60., 102702., 102515., 103027., 93500.]
   #p0 = [60., 102702., 102515., 103027.]
   #p0 = [60., 102702., 102515., 103027., 2.]  #exp
-  p0 = [40., 93600.] #BL
+  #p0 = [40., 93600.] #BL
   par, pcov = curve_fit(multidim_model, x, y, p0=p0, sigma=yerr)
   err_par = np.sqrt(np.diag(pcov))
   model = multidim_model(x, *par)
@@ -390,15 +392,15 @@ def global_fit():
 
   print "PA: {:.2f} +- {:.2f}".format(par[0], err_par[0])
   print "RM1: {:.0f} +- {:.0f}".format(par[1], err_par[1])
-  #print "RM2: {:.0f} +- {:.0f}".format(par[2], err_par[2])
-  #print "RM3: {:.0f} +- {:.0f}".format(par[3], err_par[3])
-  #print "RM4: {:.0f} +- {:.0f}".format(par[4], err_par[4])
+  print "RM2: {:.0f} +- {:.0f}".format(par[2], err_par[2])
+  print "RM3: {:.0f} +- {:.0f}".format(par[3], err_par[3])
+  print "RM4: {:.0f} +- {:.0f}".format(par[4], err_par[4])
 
   print "chi2red:", red_chi2
 
 
 
-  #""" Plot BL
+  """ Plot BL
   fig, (ax1, ax2, ax3) = plt.subplots(3, figsize=[183*mm_to_in,183/3.*mm_to_in], sharex=True)
   c = cm.rainbow(np.resize(np.linspace(0, 1, len(ar_list)), [2,(len(ar_list)+1)/2]).T.flatten())
   p = [par[0], par[1]]
@@ -433,7 +435,7 @@ def global_fit():
   ax1.yaxis.set_major_locator(MultipleLocator(1))
   ax2.yaxis.set_major_locator(MultipleLocator(1))
   ax3.yaxis.set_major_locator(MultipleLocator(25))
-  #"""
+  """
 
 
   """Plot MJD57747
@@ -486,122 +488,10 @@ def global_fit():
   """
 
 
-  """temp
-  err_y = np.angle(QU / model) / 2.
-  ax3.erro
-
-  x_f = np.linspace(np.nanmin(x_size), np.nanmax(x_size), 1e5)
-  y_f = RM_model(x_f, *p)
-  ax1.plot(x_f, y_f.real, 'grey')
-  ax2.plot(x_f, y_f.imag, 'grey')
-  """
-
-
-  #Plots
-  """pdf_plot
-  store = 'UQ_global.pdf'
-  with PdfPages(store) as pdf:
-    for i, [xn, yn, err_yn] in enumerate(zip(x, QU, err_QU)):
-      fig, (ax1, ax2, ax3) = plt.subplots(3, figsize=[20,6], sharex=True, sharey=True)
-
-      x_f = np.linspace(np.nanmin(xn), np.nanmax(xn), 1e4)
-
-      ax1.plot(xn, yn[:,0], 'ro', zorder=5, markeredgewidth=0)
-      ax2.plot(xn, yn[:,1], 'bo', zorder=5, markeredgewidth=0)
-
-      #ax1.errorbar(xn, yn[:,0], yerr=err_yn[:,0], ecolor='r', marker='None', capsize=0, linestyle='None')
-      #ax2.errorbar(xn, yn[:,1], yerr=err_yn[:,1], ecolor='b', marker='None', capsize=0, linestyle='None')
-
-      if i < 10: p = [par[0], par[1]]
-      elif i < 15: p = [par[0], par[2]]
-      else: p = [par[0], par[3]]
-
-      y_f = RM_model(x_f, *p)
-      ax1.plot(x_f, y_f.real, 'k-')
-      ax2.plot(x_f, y_f.imag, 'k-')
-
-      model = RM_model(xn, *p)
-      ax3.errorbar(xn, yn[:,0]-model.real, yerr=err_yn[:,0], ecolor='r', marker='None', capsize=0, linestyle='None')
-      ax3.errorbar(xn, yn[:,1]-model.imag, yerr=err_yn[:,1], ecolor='b', marker='None', capsize=0, linestyle='None')
-
-      ax1.set_ylabel('Q/L')
-      ax2.set_ylabel('U/L')
-      ax3.set_ylabel('res.')
-      ax3.set_xlabel('Frequency (MHz)')
-      ax1.set_xlim([4140, 4860])
-      ax1.set_ylim([-1.5, 1.5])
-      ax1.tick_params(axis='x', labelbottom='off')
-      ax2.tick_params(axis='x', labelbottom='off')
-      ax1.yaxis.set_major_locator(MultipleLocator(.5))
-      ax2.yaxis.set_major_locator(MultipleLocator(.5))
-      ax3.yaxis.set_major_locator(MultipleLocator(.5))
-      fig.subplots_adjust(hspace=0)
-      pdf.savefig(bbox_inches='tight',dpi=200)
-      plt.close()
-  """
-
-  """ gridspec
-  fig = plt.figure(figsize=[183*mm_to_in,183*mm_to_in])
-  plot_grid = gridspec.GridSpec(16, 1, wspace=0.1)
-
-  for i, [xn, yn, err_yn] in enumerate(zip(x, QU, err_QU)):
-    sub_grid = gridspec.GridSpecFromSubplotSpec(3, 1, plot_grid[i], hspace=0.)
-    ax1 = plt.Subplot(fig, sub_grid[0])
-    ax2 = plt.Subplot(fig, sub_grid[1], sharex=ax1, sharey=ax1)
-    ax3 = plt.Subplot(fig, sub_grid[2], sharex=ax1)
-
-    ax1.errorbar(xn, yn[:,0], yerr=err_yn[:,0], ecolor='r', marker='None', capsize=0, linestyle='None')
-    ax2.errorbar(xn, yn[:,1], yerr=err_yn[:,1], ecolor='b', marker='None', capsize=0, linestyle='None')
-
-    if i < 10: p = [par[0], par[1]]
-    elif i < 15: p = [par[0], par[2]]
-    else: p = [par[0], par[3]]
-
-    x_f = np.linspace(np.nanmin(xn), np.nanmax(xn), 1e4)
-    y_f = RM_model(x_f, *p)
-    ax1.plot(x_f, y_f.real, 'k-')
-    ax2.plot(x_f, y_f.imag, 'k-')
-
-    model = RM_model(xn, *p)
-    ax3.errorbar(xn, yn[:,0]-model.real, yerr=err_yn[:,0], ecolor='r', marker='None', capsize=0, linestyle='None')
-    ax3.errorbar(xn, yn[:,1]-model.imag, yerr=err_yn[:,1], ecolor='b', marker='None', capsize=0, linestyle='None')
-
-    fig.add_subplot(ax1)
-    fig.add_subplot(ax2)
-    fig.add_subplot(ax3)
-
-  """
-
-
-  """test
-  x_f = np.linspace(np.nanmin(xn), np.nanmax(xn), 1e4)
-  ph0 = par[0]
-  RM = par[3]
-  y_f = np.exp(1j*(RM*cc.c.value**2/(x_f*1e6)**2. *2 + ph0))
-  Q = y_f.real
-  U = y_f.imag
-  ax1.plot(x_f, Q, 'k-')
-  ax2.plot(x_f, U, 'k-')
-  
-  _, Q, U, _, err_Q, err_U = load_UQ_freq(ar)
-  xQU = load_freq(ar)
-  xQU, QU, err_QU = load_QU(xQU, Q, U, err_Q, err_U)
-  ax1.errorbar(xQU, QU[:QU.size/2], yerr=err_QU[:QU.size/2], fmt='r.')
-  ax2.errorbar(xQU, QU[QU.size/2:], yerr=err_QU[QU.size/2:], fmt='r.')
-  p = [ph0, RM]
-  model = model_func(xQU, *p)
-  chi2 = np.sum(((model-QU)/err_QU)**2)
-  red_chi2 = np.mean(((model-QU)/err_QU)**2)
-  print red_chi2
-  """
-
-
-  
-
   #plt.savefig('UQ.pdf', format='pdf', dpi=300)
 
   plt.show()
-  return
+  return par, err_par
 
 
 
@@ -705,6 +595,7 @@ def average(val, sig):
 
 
 def RMevolution():
+  from Cband_paper_v2 import get_RM_PA
   fig, axarr = plt.subplots(3, 4, sharey='row', sharex='col', figsize=[183*mm_to_in,183.*mm_to_in], gridspec_kw={'height_ratios': [1.,.5,1.], 'wspace': .1, 'hspace': .05})
   c = cm.rainbow(np.resize(np.linspace(0, 1, 14), [2,14/2]).T.flatten())
 
@@ -745,12 +636,17 @@ def RMevolution():
   ar_list = glob('*_puppi_57747*.DM2.clean')
   ar_list = [val for val in ar_list if path.basename(val).split('.')[0] in ar_pars.keys()]
   x = load_x(ar_list)
-  RM = [102739, 102750, 102694, 102713, 102666, 102656,]
-  err_RM = [7, 24, 12, 22, 23, 15,]
+  #RM = [102739, 102750, 102694, 102713, 102666, 102656,]
+  #err_RM = [7, 24, 12, 22, 23, 15,]
   RM_glob = 102703
   err_RM_glob = 4
-  PA = [49.866, 50.719, 63.130, 56.300, 70.552, 69.624,]
-  err_PA = [6.996, 24.457, 12.371, 22.097, 22.985, 14.609,]
+  #PA = [49.866, 50.719, 63.130, 56.300, 70.552, 69.624,]
+  #err_PA = [6.996, 24.457, 12.371, 22.097, 22.985, 14.609,]
+  
+  RM = []; err_RM = []; PA = []; err_PA = []
+  for i,ar in enumerate(ar_list):
+    RMi, err_RMi, PAi, err_PAi = get_RM_PA(ar, plot_diagnostic=False, rms_level=3)
+    RM.append(RMi); err_RM.append(err_RMi); PA.append(PAi); err_PA.append(err_PAi);
 
   plot(x, RM, err_RM, c[:6], RM_glob, err_RM_glob, PA, err_PA, PA_glob, err_PA_glob, axarr[0,0], axarr[2,0])
 
@@ -758,12 +654,17 @@ def RMevolution():
   ar_list = glob('*_puppi_57748*.DM2.clean')
   ar_list = [val for val in ar_list if path.basename(val).split('.')[0] in ar_pars.keys()]
   x = load_x(ar_list)
-  RM = [102515, 102532, 102486, 102493,]
-  err_RM = [25, 12, 13, 31,]
+  #RM = [102515, 102532, 102486, 102493,]
+  #err_RM = [25, 12, 13, 31,]
   RM_glob = 102516
   err_RM_glob = 4
-  PA = [61.468, 55.974, 67.556, 63.751,]
-  err_PA = [25.376, 12.108, 13.078, 31.402,]
+  #PA = [61.468, 55.974, 67.556, 63.751,]
+  #err_PA = [25.376, 12.108, 13.078, 31.402,]
+
+  RM = []; err_RM = []; PA = []; err_PA = []
+  for i,ar in enumerate(ar_list):
+    RMi, err_RMi, PAi, err_PAi = get_RM_PA(ar, plot_diagnostic=False, rms_level=3)
+    RM.append(RMi); err_RM.append(err_RMi); PA.append(PAi); err_PA.append(err_PAi);
 
   plot(x, RM, err_RM, c[6:10], RM_glob, err_RM_glob, PA, err_PA, PA_glob, err_PA_glob, axarr[0,1], axarr[2,1])
 
@@ -777,6 +678,11 @@ def RMevolution():
   err_RM_glob = 3
   PA = [64.459,]
   err_PA = [9.715,]
+
+  RM = []; err_RM = []; PA = []; err_PA = []
+  for i,ar in enumerate(ar_list):
+    RMi, err_RMi, PAi, err_PAi = get_RM_PA(ar, plot_diagnostic=False, rms_level=3)
+    RM.append(RMi); err_RM.append(err_RMi); PA.append(PAi); err_PA.append(err_PAi);
 
   plot(x, RM, err_RM, c[10], RM_glob, err_RM_glob, PA, err_PA, PA_glob, err_PA_glob, axarr[0,2], axarr[2,2])
 
@@ -831,13 +737,17 @@ def RMevolution():
   ar_list = ['BL/11D_323sec.calib.4p.clean.f8', 'BL/11H_597sec.calib.4p.clean.f8']
   ar_list = [val for val in ar_list if path.basename(val).split('.')[0] in ar_pars.keys()]
   x = load_x(ar_list)
-  RM = [93557, 93504,]
-  err_RM = [45, 31,]
+  #RM = [93557, 93504,]
+  #err_RM = [45, 31,]
   RM_glob = 93656
   err_RM_glob = 9
-  PA = [70.028, 74.180,]
-  err_PA = [4.698, 3.052]
+  #PA = [70.028, 74.180,]
+  #err_PA = [4.698, 3.052]
 
+  RM = []; err_RM = []; PA = []; err_PA = []
+  for i,ar in enumerate(ar_list):
+    RMi, err_RMi, PAi, err_PAi = get_RM_PA(ar, plot_diagnostic=False, rms_level=5)#, fscrunch=16)
+    RM.append(RMi); err_RM.append(err_RMi); PA.append(PAi); err_PA.append(err_PAi);
 
   plot(x, RM, err_RM, c[11:], RM_glob, err_RM_glob, PA, err_PA, PA_glob, err_PA_glob, axarr[1,3], axarr[2,3])
 
@@ -1323,13 +1233,51 @@ def fill_table():
     prof /= std
     return prof
 
+  def bary(topo, telescope, freq, dm):
+    p = Popen(['bary', telescope, '05:31:58.7', '33:08:52.5', str(freq), str(dm), 'DE200'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+    stdout_data = p.communicate(input=str(topo))[0]
+    return float(stdout_data.split()[1])
 
-  ar_list = glob('/data/FRB121102/analyses/C-band/*_puppi_*.DM2')
+  print "Arecibo bursts"
+  ar_list = glob('/data/FRB121102/analyses/C-band/*_puppi_*.clean')
+  ar_list = [val for val in ar_list if path.basename(val).split('.')[0] in ar_pars_all.keys()]
   prof = np.zeros([len(ar_list), 4096])
 
-  #ar_list = [val for val in ar_list if path.splitext(path.basename(val))[0] in ar_pars_all.keys()]
+  print ''
+  print 'Archives'
+  for i,ar_name in enumerate(ar_list):
+    print ar_name
+    prof[i] = load_ar_table(ar_name, ar_pars_all)
 
-  ar_list = glob('/data/FRB121102/analyses/C-band/BL/*.clean.f8')
+  print ''
+  print 'S/N'
+  for n in prof:
+    print "{:.0f}".format(n.sum())
+
+  print ''
+  print 'S'
+  for n in prof:
+    print "{:.1f}".format(n.max() * 30./7./(2*800*10.24)**.5)
+
+  print ''
+  print 'F'
+  for n in prof:
+    print n.sum() * 1e-3 * 30./7./(2*800*10.24)**.5
+
+  pulses = pd.read_hdf('C-band_bursts.hdf5', 'pulses')
+  pulses.sort_values(by=['IMJD', 'SMJD'], inplace=True)
+  print ''
+  print 'MJD'
+  for idx,n in pulses.iterrows():
+    mjd = n.IMJD + n.SMJD / 24./3600.
+    print "{:.10f}".format(bary(mjd, 'AO', n.top_Freq, n.DM))
+
+
+
+  """
+  print "GBT bursts"
+  ar_list = glob('/data/FRB121102/analyses/C-band/BL/*.clean')
+  ar_list = [val for val in ar_list if path.basename(val).split('.')[0] in ar_pars_all.keys()]
   prof = np.zeros([len(ar_list), 2048])
 
   print ''
@@ -1341,19 +1289,22 @@ def fill_table():
   print ''
   print 'S/N'
   for n in prof:
-    print n.sum()
-
-  
+    print "{:.0f}".format(n.sum())
 
   print ''
   print 'S'
   for n in prof:
-    print n.max() * 30./7./(2*800*10.24)**.5
+    print ":.1f".format(n.max() * 30./7./(2*800*10.24)**.5)
 
   print ''
   print 'F'
   for n in prof:
-    print n.sum() * 30./7./(2*800*10.24)**.5 *1e-3
+    print n.sum() * 30./7./(2*800*10.24)**.5
+
+  mjd = np.array([])
+  """
+
+  return
 
 
 def IQUV_plot():
@@ -1398,11 +1349,11 @@ def IQUV_plot():
 
 if __name__ == '__main__':
   #multiple_plots() 
-  #RMevolution()
+  RMevolution()
   #LI_plot()
   #Faraday_spectrum()
   #LI_RM()
-  DM_RM_all()
+  #DM_RM_all()
   #PA_f()
   #fill_table()
   #IQUV_plot()

@@ -297,7 +297,7 @@ def main():
 
   for i,ar in enumerate(ar_list):
     print '\nFitting for', ar
-    RM, err_RM, PA, err_PA = get_RM_PA(ar, rms_level=3)#, rms_level=5, fscrunch=16)
+    RM, err_RM, PA, err_PA = get_RM_PA(ar, plot_diagnostic=False, rms_level=3)#, rms_level=5, fscrunch=16)
     print "RM = {:.0f}+-{:.0f}, PA = {:.3f}+-{:.3f}".format(RM, err_RM, PA, err_PA)
 
   return
