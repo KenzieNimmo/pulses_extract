@@ -165,7 +165,9 @@ def pulses_database(args, header, events=None):
   pulses.ix[pulses.SMJD > 86400, 'IMJD'] += 1  #Deal with observations taken over midnight
   
   if args.beam_num: pulses['Beam'] = args.beam_num
-  if args.group_num: pulses['Group'] = args.beam_num
+  if args.group_num: pulses['Group'] = args.group_num
+  print pulses.Beam #TEMP TEST# 
+  print pulses.Group #TEMP TEST#
   pulses['Duration'] = pulses.Downfact * header['TBIN']
   pulses['top_Freq'] = header['OBSFREQ'] + abs(header['OBSBW']) / 2.
   pulses['Pulse'] = -1 
