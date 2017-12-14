@@ -19,7 +19,8 @@ def parser():
 
 def main(args):
   #PSR J0139+33
-  Time_RRAT = np.array([367.72409, 918.07233, 1005.4276, 1064.0929, 1065.3397, 2161.0476, 2897.3311, 3059.5791])  #p=1247.95ms
+  Time_RRAT_A = np.array([367.72415, 918.07129, 1005.4286, 1064.0923, 1065.3408, 2629.0305, 2897.3308, 3059.5774, 3126.9622])  #p=1247.95ms
+  Time_RRAT_B = np.array([3.3460729, 215.49582, 324.06693, 433.88669, 868.18079, 1091.5649, 1138.9696, 1433.505, 1535.8436, 1918.9585, 2077.4385, 2078.6909, 2260.8911])
 
   #puppi_57614_C0531+33_0803
   Time_Miraculus = np.array([318.310236, 655.795077, 1970.861998, 2201.543721, 2367.42443, 2546.742641, 2617.79628, 2640.094577, 2710.297313, 2782.591631, 3036.52651, 3046.904955, 3095.933092, 3779.83574, 4027.2234909999997, 4409.396593, 4687.717007, 4730.516439, 4921.753436, 5026.912665999999, 6033.050829, 6124.302909, 6780.836004000001])
@@ -28,15 +29,18 @@ def main(args):
   Time_Cband = np.array([515.1714509999999, 1173.711585, 1958.604964, 2416.7920440000003, 2666.797711, 3169.8055170000002, 3174.507397, 3648.334561, 3695.617556, 4524.416614])
   
   #Breakthrough
-  Time_BTL = np.array([16.2505, 285.436, 323.352, 344.768, 356.033, 597.612, 691.83, 769.864, 1036.42, 1142.41, 1454.55, 1904.922, 2453.071, 3326.39])
+  Time_BTL = np.array([16.252, 263.415, 285.463, 323.381, 344.799, 356.065, 580.683, 597.667, 691.892, 704.128, 769.934, 841.012, 993.339, 1036.519, 1142.513, 1257.52, 1454.681, 1789.513])
   
   
 
-  period_A, out_A = TOAs(Time_BTL, min_period=args.Pmin, max_period=args.Pmax, bin_res=args.bin_num, step_res=args.step_res)
+  period_A, out_A = TOAs(Time_RRAT_A, min_period=args.Pmin, max_period=args.Pmax, bin_res=args.bin_num, step_res=args.step_res)
+
+  print "Periodicities detected in the first dataset:", len(period_A)
+
   period_B = []
   out_B = []
   for i,p in enumerate(period_A):
-    a,b = TOAs(Time_Cband, min_period=p-p/args.step_res, max_period=p+p/args.step_res, bin_res=args.bin_num, step_res=args.step_res/10)
+    a,b = TOAs(Time_RRAT_B, min_period=p-p/args.step_res, max_period=p+p/args.step_res, bin_res=args.bin_num, step_res=args.step_res/10)
     [period_B.append(n) for n in a]
     [out_B.append(n) for n in b]
 
@@ -66,7 +70,7 @@ def TOAs(Time, min_period=0., max_period=1e2, bin_res=1., step_res=1e5):
   while p < max_period:
     profile = calculate_profile(p, bin_res, Time)
     if profile[profile>1].size > 0:
-      if profile.max() > Time.size / 2:
+      if profile.max() >= Time.size / 2:
         period.append(p)
         out.append(profile)
     p += (p / step_res)
@@ -98,8 +102,8 @@ def plot(period, out):
 
   if len(period) == 1:
     fig, ax = plt.subplots(1, figsize=(10,10))
-    ax.bar(np.arange(out[i].size), out[i], width=1., color='k', linewidth=0)
-    ax.annotate("p = {:.2f} ms".format(period[i]), (.8,.9), xycoords='axes fraction')
+    ax.bar(np.arange(out[0].size), out[0], width=1., color='k', linewidth=0)
+    ax.annotate("p = {:.2f} ms".format(period[0]), (.8,.9), xycoords='axes fraction')
     ax.tick_params(axis='both', left='off', right='off', labelleft='on', top='off', bottom='off', labelbottom='off')
     fig.subplots_adjust(wspace=0, hspace=0)
     plt.show()
@@ -187,9 +191,5 @@ def plot_hist(arr, length=20., max_period=1.8967887942982455e3):
 
 if __name__ == '__main__':
   args = parser()
-  try:
-    os.system('setterm -cursor off')
-    main(args)
-  finally:
-    os.system('setterm -cursor on')
+  main(args)
 
