@@ -9,9 +9,16 @@ import numpy as np
 import psrchive
 import scipy.ndimage
 from matplotlib.ticker import MultipleLocator
+import astropy.constants as cc
 
-mpl.rc('font',size=20)
-mpl.rc('lines', linewidth=2)
+mpl.rcParams['font.size'] = 7
+mpl.rcParams['font.family'] = 'sans-serif'
+mpl.rcParams['axes.linewidth'] = 1
+mpl.rcParams['ps.useafm'] = True
+mpl.rcParams['pdf.use14corefonts'] = True
+mpl.rcParams['text.usetex'] = True
+
+mm_to_in = 0.0393701
 
 def parser():
   # Command-line options
@@ -34,6 +41,9 @@ def parser():
   parser.add_argument('-pol', help="Plot polarisation information.", action='store_true')
   parser.add_argument('-plot_DM_curves', help="Plot curves of DM sweeps.", action='store_true')
   parser.add_argument('-DM', help="DM value to de-disperse the bursts.", default=False, type=float)
+  parser.add_argument('-no_spectra', help="Plot burst spectra.", action='store_false')
+  parser.add_argument('-plot_PA', help="Plot Position Angle.", action='store_true')
+
   return parser.parse_args()
 
 
@@ -41,8 +51,8 @@ def parser():
 def main():
   #Define general variables
   args = parser()
-  plot_grid = gridspec.GridSpec(args.nrows, args.ncols)  #Grid of burst plots
-  fig = plt.figure(figsize=(4*8.27, 4*11.69))  #A4  #plt.figure(figsize=(7,8))  #paper
+  plot_grid = gridspec.GridSpec(args.nrows, args.ncols, wspace=0.1)  #Grid of burst plots
+  fig = plt.figure(figsize=[120*mm_to_in,120*mm_to_in])  #Nature  
   
   #Zapping mode
   if args.zap:
@@ -52,7 +62,8 @@ def main():
   #Load archive list
   if len(args.archives_list) == 1: ar_list = glob(args.archives_list[0])
   else: ar_list = args.archives_list
-  
+
+  labels = [0,6,13,'GBT-1','GBT-2']  
   #Loop on each archive
   skip = 0
   for idx, archive_name in enumerate(ar_list):
@@ -100,14 +111,16 @@ def main():
     
     plot(DS, spectrum, ts, extent, plot_grid[idx], fig, ncols=args.ncols, nrows=args.nrows,\
          index=idx, width=width, fmin=args.f_min, fmax=args.f_max, cmap=args.cmap, log_scale=args.log_scale, components=components,\
-         zap=args.zap, pol=pol, t_scrunch=t_scrunch, f_scrunch=f_scrunch, burst_n=i, DM_curve=DM_curve)
+         zap=args.zap, pol=pol, t_scrunch=t_scrunch, f_scrunch=f_scrunch, burst_n=labels[i], DM_curve=DM_curve, plot_spectra=args.no_spectra,\
+         plot_PA=args.plot_PA)
 
   
   #General plot settings
   #fig.tight_layout()
-  fig.subplots_adjust(hspace=0.1, wspace=0.05, left=0.1,right=.9,bottom=.05,top=.95)
+  fig.subplots_adjust(hspace=0.1, wspace=0.05, left=0.1,right=.98,bottom=.1,top=.98)
+  #fig.subplots_adjust(hspace=0.1, wspace=0.05, left=0.07,right=.99,bottom=.05,top=.99)
   if args.show: plt.show()
-  if args.save_fig: fig.savefig(args.o, papertype = 'a4', orientation = 'portrait', format = 'png')
+  if args.save_fig: fig.savefig(args.o, format = 'pdf', dpi=300)
   return
   
   
@@ -152,13 +165,21 @@ def plot_DM_curves(extent, subplot_spec, fig, fmin=None, fmax=None, width=False)
   
   
 def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunch=1., f_scrunch=1., index=None,\
-    width=False, fmin=None, fmax=None, cmap='Greys', log_scale=False, components=None, zap=False, pol=False, burst_n=False, DM_curve=False):
-  #Define subplots
-  plot_grid = gridspec.GridSpecFromSubplotSpec(2, 2, subplot_spec, wspace=0., hspace=0., height_ratios=[1,4], width_ratios=[5,1])
-  ax1 = plt.Subplot(fig, plot_grid[2])
-  ax2 = plt.Subplot(fig, plot_grid[0], sharex=ax1)
-  ax3 = plt.Subplot(fig, plot_grid[3], sharey=ax1)
-  
+    width=False, fmin=None, fmax=None, cmap='Greys', log_scale=False, components=None, zap=False, pol=False,\
+    burst_n=False, DM_curve=False, plot_spectra=True, plot_PA=False):
+
+  rows = 2
+  if plot_PA: rows += 1
+  cols = 1
+  if plot_spectra: cols += 1
+
+  plot_grid = gridspec.GridSpecFromSubplotSpec(rows, cols, subplot_spec, wspace=0., hspace=0., height_ratios=[1,]*(rows-1)+[4,], width_ratios=[5,]+[1,]*(cols-1))
+  ax1 = plt.Subplot(fig, plot_grid[rows-1,0])
+  ax2 = plt.Subplot(fig, plot_grid[rows-2,0], sharex=ax1)
+  if plot_spectra: ax3 = plt.Subplot(fig, plot_grid[rows-1,1], sharey=ax1)
+  if plot_PA: ax4 = plt.Subplot(fig, plot_grid[0,0], sharex=ax1)
+
+
   #Applies temporal and frequency windows
   if zap:
     fmin = fmax = None
@@ -204,9 +225,9 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
     t = 4.14881e6 * ((f*1000)**-2 - (fmax*1000)**-2) * DM_curve[0] + DM_curve[1]
     ax1.plot(t, f, 'w-')
     t = 4.14881e6 * ((f*1000)**-2 - (fmax*1000)**-2) * DM_curve[0] + DM_curve[2]
-    ax1.plot(t, f, 'w-')    
+    ax1.plot(t, f, 'w-')
     
-  if width: ax1.set_xlim(-width/2., width/2.)
+  if width: ax1.set_xlim(-width/2.-0.001, width/2.+0.001)
   ax1.set_ylim(fmin, fmax)
   
   #Give labels only to edge plots
@@ -214,8 +235,9 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
   else: ax1.tick_params(axis='y', labelleft='off')
   if (index < ncols * (nrows - 1)) and width: ax1.tick_params(axis='x', labelbottom='off')
   else: ax1.set_xlabel("Time ({})".format(units[1]))
-  ax1.yaxis.set_major_locator(MultipleLocator(.2))
-  
+  ax1.yaxis.set_major_locator(MultipleLocator(.4))
+  ax1.xaxis.set_major_locator(MultipleLocator(.5))
+ 
   #Pulse profile
   x = np.linspace(extent[0], extent[1], ts.shape[1])
   ax2.plot(x, ts[0], 'k-')
@@ -224,33 +246,49 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
     ax2.plot(x, ts[2], 'b-')
   ax2.tick_params(axis='y', which='both', left='off', right='off', labelleft='off')
   ax2.tick_params(axis='x', labelbottom='off')
-  if width: ax2.set_xlim(-width/2., width/2.)
-  else: ax2.set_xlim(extent[0:2])
+  #if width: ax2.set_xlim(-width/2., width/2.)
+  #else: ax2.set_xlim(extent[0:2])
   y_range = ts[0].max() - ts[0].min()
   ax2.set_ylim(-y_range/4., y_range*6./5.)
   #ax2.set_yticks([ts[0].max(),])
   #ax2.annotate("{:.0f} mJy".format(ts[0].max()), xy=(0.05,0.5), xycoords='axes fraction')
-  if burst_n: ax2.annotate("Burst {}".format(burst_n), xy=(0.95,0.5), xycoords='axes fraction', ha='right')
-  
+  if burst_n: ax2.annotate("Burst {}".format(burst_n), xy=(0.98,0.5), xycoords='axes fraction', ha='right')
+
   #Spectrum
-  y = np.linspace(extent[2], extent[3], spectrum.size)
-  ax3.plot(spectrum, y, 'k-')
-  ax3.tick_params(axis='x', which='both', top='off', bottom='off', labelbottom='off')
-  ax3.tick_params(axis='y', labelleft='off')
-  ax3.set_ylim(fmin, fmax)
+  if plot_spectra:
+    y = np.linspace(extent[2], extent[3], spectrum.size)
+    ax3.plot(spectrum, y, 'k-')
+    ax3.tick_params(axis='x', which='both', top='off', bottom='off', labelbottom='off')
+    ax3.tick_params(axis='y', labelleft='off')
+    ax3.set_ylim(fmin, fmax)
   
-  #Plot components
-  try:
-    colors = ['b', 'r', 'g', 'c', 'm', 'y', 'lime', 'darkblue']
-    for i in range(len(components)-1):
-      ax2.axvspan(components_ms[i], components_ms[i+1], color=colors[i], ls='-', ymax=.1)
-      bl_c = np.sum(DS[:, components[i] : components[i+1]], axis=1)
-      ax3.plot(bl_c, y, c=colors[i], lw=1.)
-  except UnboundLocalError: pass
+    #Plot components
+    try:
+      colors = ['b', 'r', 'g', 'c', 'm', 'y', 'lime', 'darkblue']
+      for i in range(len(components)-1):
+        ax2.axvspan(components_ms[i], components_ms[i+1], color=colors[i], ls='-', ymax=.1)
+        bl_c = np.sum(DS[:, components[i] : components[i+1]], axis=1)
+        ax3.plot(bl_c, y, c=colors[i], lw=1.)
+    except UnboundLocalError: pass
+
+  if plot_PA:
+    PA = ts[3]
+    #PA -= np.nanmean(PA)
+    err_PA = ts[4]
+    ax4.errorbar(x, np.rad2deg(PA), yerr=np.rad2deg(err_PA), fmt='None', ecolor='k', capsize=0, zorder=1)
+    ax4.axhline(np.rad2deg(np.nanmedian(PA)), color='grey', zorder=0)
+    ax4.tick_params(axis='x', which='both', top='on', bottom='on', labelbottom='off')
+    #ax4.set_ylim([np.rad2deg(np.nanmean(PA)) - 25, np.rad2deg(np.nanmean(PA)) + 25])
+    if index % ncols == 0: ax4.set_ylabel('PA (deg)')
+    else: ax4.tick_params(axis='y', labelleft='off')
+    ax4.yaxis.set_major_locator(MultipleLocator(15))
+
+    ax4.set_ylim([40,90])
 
   fig.add_subplot(ax1)
   fig.add_subplot(ax2)
-  fig.add_subplot(ax3)
+  if plot_spectra: fig.add_subplot(ax3)
+  if plot_PA: fig.add_subplot(ax4)
   return 
 
 
@@ -263,6 +301,11 @@ def load_DS(archive_name, zap=False, t_scrunch=False, f_scrunch=False, DM=False)
     load_archive.update()
     load_archive.set_dispersion_measure(DM)
     load_archive.dedisperse()
+  else: load_archive.dedisperse()
+
+  #load_archive.fscrunch(2)
+  if archive_name.startswith('BL'): load_archive.fscrunch(32)
+  #load_archive.bscrunch(2)
   
   if load_archive.get_npol() > 1:
     pol_info = True
@@ -277,8 +320,25 @@ def load_DS(archive_name, zap=False, t_scrunch=False, f_scrunch=False, DM=False)
   if f_scrunch > 1: load_archive.fscrunch(f_scrunch)
   load_archive.remove_baseline()
 
-  w = load_archive.get_weights()
+  w = load_archive.get_weights().squeeze()
   archive = load_archive.get_data().squeeze()
+
+
+  if pol_info:
+    def RM_model(x, *p):
+      exp = 2.
+      ph0_deg, RM = p
+      ph0_rad = np.deg2rad(ph0_deg)
+      y = np.exp(2j*(RM*cc.c.value**2/(x*1e6)**exp + ph0_rad))
+      return y
+
+    #Reference PA to infinity
+    Q = archive[1, :, :]
+    U = archive[2, :, :]
+    QU = Q+1.j*U
+    QU /= RM_model(np.array([load_archive.get_centre_frequency()]), 0, load_archive.get_rotation_measure())[0]
+    archive[1, :, :] = QU.real
+    archive[2, :, :] = QU.imag
   
   if pol_info:
     archive = np.multiply(w, np.rollaxis(archive,2))
@@ -296,12 +356,36 @@ def load_DS(archive_name, zap=False, t_scrunch=False, f_scrunch=False, DM=False)
   #Load timeseries
   I = np.sum(DS, axis=0)
   if pol_info:
-    L = np.sqrt(np.sum(archive[1], axis=0)**2 + np.sum(archive[2], axis=0)**2)
+    err_ds = archive.copy()
+    idx = np.where(w==0)[0]
+    err_ds[:,idx,:] = np.nan
+    mean = np.nanmedian(np.reshape(err_ds, [err_ds.shape[0], err_ds.shape[1]*err_ds.shape[2]]), axis=1)
+    err_ds -= mean[:, np.newaxis, np.newaxis]
+    for i,n in enumerate(err_ds):
+      if np.abs(n.min()) > n.max():
+        err_ds[i] *= -1
+    err_I = err_ds[0].copy()
+    std = np.nanstd(err_I)
+    for i,n in enumerate(err_ds):
+      if np.abs(n.min()) > n.max():
+        err_ds[i, err_I > 3*std] = np.nan
+    err_ds = np.nanstd(np.reshape(err_ds, [err_ds.shape[0], err_ds.shape[1]*err_ds.shape[2]]), axis=1)
+
+    I = np.sum(archive[0], axis=0)
+    err_I = err_ds[0] * np.sqrt(archive.shape[1])
+    Q = np.sum(archive[1], axis=0)
+    err_Q = err_ds[1] * np.sqrt(archive.shape[1])
+    U = np.sum(archive[2], axis=0)
+    err_U = err_ds[2] * np.sqrt(archive.shape[1])
+    L = np.sqrt(U**2 + Q**2)
+    #err_L = np.sqrt((err_Q*Q.T)**2 + (err_U*U.T)**2).T / L
     L -= np.median(L)
     V = np.sum(archive[3], axis=0)
-    PA = np.rad2deg(np.arctan2(np.sum(archive[2], axis=0) , np.sum(archive[1], axis=0))) / 2.
+    PA = np.arctan2(U, Q) / 2.
+    PA[I < 5*err_I] = np.nan
+    err_PA = np.sqrt((err_Q*U)**2+(err_U*Q)**2)/2./(Q**2+U**2)
   else: L = V = PA = np.zeros_like(I)
-  ts = np.vstack((I, L, V, PA))
+  ts = np.vstack((I, L, V, PA, err_PA))
   
   #Load extensions
   if zap: extent = None
