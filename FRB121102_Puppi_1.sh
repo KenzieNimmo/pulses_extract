@@ -20,8 +20,8 @@ echo "Pipeline pulses_identify.sh starting..."
 date
 
 #Setting variables
-SUB_DIR="/data1/FRB121102/subbanded_data"
-GENERAL_OUT_DIR="/data1/FRB121102/pipeline_products"
+SUB_DIR="/exports/data/puppi/FRB121102_processing/subbanded_data"
+GENERAL_OUT_DIR="/exports/data/puppi/FRB121102_processing/pipeline_products"
 
 ORIGINAL_FITS_FILE="$1"
 FITS_NAME=${ORIGINAL_FITS_FILE##*/}
