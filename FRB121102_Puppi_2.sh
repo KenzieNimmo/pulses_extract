@@ -84,7 +84,7 @@ for PULS in `awk -F"\t" '$2 == "2" { print $1"\t"$3 }' $OUT_DIR/pulses/${OBS_ID}
 done
 cp ${OUT_DIR}/pulses/${OBS_ID}_pulses.txt $RANKING_BU
 python ${SCRIPT_DIR}/pulses_extract.py -db_name $DB_FILE -pulses_database -pulses_checked ${OUT_DIR}/pulses/${OBS_ID}_pulses.txt \
-  -store_dir $OUT_DIR/pulses -extract_raw $RAW_DIR/$OBS_ID -plot_statistics >/dev/null
+  -store_dir $OUT_DIR/pulses -extract_raw $RAW_DIR/$OBS_ID -plot_statistics 
 duration=$SECONDS
 echo "Raw fits files and diagnostic plots created. Time taken: $(($duration / 60)) m"
 
@@ -105,7 +105,7 @@ echo "Raw fits files and diagnostic plots created. Time taken: $(($duration / 60
 #Create psrarchive files
 echo "PSRARCHIVE files creating..."
 SECONDS=0
-python ${SCRIPT_DIR}/create_psrchives.py $OUT_DIR/pulses/$DB_FILE -fits_file "${OBS_ID}_*.fits" -obsPATH $OUT_DIR/pulses >/dev/null
+python ${SCRIPT_DIR}/create_psrchives.py $OUT_DIR/pulses/$DB_FILE -fits_file "${OBS_ID}_*.fits" -obsPATH $OUT_DIR/pulses
 duration=$SECONDS
 echo "PSRARCHIVE files created. Time taken: $(($duration / 60)) m"
 

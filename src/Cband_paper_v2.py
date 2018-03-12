@@ -29,14 +29,14 @@ ar_pars = {
   '01_puppi_57747_C0531+33_0558_5':    [1672,1866],
   '02_puppi_57747_C0531+33_0558_1183': [2030,2190],
   '03_puppi_57747_C0531+33_0558_1202': [2195,2258],
-  #'04_puppi_57747_C0531+33_0558_25437':[1490,1600],
-  #'05_puppi_57747_C0531+33_0558_3683': [1550,1760],
+  '04_puppi_57747_C0531+33_0558_25437':[1490,1600],
+  '05_puppi_57747_C0531+33_0558_3683': [1550,1760],
   '06_puppi_57747_C0531+33_0558_3687': [1383,1424],
   '07_puppi_57747_C0531+33_0558_3688': [1760,1886],
   '08_puppi_57747_C0531+33_0558_3689': [2112,2400],
-  #'09_puppi_57747_C0531+33_0558_3690': [1750,1975],
-  #'10_puppi_57747_C0531+33_0558_12568':[970,1090],
-  #'11_puppi_57748_C0531+33_0594_2':    [1970,2100],
+  '09_puppi_57747_C0531+33_0558_3690': [1750,1975],
+  '10_puppi_57747_C0531+33_0558_12568':[970,1090],
+  '11_puppi_57748_C0531+33_0594_2':    [1970,2100],
   '12_puppi_57748_C0531+33_0594_48':   [1200,1292],
   '13_puppi_57748_C0531+33_0594_49':   [2060,2238],
   '14_puppi_57748_C0531+33_0594_50':   [1790,1840],
@@ -86,7 +86,7 @@ def load_ar(ar, use_psrchive_baseline=False):
   return ds, err_ds
 
 
-def load_Q_U(ar, use_psrchive_baseline=True, rms_level=None):
+def load_Q_U(ar, use_psrchive_baseline=False, rms_level=None):
   ds, err_ds = load_ar(ar)
   lim = ar_pars[path.basename(ar).split('.')[0]]
   ds = ds[:, :, lim[0]:lim[1]].sum(axis=2)
@@ -292,7 +292,7 @@ def get_pol_fract(PA, RM, x, QU, err_QU, I, err_I, ar):
 
 
 def main():
-  ar_list = glob('*.clean')
+  ar_list = glob('*.clean') + ['BL/11D_323sec.calib.4p.clean', 'BL/11H_597sec.calib.4p.clean']
   ar_list = [val for val in ar_list if path.basename(val).split('.')[0] in ar_pars.keys()]
 
   for i,ar in enumerate(ar_list):

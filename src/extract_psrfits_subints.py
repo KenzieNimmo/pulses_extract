@@ -46,22 +46,24 @@ def get_starttimes(froot):
             # Increment counter
             ifile+=1
 
-            # Store file name
-            files.append(fname)
+            try:
+              # Read headers
+              fits_file=fits.open(fname,memmap=True)
+              fits_hdr=fits_file[0].header
+              subint_hdr=fits_file['SUBINT'].header                                                                                              
 
-            # Read headers
-            fits_file=fits.open(fname,memmap=True)
-            fits_hdr=fits_file[0].header
-            subint_hdr=fits_file['SUBINT'].header                                                                                              
+              # Store file name
+              files.append(fname)
 
-            # Get information
-            stt_imjd.append(fits_hdr['STT_IMJD'])
-            stt_smjd.append(fits_hdr['STT_SMJD'])
-            stt_offs.append(fits_hdr['STT_OFFS'])
-            tbin.append(subint_hdr['TBIN'])
-            nsblk.append(subint_hdr['NSBLK'])
-            nsuboffs.append(subint_hdr['NSUBOFFS'])
-            nsub.append(subint_hdr['NAXIS2'])
+              # Get information
+              stt_imjd.append(fits_hdr['STT_IMJD'])
+              stt_smjd.append(fits_hdr['STT_SMJD'])
+              stt_offs.append(fits_hdr['STT_OFFS'])
+              tbin.append(subint_hdr['TBIN'])
+              nsblk.append(subint_hdr['NSBLK'])
+              nsuboffs.append(subint_hdr['NSUBOFFS'])
+              nsub.append(subint_hdr['NAXIS2'])
+            except IOError: pass 
         else:
             break
 

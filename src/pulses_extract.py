@@ -263,31 +263,44 @@ def beam_comparison(hdf5_in='*.hdf5', hdf5_out='SinglePulses.hdf5'):
     except (KeyError, IOError): continue
     e = pd.read_hdf(f, 'events')
     #e = e[e.Pulse.isin(p.index)]
-    pulses = pd.concat(pulses, p)
-    events = pd.concat(events, e)
-  try:
-    group_order = 10**np.ceil(np.log10(pulses.Group.max()))
-    pulses.index *= group_order
-    pulses.index += pulses.Group
-    events.Pulse *= group_order
-    events.Pulse += pulses.Group
-  except AttributeError: pass
-  try:
-    beam_order = 10**np.ceil(np.log10(pulses.Beam.max()))
-    pulses.index *= beam_order
-    pulses.index += pulses.Beam
-    events.Pulse *= beam_order
-    events.Pulse += pulses.Beam
-  except AttributeError:
-    print "No candidates found in any beam/subband pair"
-    sys.exit()
+
+    try:
+      group_order = 10**np.ceil(np.log10(p.Group.max()))
+      group = p.Group.unique()
+      if len(group) == 1: group = group[0]
+      else: raise ValueError('More than one group found in a single database!')
+      p.index *= group_order
+      p.index += group
+      e.Pulse *= group_order
+      e.Pulse += group
+    except AttributeError: pass
+    try:
+      beam_order = 10**np.ceil(np.log10(p.Beam.max()))
+      beam = p.Beam.unique()
+      if len(beam) == 1: beam = beam[0]
+      else: raise ValueError('More than one beam found in a single database!')
+      p.index *= beam_order
+      p.index += beam
+      e.Pulse *= beam_order
+      e.Pulse += beam
+    except AttributeError:
+      print "No candidates found in any beam/subband pair"
+      sys.exit()
+
+    pulses = pd.concat([pulses, p])
+    events = pd.concat([events, e])
+
+  if pulses.shape[0] == 0:
+    print "No pulse detected!"
+    return
+
   #Compare the beams
   conditions_A = '(Time > @tmin) & (Time < @tmax)'
-  if 'Group' in pulses.columns: conditions_B = '(SAP == @sap) & (BEAM != @beam) & (BEAM != @inc) & (DM > @DMmin) & (DM < @DMmax) & (Sigma >= @SNRmin)'
-  else: conditions_B = '(BEAM != @beam) & (BEAM != @inc) & (DM > @DMmin) & (DM < @DMmax) & (Sigma >= @SNRmin)'
+  if 'Group' in pulses.columns: conditions_B = '(SAP == @sap) & (BEAM != @beam) & (DM > @DMmin) & (DM < @DMmax) & (Sigma >= @SNRmin)'
+  else: conditions_B = '(BEAM != @beam) & (DM > @DMmin) & (DM < @DMmax) & (Sigma >= @SNRmin)'
     
-  def comparison(puls, inc):
-    if pulse.Pulse >= 2: return False
+  def comparison(puls):
+    if puls.Pulse >= 2: return False
     if 'Group' in puls.columns: sap = int(puls.Group)
     beam = int(puls.Beam)
     tmin = float(puls.Time - 2. * puls.Duration)
@@ -298,15 +311,14 @@ def beam_comparison(hdf5_in='*.hdf5', hdf5_out='SinglePulses.hdf5'):
     if events.query(conditions_A).query(conditions_B).groupby('BEAM').count().shape[0] > 4: return True
     else: return False
   
-  pulses.Pulse[pulses.apply(lambda x: comparison(x, inc), axis=1)] = 8
+  pulses.Pulse[pulses.apply(lambda x: comparison(x), axis=1)] = 8
   
   pulses.to_hdf(hdf5_out, 'pulses')
   events.to_hdf(hdf5_out, 'events')
   return
 
 
-
-
 if __name__ == '__main__':
   args = parser()
   main(args)
+
