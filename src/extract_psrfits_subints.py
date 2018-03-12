@@ -62,8 +62,8 @@ def get_starttimes(froot):
             nsblk.append(subint_hdr['NSBLK'])
             nsuboffs.append(subint_hdr['NSUBOFFS'])
             nsub.append(subint_hdr['NAXIS2'])
-        elif ifile==14: ###TEMPORARY EDIT TO PROCESS 57645###
-            ifile +=1
+        #elif ifile==14: ###TEMPORARY EDIT TO PROCESS 57645###
+        #    ifile +=1
 
         else:
             break
