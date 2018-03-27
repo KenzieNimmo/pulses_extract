@@ -38,16 +38,16 @@ def parser():
   parser.add_argument('-extract_raw', help="Extract raw data specified in this path around detected pulses.", default='')
   parser.add_argument('-pulses_checked', help="Path of a text file containig a list of pulse identifiers to label as RFI.", default='')
   parser.add_argument('-plot_statistics', help="Produce plots with statistics of the pulses.", action='store_true')
-  parser.add_argument('-beam_num', help="Number ID of the beam.", type=int, default=False)
-  parser.add_argument('-group_num', help="Number ID of the group of beams (i.e. subband).", type=int, default=False)
-  parser.add_argument('-beam_comparison', help="Path of databases to merge and compare.", default=False)
+  parser.add_argument('-beam_num', help="Number ID of the beam.", type=int, default=None)
+  parser.add_argument('-group_num', help="Number ID of the group of beams (i.e. subband).", type=int, default=None)
+  parser.add_argument('-beam_comparison', help="Path of databases to merge and compare.", default=None)
   parser.add_argument('-no_RFI', help="Do not select RFI instances.", action='store_false')
   return parser.parse_args()
   
   
 
 def main(args):
-  if args.beam_comparison: 
+  if args.beam_comparison is not None: 
     beam_comparison(hdf5_in=args.beam_comparison, hdf5_out=args.db_name)
     exit()
   if args.pulses_database: 
@@ -74,7 +74,7 @@ def main(args):
     store.close()
 
     obs_id = os.path.splitext(args.db_name)[0]
-    pulses[(pulses.Pulse == 0) | (pulses.Pulse == 1)].sort_index().to_csv(os.path.join(args.store_dir,'{}_realPulses_info.txt'.format(obs_id)), sep='\t', \
+    pulses[(pulses.Pulse == 0) | (pulses.Pulse == 1) | (pulses.Pulse == 3)].sort_index().to_csv(os.path.join(args.store_dir,'{}_realPulses_info.txt'.format(obs_id)), sep='\t', \
       columns=['Sigma','DM','Time','Sample','IMJD','SMJD','Downfact','Duration','top_Freq','N_events','dDM','Pulse'], \
       header= ['SNR',  'DM','Time','Sample','IMJD','SMJD','Downfact','Duration','top_Freq','N_events','dDM','Rank'], index_label='#PulseID')
     
@@ -93,7 +93,7 @@ def main(args):
                                              FRB_name=params['FRB_name'], directory=args.store_dir, pulse_id=np.array(pulses.index))
   
   if args.extract_raw: 
-    real_pulses = pulses[(pulses.Pulse == 0) | (pulses.Pulse == 1)]
+    real_pulses = pulses[(pulses.Pulse == 0) | (pulses.Pulse == 1) | (pulses.Pulse == 3)]
     extract_subints_from_observation(args.extract_raw, args.store_dir, np.array(real_pulses.Time), -2, 8, pulseID=np.array(real_pulses.index).astype(str))
   
   if args.plot_statistics: 
@@ -164,8 +164,8 @@ def pulses_database(args, header, events=None):
   pulses['SMJD'] = header['STT_SMJD'] + header['STT_OFFS'] + header['NSUBOFFS'] * header['NSBLK'] * header['TBIN'] + pulses.Time
   pulses.ix[pulses.SMJD > 86400, 'IMJD'] += 1  #Deal with observations taken over midnight
   
-  if args.beam_num: pulses['Beam'] = args.beam_num
-  if args.group_num: pulses['Group'] = args.beam_num
+  if args.beam_num is not None: pulses['Beam'] = args.beam_num
+  if args.group_num is not None: pulses['Group'] = args.group_num
   pulses['Duration'] = pulses.Downfact * header['TBIN']
   pulses['top_Freq'] = header['OBSFREQ'] + abs(header['OBSBW']) / 2.
   pulses['Pulse'] = -1 

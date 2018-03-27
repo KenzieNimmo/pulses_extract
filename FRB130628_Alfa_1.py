@@ -147,11 +147,11 @@ for beam in beams:
 		execute("cp %s/TEMP/%s_b%ds%d_ZERO_DM470.00.dat %s/obs_data"%(outdir,base,beam,subband,outdir))
 		execute("cp %s/TEMP/%s_b%ds%d_ZERO_DM470.00.inf %s/obs_data"%(outdir,base,beam,subband,outdir))
 		execute("cp %s/%s_b%ds%d_proc.hdf5 %s "%(outdir,base,beam,subband,base_path))
-		execute("rm -rf %s/TEMP"%outdir)
-		#sys.exit() #REMOVE THIS. This is so that only one file is processed.
+		#execute("rm -rf %s/TEMP"%outdir)
+		sys.exit() #REMOVE THIS. This is so that only one file is processed.
 
 execute("mkdir pulses")
-execute("python %s/pulses_extract.py -beam_comparison %s"%(script_dir,base_path))
+execute("python %s/pulses_extract.py -beam_comparison *_proc.hdf5"%script_dir)
 execute("python %s/pulses_extract.py -fits %s -pulses_database -store_dir %s/pulses\
    -plot_pulses -plot_statistics -parameters_id FRB130628_Alfa_s0"%(script_dir,fits_dir,base)) #doesn't matter which subband param ID to use.
 execute("python %s/beams_plot.py > /dev/null"%script_dir)
