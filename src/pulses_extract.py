@@ -85,12 +85,12 @@ def main(args):
       if (args.parameters_id == "FRB130628_Alfa_s0") or (args.parameters_id == "FRB130628_Alfa_s1"):
         auto_waterfaller.main(args.fits, database_path, np.array(pulses.Time), np.array(pulses.DM), np.array(pulses.IMJD), np.array(pulses.SMJD), np.array(pulses.Sigma), \
                                              duration=np.array(pulses.Duration), top_freq=pulses.top_Freq.iloc[0], \
-                                             downsamp=np.clip(np.array(pulses.Downfact) / 5, 1, 1000), FRB_name=params['FRB_name'], directory=args.store_dir, \
+                                             FRB_name=params['FRB_name'], directory=args.store_dir, \
                                              pulse_id=np.array(pulses.index), beam=np.array(pulses.Beam), group=np.array(pulses.Group))
       else:  
         auto_waterfaller.main(args.fits, database_path, np.array(pulses.Time), np.array(pulses.DM), np.array(pulses.IMJD), np.array(pulses.SMJD), np.array(pulses.Sigma), \
                                              duration=np.array(pulses.Duration), top_freq=pulses.top_Freq.iloc[0], \
-                                             downsamp=np.clip(np.array(pulses.Downfact) / 5, 1, 1000), FRB_name=params['FRB_name'], directory=args.store_dir, pulse_id=np.array(pulses.index))
+                                             FRB_name=params['FRB_name'], directory=args.store_dir, pulse_id=np.array(pulses.index))
   
   if args.extract_raw: 
     real_pulses = pulses[(pulses.Pulse == 0) | (pulses.Pulse == 1)]
@@ -186,7 +186,7 @@ def pulses_database(args, header, events=None):
   print "{} pulses detected".format(n_pulses)
   
   if n_pulses > 0 and args.no_RFI:
-    RFIexcision(events, pulses, params) #1st order
+    RFIexcision(events, pulses, params, args) #1st order
     #set search parameter space
     pulses.Pulse[pulses.Sigma <= params['SNR_peak_min']] = 9
     pulses.Pulse[pulses.Downfact >= params['Downfact_max']] = 9
@@ -197,7 +197,7 @@ def pulses_database(args, header, events=None):
   pulses.sort_values(['Pulse','Sigma'], ascending=False, inplace=True) 
   return pulses #2nd (final) order
 
-def RFIexcision(events, pulses, params):
+def RFIexcision(events, pulses, params, args):
   RFI_code = 9
   events = events[events.Pulse.isin(pulses.index)]
   events.sort_values(by='DM',inplace=True)
@@ -226,9 +226,21 @@ def RFIexcision(events, pulses, params):
   def simultaneous(p):                            
     puls = pulses.Pulse[np.abs(pulses.Time-p.Time) < 0.02]
     if puls.shape[0] == 1: return False
-    if p.name == puls.index[0]: return False
+    elif p.name == puls.index[0]: return False
     else: return True
   pulses.Pulse[pulses.apply(lambda x: simultaneous(x), axis=1)] = RFI_code
+
+  #Remove many pulses concentrated in time
+  def RFI_bursts(p):
+    puls = pulses.Pulse[np.abs(pulses.Time-p.Time) < 1.]
+    if puls.shape[0] <= 10: return False
+    elif p.name == puls.index[0]: 
+      auto_waterfaller.main(args.fits, os.path.join(args.store_dir,args.db_name), p.Time, p.DM, p.IMJD, p.SMJD, p.Sigma, \
+                                             duration=p.Duration, top_freq=p.top_Freq, \
+                                             FRB_name=params['FRB_name']+'_wide', directory=args.store_dir, pulse_id=p.name)
+      return False
+    else: return True
+  pulses.Pulse[pulses.apply(lambda x: RFI_bursts(x), axis=1)] = RFI_code
   
   return
 
