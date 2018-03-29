@@ -9,8 +9,6 @@ from create_psrchives import dspsr
 
 
 
-RAW_DIR="/psr_archive/hessels/hessels/AO-FRB/raw_data"
-
 
 
 def parser():
@@ -21,13 +19,14 @@ def parser():
     parser.add_argument('time_list', help="List of times to extract, either in seconds from beginning of observation or MJD.", nargs='+', type=float)
     parser.add_argument('-output_folder', help="Path of the folder to store the bursts.", default='.')
     parser.add_argument('-time_window', help="Time window to extract around the pulse, in sec.", default=0.04194304, type=float)
+    parser.add_argument('-raw_path', help="Path to raw data", default="/psr_archive/hessels/hessels/AO-FRB/raw_data")
     return parser.parse_args()
  
 
 
 def main():
   args = parser()
-    
+  raw_path = args.raw_path 
   if max(args.time_list) < 36000:
     print "Seconds from the start of observation inserted."
     t_sec = args.time_list
@@ -61,7 +60,7 @@ def mjd2sec(t_mjd, obsID):
   obs_start, mjd = start_of_obs(obsID)
   return [(t - mjd) * 24. * 3600. - obs_start for t in t_mjd], mjd
   
-def start_of_obs(obsID):
+def start_of_obs(obsID,RAW_DIR=raw_path):
   raw_files = os.path.join(RAW_DIR, obsID)
   raw_fits_files = glob(raw_files+'*')
   file_starts = []
@@ -74,7 +73,7 @@ def start_of_obs(obsID):
   
   
   
-def extract_archive(t_sec, t_mjd, obsID, out_dir='.', width=0.04194304):
+def extract_archive(t_sec, t_mjd, obsID, out_dir='.', width=0.04194304,RAW_DIR=raw_path):
   out_dir = os.path.abspath(out_dir)
   #Create fits file
   fits_file = os.path.join(out_dir,'%.2f'%t_sec,'%s_%.2f.fits'%(obsID,t_sec))

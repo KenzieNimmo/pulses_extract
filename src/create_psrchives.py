@@ -2,7 +2,6 @@ import subprocess
 from glob import glob
 import os
 import argparse
-import multiprocessing as mp
 import shutil
 import StringIO
 

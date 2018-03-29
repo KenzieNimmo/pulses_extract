@@ -85,12 +85,12 @@ def main(args):
       if (args.parameters_id == "FRB130628_Alfa_s0") or (args.parameters_id == "FRB130628_Alfa_s1"):
         auto_waterfaller.main(args.fits, database_path, np.array(pulses.Time), np.array(pulses.DM), np.array(pulses.IMJD), np.array(pulses.SMJD), np.array(pulses.Sigma), \
                                              duration=np.array(pulses.Duration), top_freq=pulses.top_Freq.iloc[0], \
-                                             downsamp=np.clip(np.array(pulses.Downfact) / 5, 1, 1000), FRB_name=params['FRB_name'], directory=args.store_dir, \
+                                             FRB_name=params['FRB_name'], directory=args.store_dir, \
                                              pulse_id=np.array(pulses.index), beam=np.array(pulses.Beam), group=np.array(pulses.Group))
       else:  
         auto_waterfaller.main(args.fits, database_path, np.array(pulses.Time), np.array(pulses.DM), np.array(pulses.IMJD), np.array(pulses.SMJD), np.array(pulses.Sigma), \
                                              duration=np.array(pulses.Duration), top_freq=pulses.top_Freq.iloc[0], \
-                                             downsamp=np.clip(np.array(pulses.Downfact) / 5, 1, 1000), FRB_name=params['FRB_name'], directory=args.store_dir, pulse_id=np.array(pulses.index))
+                                             FRB_name=params['FRB_name'], directory=args.store_dir, pulse_id=np.array(pulses.index))
   
   if args.extract_raw: 
     real_pulses = pulses[(pulses.Pulse == 0) | (pulses.Pulse == 1) | (pulses.Pulse == 3)]
@@ -186,7 +186,7 @@ def pulses_database(args, header, events=None):
   print "{} pulses detected".format(n_pulses)
   
   if n_pulses > 0 and args.no_RFI:
-    RFIexcision(events, pulses, params) #1st order
+    RFIexcision(events, pulses, params, args) #1st order
     #set search parameter space
     pulses.Pulse[pulses.Sigma <= params['SNR_peak_min']] = 9
     pulses.Pulse[pulses.Downfact >= params['Downfact_max']] = 9
@@ -197,7 +197,7 @@ def pulses_database(args, header, events=None):
   pulses.sort_values(['Pulse','Sigma'], ascending=False, inplace=True) 
   return pulses #2nd (final) order
 
-def RFIexcision(events, pulses, params):
+def RFIexcision(events, pulses, params, args):
   RFI_code = 9
   events = events[events.Pulse.isin(pulses.index)]
   events.sort_values(by='DM',inplace=True)
@@ -226,9 +226,21 @@ def RFIexcision(events, pulses, params):
   def simultaneous(p):                            
     puls = pulses.Pulse[np.abs(pulses.Time-p.Time) < 0.02]
     if puls.shape[0] == 1: return False
-    if p.name == puls.index[0]: return False
+    elif p.name == puls.index[0]: return False
     else: return True
   pulses.Pulse[pulses.apply(lambda x: simultaneous(x), axis=1)] = RFI_code
+
+  #Remove many pulses concentrated in time
+  def RFI_bursts(p):
+    puls = pulses.Pulse[np.abs(pulses.Time-p.Time) < 1.]
+    if puls.shape[0] <= 10: return False
+    elif p.name == puls.index[0]: 
+      auto_waterfaller.main(args.fits, os.path.join(args.store_dir,args.db_name), p.Time, p.DM, p.IMJD, p.SMJD, p.Sigma, \
+                                             duration=p.Duration, top_freq=p.top_Freq, \
+                                             FRB_name=params['FRB_name']+'_wide', directory=args.store_dir, pulse_id=p.name)
+      return False
+    else: return True
+  pulses.Pulse[pulses.apply(lambda x: RFI_bursts(x), axis=1)] = RFI_code
   
   return
 
@@ -263,31 +275,44 @@ def beam_comparison(hdf5_in='*.hdf5', hdf5_out='SinglePulses.hdf5'):
     except (KeyError, IOError): continue
     e = pd.read_hdf(f, 'events')
     #e = e[e.Pulse.isin(p.index)]
-    pulses = pd.concat(pulses, p)
-    events = pd.concat(events, e)
-  try:
-    group_order = 10**np.ceil(np.log10(pulses.Group.max()))
-    pulses.index *= group_order
-    pulses.index += pulses.Group
-    events.Pulse *= group_order
-    events.Pulse += pulses.Group
-  except AttributeError: pass
-  try:
-    beam_order = 10**np.ceil(np.log10(pulses.Beam.max()))
-    pulses.index *= beam_order
-    pulses.index += pulses.Beam
-    events.Pulse *= beam_order
-    events.Pulse += pulses.Beam
-  except AttributeError:
-    print "No candidates found in any beam/subband pair"
-    sys.exit()
+
+    try:
+      group_order = 10**np.ceil(np.log10(p.Group.max()))
+      group = p.Group.unique()
+      if len(group) == 1: group = group[0]
+      else: raise ValueError('More than one group found in a single database!')
+      p.index *= group_order
+      p.index += group
+      e.Pulse *= group_order
+      e.Pulse += group
+    except AttributeError: pass
+    try:
+      beam_order = 10**np.ceil(np.log10(p.Beam.max()))
+      beam = p.Beam.unique()
+      if len(beam) == 1: beam = beam[0]
+      else: raise ValueError('More than one beam found in a single database!')
+      p.index *= beam_order
+      p.index += beam
+      e.Pulse *= beam_order
+      e.Pulse += beam
+    except AttributeError:
+      print "No candidates found in any beam/subband pair"
+      sys.exit()
+
+    pulses = pd.concat([pulses, p])
+    events = pd.concat([events, e])
+
+  if pulses.shape[0] == 0:
+    print "No pulse detected!"
+    return
+
   #Compare the beams
   conditions_A = '(Time > @tmin) & (Time < @tmax)'
-  if 'Group' in pulses.columns: conditions_B = '(SAP == @sap) & (BEAM != @beam) & (BEAM != @inc) & (DM > @DMmin) & (DM < @DMmax) & (Sigma >= @SNRmin)'
-  else: conditions_B = '(BEAM != @beam) & (BEAM != @inc) & (DM > @DMmin) & (DM < @DMmax) & (Sigma >= @SNRmin)'
+  if 'Group' in pulses.columns: conditions_B = '(SAP == @sap) & (BEAM != @beam) & (DM > @DMmin) & (DM < @DMmax) & (Sigma >= @SNRmin)'
+  else: conditions_B = '(BEAM != @beam) & (DM > @DMmin) & (DM < @DMmax) & (Sigma >= @SNRmin)'
     
-  def comparison(puls, inc):
-    if pulse.Pulse >= 2: return False
+  def comparison(puls):
+    if puls.Pulse >= 2: return False
     if 'Group' in puls.columns: sap = int(puls.Group)
     beam = int(puls.Beam)
     tmin = float(puls.Time - 2. * puls.Duration)
@@ -298,15 +323,14 @@ def beam_comparison(hdf5_in='*.hdf5', hdf5_out='SinglePulses.hdf5'):
     if events.query(conditions_A).query(conditions_B).groupby('BEAM').count().shape[0] > 4: return True
     else: return False
   
-  pulses.Pulse[pulses.apply(lambda x: comparison(x, inc), axis=1)] = 8
+  pulses.Pulse[pulses.apply(lambda x: comparison(x), axis=1)] = 8
   
   pulses.to_hdf(hdf5_out, 'pulses')
   events.to_hdf(hdf5_out, 'events')
   return
 
 
-
-
 if __name__ == '__main__':
   args = parser()
   main(args)
+

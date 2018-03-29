@@ -52,8 +52,9 @@ def main():
   #Define general variables
   args = parser()
   plot_grid = gridspec.GridSpec(args.nrows, args.ncols, wspace=0.1)  #Grid of burst plots
-  fig = plt.figure(figsize=[120*mm_to_in,120*mm_to_in])  #Nature  
-  
+  #fig = plt.figure(figsize=[120*mm_to_in,120*mm_to_in])  #Nature  
+  fig = plt.figure(figsize=[7,6])  #Nature extended 
+
   #Zapping mode
   if args.zap:
     args.t_scrunch = args.f_scrunch = False
@@ -63,7 +64,8 @@ def main():
   if len(args.archives_list) == 1: ar_list = glob(args.archives_list[0])
   else: ar_list = args.archives_list
 
-  labels = [0,6,13,'GBT-1','GBT-2']  
+  #labels = [0,6,13,'GBT-1','GBT-2']
+  labels = np.arange(len(ar_list)+1)
   #Loop on each archive
   skip = 0
   for idx, archive_name in enumerate(ar_list):
@@ -117,10 +119,10 @@ def main():
   
   #General plot settings
   #fig.tight_layout()
-  fig.subplots_adjust(hspace=0.1, wspace=0.05, left=0.1,right=.98,bottom=.1,top=.98)
-  #fig.subplots_adjust(hspace=0.1, wspace=0.05, left=0.07,right=.99,bottom=.05,top=.99)
+  #fig.subplots_adjust(hspace=0.1, wspace=0.05, left=0.1,right=.98,bottom=.1,top=.98)
+  fig.subplots_adjust(hspace=0.1, wspace=0.05, left=0.07,right=.99,bottom=.05,top=.99)
   if args.show: plt.show()
-  if args.save_fig: fig.savefig(args.o, format = 'pdf', dpi=300)
+  if args.save_fig: fig.savefig(args.o, format = 'eps', dpi=150)
   return
   
   
@@ -235,8 +237,8 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
   else: ax1.tick_params(axis='y', labelleft='off')
   if (index < ncols * (nrows - 1)) and width: ax1.tick_params(axis='x', labelbottom='off')
   else: ax1.set_xlabel("Time ({})".format(units[1]))
-  ax1.yaxis.set_major_locator(MultipleLocator(.4))
-  ax1.xaxis.set_major_locator(MultipleLocator(.5))
+  ax1.yaxis.set_major_locator(MultipleLocator(.2))
+  ax1.xaxis.set_major_locator(MultipleLocator(1))
  
   #Pulse profile
   x = np.linspace(extent[0], extent[1], ts.shape[1])
@@ -245,14 +247,14 @@ def plot(DS, spectrum, ts, extent, subplot_spec, fig, ncols=1, nrows=1, t_scrunc
     ax2.plot(x, ts[1], 'r-')
     ax2.plot(x, ts[2], 'b-')
   ax2.tick_params(axis='y', which='both', left='off', right='off', labelleft='off')
-  ax2.tick_params(axis='x', labelbottom='off')
+  ax2.tick_params(axis='x', labelbottom='off', top='off')
   #if width: ax2.set_xlim(-width/2., width/2.)
   #else: ax2.set_xlim(extent[0:2])
   y_range = ts[0].max() - ts[0].min()
   ax2.set_ylim(-y_range/4., y_range*6./5.)
   #ax2.set_yticks([ts[0].max(),])
   #ax2.annotate("{:.0f} mJy".format(ts[0].max()), xy=(0.05,0.5), xycoords='axes fraction')
-  if burst_n: ax2.annotate("Burst {}".format(burst_n), xy=(0.98,0.5), xycoords='axes fraction', ha='right')
+  if burst_n: ax2.annotate("\#{}".format(burst_n), xy=(0.98,0.5), xycoords='axes fraction', ha='right')
 
   #Spectrum
   if plot_spectra:

@@ -15,6 +15,7 @@ import matplotlib.gridspec as gridspec
 from matplotlib.backends.backend_pdf import PdfPages
 from subprocess import Popen, PIPE, STDOUT
 import pandas as pd
+from presto import psr_utils
 
 mpl.rcParams['font.size'] = 7
 mpl.rcParams['font.family'] = 'sans-serif'
@@ -29,14 +30,14 @@ ar_pars = {
   '01_puppi_57747_C0531+33_0558_5':    [1672,1866],
   '02_puppi_57747_C0531+33_0558_1183': [2030,2190],
   '03_puppi_57747_C0531+33_0558_1202': [2195,2258],
-  #'04_puppi_57747_C0531+33_0558_25437':[1490,1600],
-  #'05_puppi_57747_C0531+33_0558_3683': [1550,1760],
+  '04_puppi_57747_C0531+33_0558_25437':[1490,1600],
+  '05_puppi_57747_C0531+33_0558_3683': [1550,1760],
   '06_puppi_57747_C0531+33_0558_3687': [1383,1424],
   '07_puppi_57747_C0531+33_0558_3688': [1760,1886],
   '08_puppi_57747_C0531+33_0558_3689': [2112,2400],
-  #'09_puppi_57747_C0531+33_0558_3690': [1750,1975],
-  #'10_puppi_57747_C0531+33_0558_12568':[970,1090],
-  #'11_puppi_57748_C0531+33_0594_2':    [1970,2100],
+  '09_puppi_57747_C0531+33_0558_3690': [1750,1975],
+  '10_puppi_57747_C0531+33_0558_12568':[970,1090],
+  '11_puppi_57748_C0531+33_0594_2':    [1970,2100],
   '12_puppi_57748_C0531+33_0594_48':   [1200,1292],
   '13_puppi_57748_C0531+33_0594_49':   [2060,2238],
   '14_puppi_57748_C0531+33_0594_50':   [1790,1840],
@@ -1236,8 +1237,8 @@ def fill_table():
   def bary(topo, telescope, freq, dm):
     p = Popen(['bary', telescope, '05:31:58.7', '33:08:52.5', str(freq), str(dm), 'DE200'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
     stdout_data = p.communicate(input=str(topo))[0]
-    return float(stdout_data.split()[1])
-
+    return float(stdout_data.split()[1]) - float(stdout_data.split()[4]) /24/3600
+  
   print "Arecibo bursts"
   ar_list = glob('/data/FRB121102/analyses/C-band/*_puppi_*.clean')
   ar_list = [val for val in ar_list if path.basename(val).split('.')[0] in ar_pars_all.keys()]
@@ -1263,16 +1264,15 @@ def fill_table():
   print 'F'
   for n in prof:
     print n.sum() * 1e-3 * 30./7./(2*800*10.24)**.5
-
+  
   pulses = pd.read_hdf('C-band_bursts.hdf5', 'pulses')
   pulses.sort_values(by=['IMJD', 'SMJD'], inplace=True)
   print ''
   print 'MJD'
   for idx,n in pulses.iterrows():
     mjd = n.IMJD + n.SMJD / 24./3600.
-    print "{:.10f}".format(bary(mjd, 'AO', n.top_Freq, n.DM))
-
-
+    baricentred = bary(mjd, 'AO', n.top_Freq, n.DM)
+    print '{:.10f}'.format(baricentred)
 
   """
   print "GBT bursts"
@@ -1349,13 +1349,13 @@ def IQUV_plot():
 
 if __name__ == '__main__':
   #multiple_plots() 
-  RMevolution()
+  #RMevolution()
   #LI_plot()
   #Faraday_spectrum()
   #LI_RM()
   #DM_RM_all()
   #PA_f()
-  #fill_table()
+  fill_table()
   #IQUV_plot()
   #global_fit()
   #RM_BL() 

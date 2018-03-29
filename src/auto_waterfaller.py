@@ -292,7 +292,7 @@ def psrchive_plots(archive_name): #assuming: (full name of the archive with path
 		#psrplot -p freq+ -c psd=0 archive.ar
 
 def main(fits, database, time, DM, IMJD, SMJD, sigma, duration=0.01, pulse_id=4279, top_freq=0., directory='.',\
-		  FRB_name='FRB121102', downsamp=1., beam=0, group=0):
+		  FRB_name='FRB121102', downsamp=1., beam=0, group=0, plot_standard=True, plot_zoom=True, plot_wide=False):
         num_elements = time.size
         if isinstance(DM, float) or isinstance(DM, int): DM = np.zeros(num_elements) + DM
         if isinstance(sigma, float) or isinstance(sigma, int): sigma = np.zeros(num_elements) + sigma
@@ -317,50 +317,55 @@ def main(fits, database, time, DM, IMJD, SMJD, sigma, duration=0.01, pulse_id=42
 			observation = os.path.basename(fits)
 			observation = os.path.splitext(observation)[0]
 		pulse_events = events[events.Pulse == pulse_id[i]]
+
+                #zero-DM filering version
 		start_time = t - 0.05
 		plot_duration = 0.1
-        #zero-DM filering version
-		zero_dm_data, nbinsextra, nbins, zero_dm_start = waterfall(rawdata, start_time, plot_duration, DM[i],\
+                if plot_standard:
+			zero_dm_data, nbinsextra, nbins, zero_dm_start = waterfall(rawdata, start_time, plot_duration, DM[i],\
 				nbins=None, nsub=None, subdm = DM, zerodm=True, downsamp=1,\
 				scaleindep=False, width_bins=1, mask=False, maskfn=None,\
 				bandpass_corr=False, ref_freq=None)
-		#non-zero-DM filtering version
-		data, nbinsextra, nbins, start = waterfall(rawdata, start_time, plot_duration, DM[i],\
+			#non-zero-DM filtering version
+			data, nbinsextra, nbins, start = waterfall(rawdata, start_time, plot_duration, DM[i],\
 				nbins=None, nsub=None, subdm = DM, zerodm=False, downsamp=1,\
 				scaleindep=False, width_bins=1, mask=False, maskfn=None,\
 				bandpass_corr=False, ref_freq=None)
+			plotter(data, start, plot_duration, t, DM[i], IMJD[i], SMJD[i], duration[i], top_freq,\
+				sigma[i], directory, FRB_name, observation, zero_dm_data, zero_dm_start, pulse_events=pulse_events, zoom=False, idx=i, pulse_id=pulse_id[i], downsamp=False)
 
-		plotter(data, start, plot_duration, t, DM[i], IMJD[i], SMJD[i], duration[i], top_freq,\
-			sigma[i], directory, FRB_name, observation, zero_dm_data, zero_dm_start, pulse_events=pulse_events, zoom=False, idx=i, pulse_id=pulse_id[i], downsamp=False)
-
-        #Zoomed version
+	        #Zoomed version
  		start_time = t - 0.01
 		plot_duration = 0.03
-
-		zero_dm_data, nbinsextra, nbins, zero_dm_start = waterfall(rawdata, start_time, plot_duration, DM[i],\
+		if plot_zoom:
+			zero_dm_data, nbinsextra, nbins, zero_dm_start = waterfall(rawdata, start_time, plot_duration, DM[i],\
 				nbins=None, nsub=None, subdm = DM, zerodm=True, downsamp=1,\
 				scaleindep=False, width_bins=1, mask=False, maskfn=None,\
 				bandpass_corr=False, ref_freq=None)
-		data, nbinsextra, nbins, start = waterfall(rawdata, start_time, plot_duration, DM[i],\
+			data, nbinsextra, nbins, start = waterfall(rawdata, start_time, plot_duration, DM[i],\
 				nbins=None, nsub=None, subdm = DM, zerodm=False, downsamp=1,\
 				scaleindep=False, width_bins=1, mask=False, maskfn=None,\
 				bandpass_corr=False, ref_freq=None)
-		plotter(data, start, plot_duration, t, DM[i], IMJD[i], SMJD[i], duration[i], top_freq,\
-			sigma[i], directory, FRB_name, observation, zero_dm_data, zero_dm_start, pulse_events=pulse_events, zoom=True, idx=i, pulse_id=pulse_id[i], downsamp=False)               
-        
-        #downsamped version (zoomed)
-		zero_dm_data, nbinsextra, nbins, zero_dm_start = waterfall(rawdata, start_time, plot_duration, DM[i],\
-				nbins=None, nsub=None, subdm = DM, zerodm=True, downsamp=downsamp[i],\
-				scaleindep=False, width_bins=1, mask=False, maskfn=None,\
-				bandpass_corr=False, ref_freq=None)
-		data, nbinsextra, nbins, start = waterfall(rawdata, start_time, plot_duration, DM[i],\
-				nbins=None, nsub=None, subdm = DM, zerodm=False, downsamp=downsamp[i],\
-				scaleindep=False, width_bins=1, mask=False, maskfn=None,\
-				bandpass_corr=False, ref_freq=None)
-		plotter(data, start, plot_duration, t, DM[i], IMJD[i], SMJD[i], duration[i], top_freq,\
-				sigma[i], directory, FRB_name, observation, zero_dm_data, zero_dm_start, pulse_events=pulse_events, zoom=True, idx=i, pulse_id=pulse_id[i],\
-			 	downsamp=downsamp[i])
-		
+			plotter(data, start, plot_duration, t, DM[i], IMJD[i], SMJD[i], duration[i], top_freq,\
+				sigma[i], directory, FRB_name, observation, zero_dm_data, zero_dm_start, pulse_events=pulse_events, zoom=True, idx=i, pulse_id=pulse_id[i], downsamp=False)               
+
+	        #Wide version
+                start_time = t - 0.5
+                plot_duration = 1.
+                if plot_wide:
+                        zero_dm_data, nbinsextra, nbins, zero_dm_start = waterfall(rawdata, start_time, plot_duration, DM[i],\
+                                nbins=None, nsub=None, subdm = DM, zerodm=True, downsamp=1,\
+                                scaleindep=False, width_bins=1, mask=False, maskfn=None,\
+                                bandpass_corr=False, ref_freq=None)
+                        #non-zero-DM filtering version
+                        data, nbinsextra, nbins, start = waterfall(rawdata, start_time, plot_duration, DM[i],\
+                                nbins=None, nsub=None, subdm = DM, zerodm=False, downsamp=1,\
+                                scaleindep=False, width_bins=1, mask=False, maskfn=None,\
+                                bandpass_corr=False, ref_freq=None)
+
+                        plotter(data, start, plot_duration, t, DM[i], IMJD[i], SMJD[i], duration[i], top_freq,\
+                                sigma[i], directory, FRB_name, observation, zero_dm_data, zero_dm_start, pulse_events=pulse_events, zoom=False, idx=i, pulse_id=pulse_id[i], downsamp=False)
+	
 
 def dm_snr(pulse_events, ax=None):
 	plt.scatter(pulse_events.DM, pulse_events.Sigma, marker='o', s=10, facecolors='none', edgecolors ='k')
