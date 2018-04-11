@@ -57,7 +57,7 @@ echo ".dat files created. Time taken: $(($duration / 60)) m"
 if [ "$2" == "-single_core" ]; then 
   n_cores=1
 else
-  n_cores=`lscpu -p | egrep -v '#' | sort -u -t, -k 2,4 | wc -l`
+  n_cores=4
 fi
 
 #Create .fft files

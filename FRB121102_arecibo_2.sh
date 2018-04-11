@@ -20,12 +20,10 @@ echo "Pipeline chop_raw_data.sh starting..."
 date
 
 #Setting variables
-SUB_DIR="/psr_archive/hessels/hessels/AO-FRB/subbanded_data"
-GENERAL_OUT_DIR="/data/FRB121102/pipeline_products"
-RAW_DIR="/psr_archive/hessels/hessels/AO-FRB/raw_data"
+SUB_DIR="/exports/data/puppi/FRB121102_processing/subbanded_data"
+GENERAL_OUT_DIR="/exports/data/puppi/FRB121102_processing/pipeline_products"
+RAW_DIR="/exports/data/puppi/FRB121102_processing/raw_data"
 #PAR_FILE="/psr_archive/hessels/hessels/AO-FRB/pipeline_products/0531+33.par"
-RANKING_BU="/psr_archive/hessels/hessels/AO-FRB/pipeline_products/pulses_rank_BU"
-
 SCRIPT_DIR="$( cd -P "$( dirname "$0" )" && pwd )/src"
 OBS_ID="$1"
 OUT_DIR="$GENERAL_OUT_DIR/$OBS_ID"
@@ -82,7 +80,6 @@ fi
 for PULS in `awk -F"\t" '$2 == "2" { print $1"\t"$3 }' $OUT_DIR/pulses/${OBS_ID}_pulses.txt`; do
   mv $OUT_DIR/pulses/$PULS $OUT_DIR/pulses/RFI_pulses/
 done
-cp ${OUT_DIR}/pulses/${OBS_ID}_pulses.txt $RANKING_BU
 python ${SCRIPT_DIR}/pulses_extract.py -db_name $DB_FILE -pulses_database -pulses_checked ${OUT_DIR}/pulses/${OBS_ID}_pulses.txt \
   -store_dir $OUT_DIR/pulses -extract_raw $RAW_DIR/$OBS_ID -plot_statistics 
 duration=$SECONDS

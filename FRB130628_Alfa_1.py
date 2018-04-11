@@ -151,7 +151,7 @@ for beam in beams:
 		sys.exit() #REMOVE THIS. This is so that only one file is processed.
 
 execute("mkdir pulses")
-execute("python %s/pulses_extract.py -beam_comparison %s"%(script_dir,base_path))
+execute("python %s/pulses_extract.py -beam_comparison *_proc.hdf5"%script_dir)
 execute("python %s/pulses_extract.py -fits %s -pulses_database -store_dir %s/pulses\
    -plot_pulses -plot_statistics -parameters_id FRB130628_Alfa_s0"%(script_dir,fits_dir,base)) #doesn't matter which subband param ID to use.
 execute("python %s/beams_plot.py > /dev/null"%script_dir)

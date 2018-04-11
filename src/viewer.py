@@ -252,7 +252,7 @@ if __name__ == '__main__':
 	#filename = 'puppi_57607_C0531+33_0603/pulses/puppi_57607_C0531+33_0603.hdf5'
 	#select_cands(filename, DM_min=530, DM_max=570, Sigma_min=10, sort='Sigma')
 	def parser():
-		parser = argparse.ArgumentParser(description='View or rank an observation. Hit enter to view the next image.')
+		parser = argparse.ArgumentParser(description='View or rank an observation. Hit enter to view the next image. Rank 0 for real, 1 for "smudge", 2 for RFI, 3 for maybe')
 		parser.add_argument('-view_only_mode', help="View candidates without ranking them", action='store_true')
 		parser.add_argument('-rank', help="View only candidates with these/this rank(s). E.g. If you want to view \
 		 					candidates of ranks 1 and 2 type: -rank 12. Default: Rank 0 only", default=[0], type=list)
