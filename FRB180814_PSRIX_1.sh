@@ -48,7 +48,7 @@ if [ $# -ne 1 ] && [ $# -ne 2 ]; then
  cd TEMP
 
  #Mask RFI
-
+ rfifind -time 1 -o rfimask $FIL_FILE
 
  #Create .dat files
  echo ".dat files creating..."
