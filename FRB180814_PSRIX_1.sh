@@ -24,7 +24,7 @@ if [ $# -ne 1 ] && [ $# -ne 2 ]; then
  GENERAL_OUT_DIR="/data2/nimmo/FRB_R2_2019/pipeline_products"
 
  ORIGINAL_FIL_FILE="$1"
- FIL_NAME=${ORIGINAL_FIL_FILE##*/}
+ FIL_NAME=${ORIGINAL_FIL_FILE}
  FIL_ID=${FIL_NAME%.out.fil}
  SCRIPT_DIR="~/pulses_extract/src"
  OUT_DIR="$GENERAL_OUT_DIR/$FIL_ID"
@@ -45,6 +45,9 @@ if [ $# -ne 1 ] && [ $# -ne 2 ]; then
  mkdir periodic_cands
  mkdir TEMP
  cd TEMP
+
+ #Mask RFI
+
 
  #Create .dat files
  echo ".dat files creating..."
