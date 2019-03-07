@@ -27,6 +27,7 @@ if [ $# -ne 1 ] && [ $# -ne 2 ]; then
  FIL_NAME=${ORIGINAL_FIL_FILE}
  FIL_ID=${FIL_NAME%.out.fil}
  SCRIPT_DIR="~/pulses_extract/src"
+ mkdir $GENERAL_OUT_DIR/$FIL_ID
  OUT_DIR="$GENERAL_OUT_DIR/$FIL_ID"
  FIL_FILE="$SUB_DIR/$FIL_NAME"
 
