@@ -53,7 +53,7 @@ if [ $# -ne 1 ] && [ $# -ne 2 ]; then
  #Create .dat files
  echo ".dat files creating..."
  SECONDS=0
- prepsubband -nsub 640 -nobary -lodm 120 -numdms 400 -dmstep 0.3 -o ${FIL_ID}_TOPO -zerodm $FIL_FILE
+ prepsubband -nsub 640 -nobary -lodm 120 -numdms 400 -dmstep 0.3 -mask rfimask_rfifind.mask -o ${FIL_ID}_TOPO -zerodm $FIL_FILE
  duration=$SECONDS
  echo ".dat files created. Time taken: $(($duration / 60)) m"
 
