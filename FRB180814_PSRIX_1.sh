@@ -26,7 +26,7 @@ if [ $# -ne 1 ] && [ $# -ne 2 ]; then
  ORIGINAL_FIL_FILE="$1"
  FIL_NAME=${ORIGINAL_FIL_FILE}
  FIL_ID=${FIL_NAME%.out.fil}
- SCRIPT_DIR="~/pulses_extract/src"
+ SCRIPT_DIR="/home/nimmo/pulses_extract/src"
  mkdir $GENERAL_OUT_DIR/$FIL_ID
  OUT_DIR="$GENERAL_OUT_DIR/$FIL_ID"
  FIL_FILE="$SUB_DIR/$FIL_NAME"
@@ -83,7 +83,7 @@ if [ $# -ne 1 ] && [ $# -ne 2 ]; then
 
  #Remove meta products
  cd $OUT_DIR
- rm -rf TEMP
+ #rm -rf TEMP
 
  echo "Pipeline pulses_identify.sh finished"
  date
