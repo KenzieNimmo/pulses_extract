@@ -10,7 +10,7 @@ parameters = {
     'FRB_name' : "FRB",
     'down_values' : {50: 2, 150: 3}     #Correct downsample by prepsubband. All DMs above the key value are multiplied by the item value
     },
-  
+
   "FRB121102_Puppi": {
     'DM_low' : 461.,
     'DM_high' : 661.,
@@ -21,7 +21,7 @@ parameters = {
     'Downfact_max' : 100,
     'FRB_name' : "FRB121102",
     },
-  
+
   "FRB130628_Alfa_s0": {
     'DM_low' : 0.,
     'DM_high' : 575.,
@@ -44,5 +44,16 @@ parameters = {
     'Downfact_max' : 100,
     'FRB_name' : "FRB130628",
     'down_values' : {0: 2, 315: 3, 540: 6}
-  } 
+  },
+
+  "FRB180814_PSRIX": {
+    'DM_low' : 120.,
+    'DM_high' : 240.,
+    'DM_search_low' : 150.,
+    'DM_search_high' : 230.,
+    'SNR_peak_min' : 8.,
+    'SNR_min' : 6.,
+    'Downfact_max' : 100.,
+    'FRB_name' : "FRB180814",
+    }
 }

@@ -26,7 +26,7 @@ if [ $# -ne 1 ] && [ $# -ne 2 ]; then
  ORIGINAL_FIL_FILE="$1"
  FIL_NAME=${ORIGINAL_FIL_FILE##*/}
  FIL_ID=${FIL_NAME%.out.fil}
- SCRIPT_DIR="$( cd -P "$( dirname "$0" )" && pwd )/src"
+ SCRIPT_DIR="~/pulses_extract/src"
  OUT_DIR="$GENERAL_OUT_DIR/$FIL_ID"
  FIL_FILE="$SUB_DIR/$FIL_NAME"
 
@@ -72,8 +72,8 @@ if [ $# -ne 1 ] && [ $# -ne 2 ]; then
  echo "Database and plots creating..."
  SECONDS=0
  #Single pulse candidates
- python ${SCRIPT_DIR}/pulses_extract.py -db_name ${FITS_ID}.hdf5 -fits $FITS_FILE -store_events -idL ${FITS_ID}_TOPO -store_dir $OUT_DIR/pulses \
-   -folder $OUT_DIR/TEMP -plot_pulses -plot_statistics -parameters_id FRB121102_Puppi > /dev/null
+ python ${SCRIPT_DIR}/pulses_extract.py -db_name ${FIL_ID}.hdf5 -fits $FIL_FILE -store_events -idL ${FIL_ID}_TOPO -store_dir $OUT_DIR/pulses \
+   -folder $OUT_DIR/TEMP -plot_pulses -plot_statistics -parameters_id FRB180814_PSRIX > /dev/null
  duration=$SECONDS
  echo "Database and plots created. Time taken: $(($duration / 60)) m"
 
