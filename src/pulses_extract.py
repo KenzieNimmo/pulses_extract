@@ -235,7 +235,7 @@ def RFIexcision(events, pulses, params, args):
     puls = pulses.Pulse[np.abs(pulses.Time-p.Time) < 1.]
     if puls.shape[0] <= 10: return False
     elif p.name == puls.index[0]:
-      auto_waterfaller.main(args.fits, os.path.join(args.store_dir,args.db_name), p.Time, p.DM, p.IMJD, p.SMJD, p.Sigma, \
+      auto_waterfaller.main(args.file_name, os.path.join(args.store_dir,args.db_name), p.Time, p.DM, p.IMJD, p.SMJD, p.Sigma, \
                                              duration=p.Duration, top_freq=p.top_Freq, \
                                              FRB_name=params['FRB_name']+'_wide', directory=args.store_dir, pulse_id=p.name)
       return False
@@ -245,10 +245,10 @@ def RFIexcision(events, pulses, params, args):
   return
 
 
-def fits_header(filename):
-  with pyfits.open(filename,memmap=True) as fits:
-    header = fits['SUBINT'].header + fits['PRIMARY'].header
-  return header
+#def fits_header(filename):
+  #with pyfits.open(filename,memmap=True) as fits:
+    #header = fits['SUBINT'].header + fits['PRIMARY'].header
+  #return header
 
 
 def pulses_checked(pulses, filename):
