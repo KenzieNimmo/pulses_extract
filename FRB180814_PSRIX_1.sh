@@ -76,7 +76,7 @@ if [ $# -ne 1 ] && [ $# -ne 2 ]; then
  echo "Database and plots creating..."
  SECONDS=0
  #Single pulse candidates
- python ${SCRIPT_DIR}/pulses_extract.py -db_name ${FIL_ID}.hdf5 -fits $FIL_FILE -store_events -idL ${FIL_ID}_TOPO -store_dir $OUT_DIR/pulses \
+ python ${SCRIPT_DIR}/pulses_extract.py -db_name ${FIL_ID}.hdf5 -file_name $FIL_FILE -store_events -idL ${FIL_ID}_TOPO -store_dir $OUT_DIR/pulses \
    -folder $OUT_DIR/TEMP -plot_pulses -plot_statistics -parameters_id FRB180814_PSRIX > /dev/null
  duration=$SECONDS
  echo "Database and plots created. Time taken: $(($duration / 60)) m"
