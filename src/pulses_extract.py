@@ -132,11 +132,11 @@ def events_database(args, header):
   events.Downfact = events.Downfact.astype(np.int16)
   events.Sample = events.Sample.astype(np.int32)
   events.sort_values(['DM','Time'],inplace=True)
-
+  """
   #Remove last 10s of data
   obs_length = header['NSBLK'] * header['NAXIS2'] * header['TBIN']
   events = events[events.Time < obs_length-10.]
-
+  """
   C_Funct.Get_Group(events.DM.values, events.Sigma.values, events.Time.values, events.Pulse.values,
                     args.events_dDM, args.events_dt, args.DM_step)
 
