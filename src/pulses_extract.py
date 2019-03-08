@@ -160,6 +160,8 @@ def pulses_database(args, header, events=None):
   pulses.index.name = None
   pulses = pulses.loc[:,['DM','Sigma','Time','Sample','Downfact']]
   pulses.index.name = 'idx'
+  print(header)
+  print(pulses)
   pulses['IMJD'] = header['STT_IMJD']
   pulses['SMJD'] = header['STT_SMJD'] + header['STT_OFFS'] + header['NSUBOFFS'] * header['NSBLK'] * header['TBIN'] + pulses.Time
   pulses.ix[pulses.SMJD > 86400, 'IMJD'] += 1  #Deal with observations taken over midnight
