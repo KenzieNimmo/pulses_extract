@@ -37,7 +37,7 @@ if [ $# -ne 1 ] && [ $# -ne 2 ]; then
    echo "ATTENTION! Filterbank file $FIL_NAME not found. Exiting..."
    exit 1
  fi
-
+"""
  #Set up the output folder
  mkdir $OUT_DIR
  cd $OUT_DIR
@@ -71,7 +71,7 @@ if [ $# -ne 1 ] && [ $# -ne 2 ]; then
  bash $SCRIPT_DIR/parallel.sh jobs.txt $n_cores >/dev/null
  duration=$SECONDS
  echo ".singlepulse files created. Time taken: $(($duration / 60)) m"
-
+"""
  #Create database and plots
  echo "Database and plots creating..."
  SECONDS=0
