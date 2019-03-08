@@ -26,9 +26,9 @@ import subprocess
 from PIL import Image
 from glob import glob
 
-def plotter(data, start, plot_duration, t, DM, IMJD, SMJD, duration, top_freq, sigma, 
+def plotter(data, start, plot_duration, t, DM, IMJD, SMJD, duration, top_freq, sigma,
 			directory, FRB_name, observation, zero_dm_data, zero_dm_start, pulse_id, pulse_events, zoom=True, idx='', downsamp=True):
-	
+
 	fig = plt.figure(figsize=(8,5))
 	ax1 = plt.subplot2grid((3,3), (1,1), rowspan=2, colspan=3)
 	ax2 = plt.subplot2grid((3,3), (1,0), rowspan=3) #row = right, col = left, row = left, col=right
@@ -44,13 +44,13 @@ def plotter(data, start, plot_duration, t, DM, IMJD, SMJD, duration, top_freq, s
 	ax2.annotate('Duration (ms): %0.2f'%(duration*1000.), xy=(0,3), fontsize=fontsize)
 	ax2.annotate('Top frequency: %0.2f'%top_freq, xy=(0,1.5), fontsize=fontsize)
 	ax2.annotate('Sigma: %0.2f'%sigma, xy=(0,0), fontsize=fontsize)
-	
+
 	zerodm_timeseries(ax3, plot_duration, zero_dm_data, zero_dm_start)
-	plot_waterfall(data, start, plot_duration, 
-	               integrate_ts=True, integrate_spec=False, show_cb=False, 
+	plot_waterfall(data, start, plot_duration,
+	               integrate_ts=True, integrate_spec=False, show_cb=False,
 	               cmap_str="gist_yarg", sweep_dms=[], sweep_posns=[],
 	               ax_im=ax1, ax_ts=ax3, ax_spec=None, interactive=False)
-	
+
 	dm_snr(pulse_events, ax=ax4)
 	ax3.axvline(t, c='r')
 	ax3.legend(loc=1, fontsize=8, frameon=False)
@@ -92,7 +92,7 @@ def zerodm_timeseries(ax, plot_duration, data, zero_dm_start):
 
 def histogram(data, ax, title='', xlabel='', color='', bins=None, stacked=False, logy=False, logx=False, ranked=False):
 	"""
-	Creates a histogram of a given burst property. 
+	Creates a histogram of a given burst property.
 
 	Inputs:
 
@@ -123,9 +123,9 @@ def histogram(data, ax, title='', xlabel='', color='', bins=None, stacked=False,
 		#n, bin_edges, patches = ax.hist(data, bins=bins, color=color, histtype='step', lw=2, stacked=stacked, log=logy)
 		#ax.set_xscale('linear')
 		#ax.set_xlim([np.amin(bin_edges), np.amax(bin_edges)])
-	#try: 
+	#try:
 	#ax.hist(data, bins=bins, color=color, histtype='step', lw=2, stacked=stacked, log=logy)
-	#except ValueError: 
+	#except ValueError:
 	#	pass
 	#	print 'did not plot histogram'
 	ax.set_xlabel(xlabel, fontsize=8)
@@ -152,7 +152,7 @@ def toa_plotter(time, SN, duration, Rank, observation, ax=None):
 
 
 	"""
-	rank_colors = cm.colors.LinearSegmentedColormap.from_list('rank_colors', [(0,'green'), (0.5,'#D4AC0D'), (1,'red')]) 
+	rank_colors = cm.colors.LinearSegmentedColormap.from_list('rank_colors', [(0,'green'), (0.5,'#D4AC0D'), (1,'red')])
 	norm=cm.colors.Normalize(vmin=0, vmax=2)
 	ranks=norm(Rank)
 	ax.bar(time, SN, duration, color=rank_colors(ranks), edgecolor=rank_colors(ranks))
@@ -163,7 +163,7 @@ def toa_plotter(time, SN, duration, Rank, observation, ax=None):
 	ax.tick_params(axis='y', labelsize=8)
 
 def scatter(xdata, ydata, ax, Rank, title='', xlabel='', ylabel=''):
-	rank_colors = cm.colors.LinearSegmentedColormap.from_list('rank_colors', [(0,'green'), (0.5,'#D4AC0D'), (1,'red')]) 
+	rank_colors = cm.colors.LinearSegmentedColormap.from_list('rank_colors', [(0,'green'), (0.5,'#D4AC0D'), (1,'red')])
 	norm=cm.colors.Normalize(vmin=0, vmax=2)
 	ranks=norm(Rank)
 	ax.scatter(xdata, ydata, c=rank_colors(ranks), marker='.', edgecolors=rank_colors(ranks))
@@ -237,7 +237,7 @@ def master_statistics(dm, SNR, duration, figtitle, figname):
 	ax3 = plt.subplot2grid((2,3), (0,2))
 	ax4 = plt.subplot2grid((2,3), (1,0))
 	ax5 = plt.subplot2grid((2,3), (1,1))
-	ax6 = plt.subplot2grid((2,3), (1,2))	
+	ax6 = plt.subplot2grid((2,3), (1,2))
 
 	histogram(dm, ax = ax1, title='Distribution of Dispersion Measures',\
 		                                            xlabel=(r'DM (pc cm$^{-3}$)'))
@@ -268,7 +268,7 @@ def psrchive_plots(archive_name): #assuming: (full name of the archive with path
 		subprocess.call(['convert', '%s.ps'%plot_name,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s.png'%plot_name], cwd=folder)
 		subprocess.call(['pav','-SFT','-g',"%s_stokes.ps /CPS"%plot_name, '%s.ar'%plot_name], cwd=folder)
 		subprocess.call(['convert', '%s_stokes.ps'%plot_name,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s_stokes.png'%plot_name], cwd=folder)
-		
+
 		stokes = Image.open(folder + '/' + '%s_stokes.png'%plot_name)
 		DS = Image.open(folder + '/' + '%s.png'%plot_name)
 		width_stokes, height_stokes = stokes.size
@@ -285,7 +285,7 @@ def psrchive_plots(archive_name): #assuming: (full name of the archive with path
 		os.remove('%s_stokes.ps'%os.path.join(folder,plot_name))
 		os.remove('%s_stokes.png'%os.path.join(folder,plot_name))
 		#os.remove('%s_DS.ps'%os.path.join(folder,plot_name))
-		#produce pulse profile	
+		#produce pulse profile
 		#subprocess.call(['pav','-DFpTd','-g',"%s_profile.ps /CPS"%plot_name,archive_name], cwd=folder)
 		#subprocess.call(['convert', '%s_profile.ps'%plot_name,'-border','10x10','-fill','white','-opaque','none','-rotate','90','%s_profile.png'%plot_name], cwd=folder)
 		#os.remove('%s_profile.ps'%os.path.join(folder,plot_name))
@@ -299,12 +299,15 @@ def main(fits, database, time, DM, IMJD, SMJD, sigma, duration=0.01, pulse_id=42
         if isinstance(duration, float) or isinstance(duration, int): duration = np.zeros(num_elements) + duration
         if isinstance(pulse_id, float) or isinstance(pulse_id, int): pulse_id = np.zeros(num_elements) + pulse_id
         if isinstance(downsamp, float) or isinstance(downsamp, int): downsamp = np.zeros(num_elements) + downsamp
-        
+
 	if FRB_name == 'FRB121102':
 		rawdata = psrfits.PsrfitsFile(fits)
 		observation = os.path.basename(fits)
-		observation = observation[:observation.find('_subs_')]	
-
+		observation = observation[:observation.find('_subs_')]
+	if FRB_name == 'FRB180814':
+		rawdata = filterbank.FilterbankFile(fits)
+		observation = os.path.basename(fits)
+		observation = observation[:observation.find('.0001.')]
 	events = pd.read_hdf(database, 'events')
 
 	#Fractional day
@@ -347,7 +350,7 @@ def main(fits, database, time, DM, IMJD, SMJD, sigma, duration=0.01, pulse_id=42
 				scaleindep=False, width_bins=1, mask=False, maskfn=None,\
 				bandpass_corr=False, ref_freq=None)
 			plotter(data, start, plot_duration, t, DM[i], IMJD[i], SMJD[i], duration[i], top_freq,\
-				sigma[i], directory, FRB_name, observation, zero_dm_data, zero_dm_start, pulse_events=pulse_events, zoom=True, idx=i, pulse_id=pulse_id[i], downsamp=False)               
+				sigma[i], directory, FRB_name, observation, zero_dm_data, zero_dm_start, pulse_events=pulse_events, zoom=True, idx=i, pulse_id=pulse_id[i], downsamp=False)
 
 	        #Wide version
                 start_time = t - 0.5
@@ -365,7 +368,7 @@ def main(fits, database, time, DM, IMJD, SMJD, sigma, duration=0.01, pulse_id=42
 
                         plotter(data, start, plot_duration, t, DM[i], IMJD[i], SMJD[i], duration[i], top_freq,\
                                 sigma[i], directory, FRB_name, observation, zero_dm_data, zero_dm_start, pulse_events=pulse_events, zoom=False, idx=i, pulse_id=pulse_id[i], downsamp=False)
-	
+
 
 def dm_snr(pulse_events, ax=None):
 	plt.scatter(pulse_events.DM, pulse_events.Sigma, marker='o', s=10, facecolors='none', edgecolors ='k')
@@ -378,7 +381,7 @@ def dm_snr(pulse_events, ax=None):
 
 if __name__ == '__main__':
 	#DM, sigma, time, downfact = np.loadtxt(sys.argv[2], usecols=(0,1,2,4), unpack=True) #argv[2] = .singlepulse
-	#downsamp = np.zeros(len(downfact)) + 1. #just a place holder so my code runs upon testing.	
+	#downsamp = np.zeros(len(downfact)) + 1. #just a place holder so my code runs upon testing.
 	#main(sys.argv[1],time, DM, sigma, downsamp = downsamp) #arg1 = fitsfile
 	#singlepulse_file = 'puppi_57614_C0531+33_0803_subs_0001_TOPO_DM561.00.singlepulse'
 	#DM, sigma, time, downfact = np.loadtxt(singlepulse_file, usecols=(0,1,2,4), unpack=True)
@@ -402,7 +405,3 @@ if __name__ == '__main__':
 	figtitle = "FRB121102"
 	figname = "FRB121102_statistics.png"
 	master_statistics(dm, SNR, duration, figtitle, figname)
-
-
-
-

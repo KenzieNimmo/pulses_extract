@@ -13,14 +13,14 @@ import C_Funct
 import auto_waterfaller
 from extract_psrfits_subints import extract_subints_from_observation
 from obs_parameters import parameters
-
+import filterbank
 
 def parser():
   # Command-line options
   parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
                                   description="The program groupes events from single_pulse_search.py in pulses.")
   parser.add_argument('-db_name', help="Filename of the HDF5 database.", default='SinglePulses.hdf5')
-  parser.add_argument('-fits', help="Filename of .fits file.", default='*.fits')
+  parser.add_argument('-file_name', help="Filename of raw data file.", default='*.fits')
   parser.add_argument('-idL', help="Basename of .singlepulse files.", default='*')
   parser.add_argument('-folder', help="Path of the folder containig the .singlepulse files.", default='.')
   parser.add_argument('-store_events', help="Store events in a HDF5 database.", action='store_true')
@@ -56,7 +56,7 @@ def main(args):
       print "Database does not contain pulses!"
       return
   else:
-    header = fits_header(args.fits)
+    header = filterbank.read_header(args.file_name)
     pulses = pulses_database(args, header)
     print pulses
     store = pd.HDFStore(os.path.join(args.store_dir,args.db_name), 'a')
@@ -83,12 +83,12 @@ def main(args):
       database_path = os.path.join(args.store_dir,args.db_name)
       params = parameters[args.parameters_id]
       if (args.parameters_id == "FRB130628_Alfa_s0") or (args.parameters_id == "FRB130628_Alfa_s1"):
-        auto_waterfaller.main(args.fits, database_path, np.array(pulses.Time), np.array(pulses.DM), np.array(pulses.IMJD), np.array(pulses.SMJD), np.array(pulses.Sigma), \
+        auto_waterfaller.main(args.file_name, database_path, np.array(pulses.Time), np.array(pulses.DM), np.array(pulses.IMJD), np.array(pulses.SMJD), np.array(pulses.Sigma), \
                                              duration=np.array(pulses.Duration), top_freq=pulses.top_Freq.iloc[0], \
                                              FRB_name=params['FRB_name'], directory=args.store_dir, \
                                              pulse_id=np.array(pulses.index), beam=np.array(pulses.Beam), group=np.array(pulses.Group))
       else:
-        auto_waterfaller.main(args.fits, database_path, np.array(pulses.Time), np.array(pulses.DM), np.array(pulses.IMJD), np.array(pulses.SMJD), np.array(pulses.Sigma), \
+        auto_waterfaller.main(args.file_name, database_path, np.array(pulses.Time), np.array(pulses.DM), np.array(pulses.IMJD), np.array(pulses.SMJD), np.array(pulses.Sigma), \
                                              duration=np.array(pulses.Duration), top_freq=pulses.top_Freq.iloc[0], \
                                              FRB_name=params['FRB_name'], directory=args.store_dir, pulse_id=np.array(pulses.index))
 
