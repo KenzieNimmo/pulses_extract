@@ -59,6 +59,8 @@ def main(args):
     header = filterbank.read_header(args.file_name)
     pulses = pulses_database(args, header)
     print pulses
+    print header
+    exit()
     store = pd.HDFStore(os.path.join(args.store_dir,args.db_name), 'a')
     store.append('pulses',pulses)
     #store.append('pulses_bu',pulses) #Create a back up table in the database
