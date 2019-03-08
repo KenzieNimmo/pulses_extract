@@ -10,11 +10,12 @@ from scipy import special
 from astropy.io import fits as pyfits
 
 import auto_waterfaller
-import C_Funct
-
 from extract_psrfits_subints import extract_subints_from_observation
 from obs_parameters import parameters
 
+import sys
+sys.path.append("/home/nimmo/pulses_extract/src/")
+import C_Funct.pyx
 
 def parser():
   # Command-line options
