@@ -9,8 +9,9 @@ import numpy as np
 from scipy import special
 from astropy.io import fits as pyfits
 
-import C_Funct
 import auto_waterfaller
+import C_Funct
+
 from extract_psrfits_subints import extract_subints_from_observation
 from obs_parameters import parameters
 
@@ -26,9 +27,9 @@ def parser():
   parser.add_argument('-store_events', help="Store events in a HDF5 database.", action='store_true')
   parser.add_argument('-events_dt', help="Duration in sec within two events are related to the same pulse.", default=20e-3,
                       type=float)
-  parser.add_argument('-events_dDM', help="Number of DM steps within two events are related to the same pulse.", 
+  parser.add_argument('-events_dDM', help="Number of DM steps within two events are related to the same pulse.",
                       default=5, type=float)
-  parser.add_argument('-DM_step', help="Value of the DM step between timeseries.", 
+  parser.add_argument('-DM_step', help="Value of the DM step between timeseries.",
                       default=1., type=float)
   parser.add_argument('-events_database', help="Load events from the database.", action='store_true')
   parser.add_argument('-pulses_database', help="Load pulses from the database.", action='store_true')
@@ -43,19 +44,19 @@ def parser():
   parser.add_argument('-beam_comparison', help="Path of databases to merge and compare.", default=None)
   parser.add_argument('-no_RFI', help="Do not select RFI instances.", action='store_false')
   return parser.parse_args()
-  
-  
+
+
 
 def main(args):
-  if args.beam_comparison is not None: 
+  if args.beam_comparison is not None:
     beam_comparison(hdf5_in=args.beam_comparison, hdf5_out=args.db_name)
     exit()
-  if args.pulses_database: 
+  if args.pulses_database:
     try: pulses = pd.read_hdf(os.path.join(args.store_dir,args.db_name),'pulses')
     except (KeyError, IOError):
       print "Database does not contain pulses!"
       return
-  else: 
+  else:
     header = fits_header(args.fits)
     pulses = pulses_database(args, header)
     print pulses
@@ -66,7 +67,7 @@ def main(args):
     obs_id = os.path.splitext(args.db_name)[0]
     pulses.sort_index().to_csv(os.path.join(args.store_dir,'{}_pulses.txt'.format(obs_id)), sep='\t', columns=['Pulse',], header=['Rank',], index_label='#PulseID')
 
-  if args.pulses_checked: 
+  if args.pulses_checked:
     pulses_checked(pulses, args.pulses_checked)
     store = pd.HDFStore(os.path.join(args.store_dir,args.db_name), 'r+')
     store.remove('pulses')
@@ -77,8 +78,8 @@ def main(args):
     pulses[(pulses.Pulse == 0) | (pulses.Pulse == 1) | (pulses.Pulse == 3)].sort_index().to_csv(os.path.join(args.store_dir,'{}_realPulses_info.txt'.format(obs_id)), sep='\t', \
       columns=['Sigma','DM','Time','Sample','IMJD','SMJD','Downfact','Duration','top_Freq','N_events','dDM','Pulse'], \
       header= ['SNR',  'DM','Time','Sample','IMJD','SMJD','Downfact','Duration','top_Freq','N_events','dDM','Rank'], index_label='#PulseID')
-    
-  if args.plot_pulses: 
+
+  if args.plot_pulses:
     if pulses.shape[0] > 0:
       database_path = os.path.join(args.store_dir,args.db_name)
       params = parameters[args.parameters_id]
@@ -87,16 +88,16 @@ def main(args):
                                              duration=np.array(pulses.Duration), top_freq=pulses.top_Freq.iloc[0], \
                                              FRB_name=params['FRB_name'], directory=args.store_dir, \
                                              pulse_id=np.array(pulses.index), beam=np.array(pulses.Beam), group=np.array(pulses.Group))
-      else:  
+      else:
         auto_waterfaller.main(args.fits, database_path, np.array(pulses.Time), np.array(pulses.DM), np.array(pulses.IMJD), np.array(pulses.SMJD), np.array(pulses.Sigma), \
                                              duration=np.array(pulses.Duration), top_freq=pulses.top_Freq.iloc[0], \
                                              FRB_name=params['FRB_name'], directory=args.store_dir, pulse_id=np.array(pulses.index))
-  
-  if args.extract_raw: 
+
+  if args.extract_raw:
     real_pulses = pulses[(pulses.Pulse == 0) | (pulses.Pulse == 1) | (pulses.Pulse == 3)]
     extract_subints_from_observation(args.extract_raw, args.store_dir, np.array(real_pulses.Time), -2, 8, pulseID=np.array(real_pulses.index).astype(str))
-  
-  if args.plot_statistics: 
+
+  if args.plot_statistics:
     if args.pulses_checked: ranked = True
     else: ranked = False
     obs_id = os.path.splitext(args.db_name)[0]
@@ -128,7 +129,7 @@ def events_database(args, header):
       df[events.DM >= i] = dv[i]
     events.Downfact *= df
   except KeyError: pass
-  
+
   events.Downfact = events.Downfact.astype(np.int16)
   events.Sample = events.Sample.astype(np.int32)
   events.sort_values(['DM','Time'],inplace=True)
@@ -137,7 +138,7 @@ def events_database(args, header):
   obs_length = header['NSBLK'] * header['NAXIS2'] * header['TBIN']
   events = events[events.Time < obs_length-10.]
 
-  C_Funct.Get_Group(events.DM.values, events.Sigma.values, events.Time.values, events.Pulse.values, 
+  C_Funct.Get_Group(events.DM.values, events.Sigma.values, events.Time.values, events.Pulse.values,
                     args.events_dDM, args.events_dt, args.DM_step)
 
   #events = events[events.Pulse >= 0]
@@ -146,10 +147,10 @@ def events_database(args, header):
     store = pd.HDFStore(os.path.join(args.store_dir,args.db_name), 'w')
     store.append('events',events,data_columns=['Pulse','SAP','BEAM','DM','Time'])
     store.close()
-    
+
   return events
-  
-  
+
+
 def pulses_database(args, header, events=None):
   #Create pulses database
   if args.events_database: events = pd.read_hdf(os.path.join(args.store_dir,args.db_name),'events')
@@ -163,12 +164,12 @@ def pulses_database(args, header, events=None):
   pulses['IMJD'] = header['STT_IMJD']
   pulses['SMJD'] = header['STT_SMJD'] + header['STT_OFFS'] + header['NSUBOFFS'] * header['NSBLK'] * header['TBIN'] + pulses.Time
   pulses.ix[pulses.SMJD > 86400, 'IMJD'] += 1  #Deal with observations taken over midnight
-  
+
   if args.beam_num is not None: pulses['Beam'] = args.beam_num
   if args.group_num is not None: pulses['Group'] = args.group_num
   pulses['Duration'] = pulses.Downfact * header['TBIN']
   pulses['top_Freq'] = header['OBSFREQ'] + abs(header['OBSBW']) / 2.
-  pulses['Pulse'] = -1 
+  pulses['Pulse'] = -1
   pulses.Pulse = pulses.Pulse.astype(np.int8)
   pulses['dDM'] = (gb.DM.max() - gb.DM.min()) / 2.
   pulses.dDM=pulses.dDM.astype(np.float32)
@@ -184,7 +185,7 @@ def pulses_database(args, header, events=None):
 
   n_pulses = pulses.shape[0] #zeroth order pulses
   print "{} pulses detected".format(n_pulses)
-  
+
   if n_pulses > 0 and args.no_RFI:
     RFIexcision(events, pulses, params, args) #1st order
     #set search parameter space
@@ -194,7 +195,7 @@ def pulses_database(args, header, events=None):
     pulses.Pulse[pulses.DM >= params['DM_search_high']] = 9
     print "{} pulses classified as astrophysical".format(pulses[pulses.Pulse == -1].shape[0])
   #print pulses.Pulse
-  pulses.sort_values(['Pulse','Sigma'], ascending=False, inplace=True) 
+  pulses.sort_values(['Pulse','Sigma'], ascending=False, inplace=True)
   return pulses #2nd (final) order
 
 def RFIexcision(events, pulses, params, args):
@@ -203,14 +204,14 @@ def RFIexcision(events, pulses, params, args):
   events.sort_values(by='DM',inplace=True)
   gb = events.groupby('Pulse')
   pulses.sort_index(inplace=True)
-  
-  
+
+
   #Remove flat SNR pulses. Minimum ratio to have weakest pulses with SNR = 8
   pulses.Pulse[pulses.Sigma / gb.Sigma.min() <= params['SNR_peak_min'] / params['SNR_min']] = RFI_code
-  
+
   #Remove flat duration pulses. Minimum ratio to have weakest pulses with SNR = 8 (from Eq.6.21 of Pulsar Handbook)
   pulses.Pulse[gb.Downfact.max() / pulses.Downfact < (params['SNR_peak_min'] / params['SNR_min'])**2] = RFI_code
-  
+
   #Remove pulses peaking near the DM edges
   DM_frac = (params['DM_high'] - params['DM_low']) * 0.2  #Remove 5% of DM range from each edge
   pulses.Pulse[(pulses.DM < params['DM_low']+DM_frac) | (pulses.DM > params['DM_high']-DM_frac)] = RFI_code
@@ -221,9 +222,9 @@ def RFIexcision(events, pulses, params, args):
     count = np.count_nonzero(np.diff(np.sign(diff)))
     return (count != 2) & (count != 4) & (count != 6) & (count != 8)
   pulses.Pulse[gb.apply(lambda x: crosses(x.Sigma))] = RFI_code
-  
+
   #Remove weaker pulses within a temporal window
-  def simultaneous(p):                            
+  def simultaneous(p):
     puls = pulses.Pulse[np.abs(pulses.Time-p.Time) < 0.02]
     if puls.shape[0] == 1: return False
     elif p.name == puls.index[0]: return False
@@ -234,14 +235,14 @@ def RFIexcision(events, pulses, params, args):
   def RFI_bursts(p):
     puls = pulses.Pulse[np.abs(pulses.Time-p.Time) < 1.]
     if puls.shape[0] <= 10: return False
-    elif p.name == puls.index[0]: 
+    elif p.name == puls.index[0]:
       auto_waterfaller.main(args.fits, os.path.join(args.store_dir,args.db_name), p.Time, p.DM, p.IMJD, p.SMJD, p.Sigma, \
                                              duration=p.Duration, top_freq=p.top_Freq, \
                                              FRB_name=params['FRB_name']+'_wide', directory=args.store_dir, pulse_id=p.name)
       return False
     else: return True
   pulses.Pulse[pulses.apply(lambda x: RFI_bursts(x), axis=1)] = RFI_code
-  
+
   return
 
 
@@ -257,10 +258,10 @@ def pulses_checked(pulses, filename):
   #print "Folowing pulses will be marked as RFI: ", RFI_list[0,RFI_list[1]==0]
   #sys.stdout.write("Proceed? [y/n]")
   #choice = raw_input().lower()
-  #if not (choice == 'y') | (choice == 'yes'): 
+  #if not (choice == 'y') | (choice == 'yes'):
     #print "Aborting..."
     #return
-  
+
   pulses.Pulse.loc[RFI_list[0]] = RFI_list[1]
   return
 
@@ -310,7 +311,7 @@ def beam_comparison(hdf5_in='*.hdf5', hdf5_out='SinglePulses.hdf5'):
   conditions_A = '(Time > @tmin) & (Time < @tmax)'
   if 'Group' in pulses.columns: conditions_B = '(SAP == @sap) & (BEAM != @beam) & (DM > @DMmin) & (DM < @DMmax) & (Sigma >= @SNRmin)'
   else: conditions_B = '(BEAM != @beam) & (DM > @DMmin) & (DM < @DMmax) & (Sigma >= @SNRmin)'
-    
+
   def comparison(puls):
     if puls.Pulse >= 2: return False
     if 'Group' in puls.columns: sap = int(puls.Group)
@@ -322,9 +323,9 @@ def beam_comparison(hdf5_in='*.hdf5', hdf5_out='SinglePulses.hdf5'):
     SNRmin = puls.Sigma / 2.
     if events.query(conditions_A).query(conditions_B).groupby('BEAM').count().shape[0] > 4: return True
     else: return False
-  
+
   pulses.Pulse[pulses.apply(lambda x: comparison(x), axis=1)] = 8
-  
+
   pulses.to_hdf(hdf5_out, 'pulses')
   events.to_hdf(hdf5_out, 'events')
   return
@@ -333,4 +334,3 @@ def beam_comparison(hdf5_in='*.hdf5', hdf5_out='SinglePulses.hdf5'):
 if __name__ == '__main__':
   args = parser()
   main(args)
-
