@@ -58,8 +58,6 @@ def main(args):
   else:
     header = filterbank.read_header(args.file_name)
     pulses = pulses_database(args, header)
-    print pulses
-    print header
     exit()
     store = pd.HDFStore(os.path.join(args.store_dir,args.db_name), 'a')
     store.append('pulses',pulses)
@@ -162,8 +160,7 @@ def pulses_database(args, header, events=None):
   pulses.index.name = None
   pulses = pulses.loc[:,['DM','Sigma','Time','Sample','Downfact']]
   pulses.index.name = 'idx'
-  print(header)
-  print(pulses)
+  print pulses
   pulses['IMJD'] = header['STT_IMJD']
   pulses['SMJD'] = header['STT_SMJD'] + header['STT_OFFS'] + header['NSUBOFFS'] * header['NSBLK'] * header['TBIN'] + pulses.Time
   pulses.ix[pulses.SMJD > 86400, 'IMJD'] += 1  #Deal with observations taken over midnight
